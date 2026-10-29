@@ -18,6 +18,10 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
   const [userIncludes, setUserIncludes] = useState<string[]>([]);
   const [userExcludes, setUserExcludes] = useState<string[]>([]);
 
+  // Filtres et exploration des composants retenus
+  const [selectedKindFilter, setSelectedKindFilter] = useState<'ALL' | 'RULE' | 'SUBAGENT' | 'SKILL' | 'COMMAND_CONVERTED'>('ALL');
+  const [selectedSearch, setSelectedSearch] = useState('');
+
   // Filtres et exploration des candidats écartés
   const [rejectedSearch, setRejectedSearch] = useState('');
   const [rejectedKindFilter, setRejectedKindFilter] = useState<'ALL' | 'RULE' | 'SUBAGENT' | 'SKILL' | 'COMMAND_CONVERTED'>('ALL');
@@ -151,96 +155,172 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Composants sélectionnés */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-900">
-            Composants Retenus ({selection?.selectedComponents?.length || 0})
-          </h3>
-          <span className="text-xs text-slate-400">Score de pertinence &gt;= seuil preset</span>
-        </div>
+      {(() => {
+        const retainedList = [
+          ...(selection?.selectedComponents || []).map((comp) => ({
+            slug: comp.slug,
+            name: comp.name,
+            kind: comp.kind,
+            origin: comp.origin,
+            rationale: comp.acceptedRationale,
+            score: comp.score?.totalScore ?? 100,
+            isCustom: false,
+          })),
+          ...(selection?.customComponents || []).map((custom) => ({
+            slug: custom.slug,
+            name: custom.name,
+            kind: custom.kind,
+            origin: 'PROJECT_CUSTOM' as const,
+            rationale: custom.gapReason,
+            score: 100,
+            isCustom: true,
+          })),
+        ];
 
-        <div className="space-y-3">
-          {selection?.selectedComponents?.map((comp) => (
-            <div
-              key={comp.slug}
-              className="p-4 rounded-lg bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`font-mono text-xs px-2 py-0.5 rounded font-bold ${
-                      comp.kind === 'RULE'
-                        ? 'bg-blue-100 text-blue-800'
-                        : comp.kind === 'SUBAGENT'
-                          ? 'bg-purple-100 text-purple-800'
-                          : 'bg-emerald-100 text-emerald-800'
+        const filteredRetained = retainedList.filter((comp) => {
+          if (selectedKindFilter !== 'ALL' && comp.kind !== selectedKindFilter) {
+            return false;
+          }
+          if (selectedSearch.trim()) {
+            const q = selectedSearch.toLowerCase().trim();
+            const matchName = comp.name.toLowerCase().includes(q);
+            const matchSlug = comp.slug.toLowerCase().includes(q);
+            const matchRationale = comp.rationale.toLowerCase().includes(q);
+            return matchName || matchSlug || matchRationale;
+          }
+          return true;
+        });
+
+        const KIND_TABS: Array<{ label: string; kind: 'ALL' | 'SUBAGENT' | 'RULE' | 'SKILL' | 'COMMAND_CONVERTED' }> = [
+          { label: 'Tous', kind: 'ALL' },
+          { label: 'Sous-agents', kind: 'SUBAGENT' },
+          { label: 'Règles', kind: 'RULE' },
+          { label: 'Skills', kind: 'SKILL' },
+          { label: 'Commandes', kind: 'COMMAND_CONVERTED' },
+        ];
+
+        return (
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                  <span>Composants Retenus ({retainedList.length})</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Composants validés pour le harnais (catalogue ECC adapté et règles métier sur-mesure).
+                </p>
+              </div>
+
+              {/* Recherche rapide */}
+              <div className="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Filtrer par nom, slug..."
+                  value={selectedSearch}
+                  onChange={(e) => setSelectedSearch(e.target.value)}
+                  className="w-full px-3 py-1.5 pl-8 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                {selectedSearch && (
+                  <button
+                    onClick={() => setSelectedSearch('')}
+                    className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Onglets de filtrage par type */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 border-b border-slate-100 pb-3">
+              {KIND_TABS.map((tab) => {
+                const count =
+                  tab.kind === 'ALL'
+                    ? retainedList.length
+                    : retainedList.filter((c) => c.kind === tab.kind).length;
+                const active = selectedKindFilter === tab.kind;
+                return (
+                  <button
+                    key={tab.kind}
+                    type="button"
+                    onClick={() => setSelectedKindFilter(tab.kind)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      active
+                        ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                     }`}
                   >
-                    {comp.kind}
-                  </span>
-                  <span className="font-semibold text-slate-900 text-sm">{comp.name}</span>
-                  <span className="text-slate-400 font-mono">({comp.slug})</span>
-                </div>
-                <p className="text-slate-600">
-                  <strong>Justification :</strong> {comp.acceptedRationale}
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-3 shrink-0">
-                <span className="font-semibold px-2 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  Score : {comp.score?.totalScore}/100
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUserExcludes([...userExcludes, comp.slug]);
-                    calculateSelection();
-                  }}
-                  className="text-red-500 hover:text-red-700 font-medium"
-                >
-                  Exclure ✕
-                </button>
-              </div>
+                    {tab.label} ({count})
+                  </button>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Composants Spécifiques au Projet (Générés Sur-Mesure) */}
-      {(selection?.customComponents || []).length > 0 && (
-        <div className="bg-white p-6 rounded-xl border border-indigo-200 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                <span>Composants Générés Sur-Mesure pour ce Projet</span>
-                <span className="text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full font-medium">
-                  {selection?.customComponents?.length} composant(s) synthétisé(s)
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                <strong>Pourquoi cette section ?</strong> Le catalogue communautaire ECC ne fournit que des composants génériques. À partir de votre cahier des charges et de votre design system, le générateur synthétise automatiquement des règles et tokens dédiés pour apporter à l&apos;agent Antigravity la connaissance approfondie de votre métier et de votre charte graphique.
-              </p>
+            {/* Liste filtrée des composants */}
+            <div className="space-y-3 pt-1">
+              {filteredRetained.length === 0 ? (
+                <div className="text-center py-6 text-slate-400 text-xs">
+                  Aucun composant retenu ne correspond à ce filtre ou critère de recherche.
+                </div>
+              ) : (
+                filteredRetained.map((comp) => (
+                  <div
+                    key={comp.slug}
+                    className="p-4 rounded-lg bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`font-mono text-xs px-2 py-0.5 rounded font-bold ${
+                            comp.kind === 'RULE'
+                              ? 'bg-blue-100 text-blue-800'
+                              : comp.kind === 'SUBAGENT'
+                                ? 'bg-purple-100 text-purple-800'
+                                : comp.kind === 'SKILL'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {comp.kind}
+                        </span>
+
+                        {comp.isCustom && (
+                          <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                            SUR-MESURE PROJET
+                          </span>
+                        )}
+
+                        <span className="font-semibold text-slate-900 text-sm">{comp.name}</span>
+                        <span className="text-slate-400 font-mono text-[11px]">({comp.slug})</span>
+                      </div>
+                      <p className="text-slate-600">
+                        <strong>Justification :</strong> {comp.rationale}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-3 shrink-0 self-start sm:self-auto">
+                      <span className="font-semibold px-2 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs">
+                        Score : {comp.score}/100
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserExcludes([...userExcludes, comp.slug]);
+                          calculateSelection();
+                        }}
+                        className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                      >
+                        Exclure ✕
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-            {selection?.customComponents?.map((custom) => (
-              <div key={custom.slug} className="p-4 rounded-lg bg-indigo-50/30 border border-indigo-200 text-xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-sm">{custom.name}</span>
-                  <span className="text-indigo-600 font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-indigo-100">{custom.slug}</span>
-                </div>
-                <p className="text-slate-600">
-                  <strong className="text-slate-700">Rôle :</strong> {custom.gapReason}
-                </p>
-                <div className="text-[11px] text-indigo-800 bg-white/80 p-2 rounded border border-indigo-100/60 font-mono truncate">
-                  Type: {custom.kind} • Cible: .antigravity/{custom.kind === 'RULE' ? 'rules' : custom.kind === 'SKILL' ? 'skills' : 'agents'}/{custom.slug}.md
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Candidats écartés avec justifications et exploration complète */}
       {(() => {

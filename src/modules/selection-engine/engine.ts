@@ -382,7 +382,9 @@ export class SelectionEngine {
     }
 
     // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC (Composants sur mesure §7 FR-05) ---
-    const customComponents: CustomComponentSpec[] = [...(options.customComponents ?? [])];
+    const customComponents: CustomComponentSpec[] = [...(options.customComponents ?? [])].filter(
+      (c) => !options.userExcludes?.includes(c.slug)
+    );
 
     // 1. Règle / Compétence de Design System spécifique au projet
     const ds = profile.designSystem;
@@ -397,7 +399,7 @@ export class SelectionEngine {
       (c) => c.slug.includes('design') || c.slug.includes('tokens')
     );
 
-    if (hasDesignTokens && !existingDesignRule) {
+    if (hasDesignTokens && !existingDesignRule && !options.userExcludes?.includes('project-design-system-tokens')) {
       const colors = ds?.colorTokens ?? {};
       const fontFamilies = ds?.typography?.fontFamilies ?? {};
       const primaryColor = colors['primary'] ?? colors['brand-primary'] ?? 'Non spécifiée';
@@ -431,7 +433,7 @@ ${(ds?.uxAndAccessibilityRules ?? []).map((p: string) => `  * ${p}`).join('\n') 
     const securityConstraints = profile.securityAndCompliance ?? [];
     if (securityConstraints.length > 0) {
       const hasSecurityRule = selectedList.find((c) => c.family === 'security' || c.slug.includes('security'));
-      if (!hasSecurityRule) {
+      if (!hasSecurityRule && !options.userExcludes?.includes('project-security-compliance-guard')) {
         customComponents.push({
           slug: 'project-security-compliance-guard',
           name: 'Garde-fous de Sécurité et Conformité Projet',
