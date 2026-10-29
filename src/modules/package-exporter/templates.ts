@@ -434,10 +434,13 @@ export function renderAssumptionsMarkdown(input: DeterministicPackageInput): str
   const uncertaintiesSection =
     profile.uncertainties.length > 0
       ? profile.uncertainties
-          .map(
-            (u) =>
-              `### [${u.id}] ${u.topic} — Catégorie : \`${u.category}\` (Impact : \`${u.impact}\`)\n- **Constat :** ${u.statement}\n- **Choix provisoire / Repli proposé :** ${u.proposedFallback}\n- **Décision humaine requise :** ${u.requiresHumanDecision ? 'OUI (à confirmer avant implémentation)' : 'Non bloquante'}`
-          )
+          .map((u) => {
+            const statusLines = u.isResolved
+              ? `- **Statut :** Arbitré et validé par l'architecte\n- **Décision adoptée :** ${u.userResolution || u.proposedFallback}\n- **Date d'arbitrage :** ${u.resolvedAt || 'Lors du cadrage'}`
+              : `- **Choix provisoire / Repli proposé :** ${u.proposedFallback}\n- **Décision humaine requise :** ${u.requiresHumanDecision ? 'OUI (à confirmer avant implémentation)' : 'Non bloquante'}`;
+
+            return `### [${u.id}] ${u.topic} — Catégorie : \`${u.category}\` (Impact : \`${u.impact}\`)\n- **Constat :** ${u.statement}\n${statusLines}`;
+          })
           .join('\n\n')
       : '*(Aucune incertitude ou contradiction majeure enregistrée dans le profil confirmé.)*';
 

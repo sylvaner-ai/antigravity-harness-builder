@@ -32,7 +32,7 @@ async function seed() {
         status: 'ACTIVE',
       })
       .returning();
-    felicicarProj = p;
+    felicicarProj = p!;
     console.log('Project restored:', felicicarProj.name);
   } else {
     await db.update(projects).set({ userId: admin.id }).where(eq(projects.id, felicicarId));

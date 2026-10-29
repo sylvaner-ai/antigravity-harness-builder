@@ -228,10 +228,13 @@ function buildAssumptionsDoc(profile: ProjectProfile): string {
 ${
   uncertainties.length > 0
     ? uncertainties
-        .map(
-          (u, idx) =>
-            `| **UNC-${idx + 1}** | \`${u.category}\` | ${u.topic} | ${u.statement.replace(/\|/g, '-')} | \`${u.impact}\` | ${u.proposedFallback.replace(/\|/g, '-')} | ${u.requiresHumanDecision ? '**OUI**' : 'Non'} |`
-        )
+        .map((u, idx) => {
+          const decisionCol = u.isResolved
+            ? `**VALIDÉ :** ${(u.userResolution || u.proposedFallback).replace(/\|/g, '-')}`
+            : u.proposedFallback.replace(/\|/g, '-');
+          const reqCol = u.isResolved ? 'RÉSOLU' : (u.requiresHumanDecision ? '**OUI**' : 'Non');
+          return `| **UNC-${idx + 1}** | \`${u.category}\` | ${u.topic} | ${u.statement.replace(/\|/g, '-')} | \`${u.impact}\` | ${decisionCol} | ${reqCol} |`;
+        })
         .join('\n')
     : '| - | - | _Aucune incertitude critique détectée._ | - | - | - | - |'
 }

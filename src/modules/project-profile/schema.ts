@@ -104,6 +104,9 @@ export const UncertaintyItemSchema = z.object({
   proposedFallback: z.string().min(1),
   requiresHumanDecision: z.boolean().default(true),
   sourceRefs: z.array(SourceReferenceSchema).default([]),
+  userResolution: z.string().optional(),
+  isResolved: z.boolean().optional(),
+  resolvedAt: z.string().optional(),
 });
 export type UncertaintyItem = z.infer<typeof UncertaintyItemSchema>;
 

@@ -2,7 +2,8 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { closeDbPool, getDb, projectProfiles, projects, users } from '../src/db';
+import { closeDbPool, getDb, projects, users } from '../src/db';
+import { eq } from 'drizzle-orm';
 import {
   LocalDiskStorage,
   extractDocumentText,
