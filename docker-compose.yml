@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ahb-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ahb_user:ahb_password@postgres:5432/ahb_db
+      - PRIVATE_STORAGE_DIR=/data/storage
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - ahb_storage:/data/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ahb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ahb_user
+      POSTGRES_PASSWORD: ahb_password
+      POSTGRES_DB: ahb_db
+    volumes:
+      - ahb_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ahb_user -d ahb_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  ahb_postgres_data:
+  ahb_storage:
