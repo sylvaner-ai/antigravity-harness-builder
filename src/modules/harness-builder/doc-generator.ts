@@ -291,8 +291,11 @@ Selon la surface Antigravity ciblée (\`${profile.targetSurface}\`) :
 
 ### A. Dans Google Antigravity (App / IDE)
 - Ouvrez le projet dans Antigravity.
-- Vous pouvez recommander ou utiliser la commande \`/teamwork\` pour lancer la collaboration multi-agents en suivant le plan défini dans \`docs/ORCHESTRATION.md\`.
-- Pour les tâches au long cours, utilisez la commande \`/goal\`.
+- **Fonctionnement naturel** : Dialoguez simplement avec l'agent principal. Il applique automatiquement vos règles transverses et invoque de lui-même les sous-agents spécialisés (architecte, base de données, revue de code) via ses outils internes.
+- **Commandes utilisateur optionnelles (slash commands)** :
+  * \`/goal\` : Pour lancer une session au long cours en autonomie complète sans interruption.
+  * \`/teamwork\` : Pour forcer une concertation multi-agents formelle selon le protocole de \`docs/ORCHESTRATION.md\`.
+  * \`/plan\` : Pour faire décomposer et valider les étapes d'un jalon avant le codage.
 
 ### B. En ligne de commande (Antigravity CLI \`agy\`)
 \`\`\`bash

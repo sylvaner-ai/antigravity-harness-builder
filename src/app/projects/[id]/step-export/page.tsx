@@ -134,16 +134,22 @@ export default function StepExportPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <strong>3. Slash Commands Recommandées :</strong>
-            <ul className="list-disc pl-5 mt-1 space-y-1">
+            <div className="flex items-center justify-between">
+              <strong>3. Commandes Slash Recommandées (Optionnelles) :</strong>
+              <span className="text-[11px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-medium">À saisir dans le chat par l&apos;utilisateur</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1 mb-2">
+              L&apos;agent principal applique automatiquement vos règles et invoque les sous-agents spécialisés (BDD, architecture, revue) de façon autonome en langage naturel. Vous n&apos;avez pas l&apos;obligation d&apos;utiliser ces commandes, mais vous pouvez les déclencher (ou l&apos;agent vous les proposera) pour forcer des modes avancés :
+            </p>
+            <ul className="list-disc pl-5 mt-1 space-y-1.5 text-xs text-slate-700">
               <li>
-                <code className="font-bold">/teamwork</code> : Lancer la collaboration multi-agents en suivant le plan défini dans <code>docs/ORCHESTRATION.md</code>.
+                <code className="font-bold text-indigo-700">/goal</code> : Lancer une session au long cours en autonomie complète (idéal pour un jalon ou une grosse tâche complexe sans interruption).
               </li>
               <li>
-                <code className="font-bold">/goal</code> : Lancer une session au long cours autonome pour exécuter une tâche critique sans arrêt intermédiaire.
+                <code className="font-bold text-indigo-700">/teamwork</code> : Déclencher formellement la collaboration multi-agents selon le protocole de <code>docs/ORCHESTRATION.md</code>.
               </li>
               <li>
-                <code className="font-bold">/plan</code> : Consulter et affiner la décomposition atomique des tâches.
+                <code className="font-bold text-indigo-700">/plan</code> : Consulter et affiner la décomposition détaillée des étapes avant de lancer l&apos;écriture du code.
               </li>
             </ul>
           </div>
