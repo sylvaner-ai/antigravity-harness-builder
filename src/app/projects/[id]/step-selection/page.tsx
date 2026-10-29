@@ -5,6 +5,53 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PresetMode, SelectionResult } from '../../../../modules/selection-engine/schema';
 
+// Descriptions claires et détaillées de ce que fait chaque composant
+const ECC_DESCRIPTIONS_FR: Record<string, string> = {
+  // Règles de développement et qualité
+  'react-testing': 'Directives pour les tests de composants React (React Testing Library, Vitest/Jest, mocks MSW et couverture comportementale).',
+  'typescript-testing': 'Standards de test TypeScript/JavaScript : typage strict des tests, fixtures, suites unitaires et assertions fiables.',
+  'common-testing': 'Exigences fondamentales de test logiciel : isolation unitaire, couverture des cas limites et non-régression.',
+  'common-code-review': 'Critères de revue de code : lisibilité, architecture, sécurité, gestion des erreurs et maintenabilité.',
+  'common-security': 'Garde-fous impératifs de sécurité : prévention des injections, assainissement des entrées et gestion sécurisée des secrets.',
+  'common-performance': 'Directives d’optimisation de performance transversale : requêtes économes, limitation des re-rendus et mise en cache.',
+  'common-patterns': 'Design patterns recommandés et anti-patterns à proscrire pour garantir la modularité et l’évolutivité du code.',
+  'common-git-workflow': 'Normes de versioning Git : commits conventionnels, organisation des branches et messages explicites.',
+  'common-development-workflow': 'Cycle de développement local et qualité continue : validation progressive, linting et tests avant commit.',
+  'arkts-testing': 'Standards de tests pour les applications ArkTS / OpenHarmony.',
+  'react-native-coding-style': 'Conventions de style et patterns spécifiques à React Native mobile.',
+
+  // Sous-agents spécialisés
+  'architect': 'Architecte logiciel : conçoit l’architecture globale du système, évalue les arbitrages techniques et garantit la scalabilité.',
+  'database-reviewer': 'Spécialiste PostgreSQL & SQL : optimise les schémas relationnels, les requêtes, index et stratégies de migration.',
+  'code-reviewer': 'Revue de code senior : analyse la qualité, la maintenabilité, la lisibilité et la sécurité des modifications.',
+  'build-error-resolver': 'Résolution de compilation : diagnostique et corrige les erreurs de build Next.js, imports cassés et erreurs de typage TypeScript.',
+
+  // Skills & Commandes
+  'codebase-onboarding': 'Cartographie et guide d’onboarding pour explorer rapidement une base de code et comprendre son architecture.',
+  'react-build': 'Résolution incrémentale des échecs de build React (Vite, Next.js, webpack) et typages JSX/TSX.',
+
+  // Règles projet sur-mesure
+  'project-design-system-tokens': 'Application stricte des tokens visuels (palette de couleurs, typographies, règles UX) du projet.',
+  'project-security-compliance-guard': 'Application impérative des règles de conformité et des contraintes de sécurité spécifiques au projet.',
+};
+
+function getComponentDescription(comp: { slug: string; kind: string; description?: string }): string {
+  const customDesc = ECC_DESCRIPTIONS_FR[comp.slug];
+  if (customDesc) {
+    return customDesc;
+  }
+  if (comp.description && comp.description.trim()) {
+    if (comp.description.startsWith('Règle ECC')) {
+      const parts = comp.description.split(' : ');
+      if (parts.length > 1 && parts[1]) {
+        return `Règle de qualité et standards pour ${parts.slice(1).join(' : ')}.`;
+      }
+    }
+    return comp.description;
+  }
+  return 'Composant de configuration et bonnes pratiques logicielles.';
+}
+
 export default function StepSelectionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
   const router = useRouter();
@@ -162,6 +209,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
             name: comp.name,
             kind: comp.kind,
             origin: comp.origin,
+            description: comp.description,
             rationale: comp.acceptedRationale,
             score: comp.score?.totalScore ?? 100,
             isCustom: false,
@@ -171,6 +219,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
             name: custom.name,
             kind: custom.kind,
             origin: 'PROJECT_CUSTOM' as const,
+            description: custom.description,
             rationale: custom.gapReason,
             score: 100,
             isCustom: true,
@@ -183,10 +232,12 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
           }
           if (selectedSearch.trim()) {
             const q = selectedSearch.toLowerCase().trim();
+            const desc = getComponentDescription(comp).toLowerCase();
             const matchName = comp.name.toLowerCase().includes(q);
             const matchSlug = comp.slug.toLowerCase().includes(q);
+            const matchDesc = desc.includes(q);
             const matchRationale = comp.rationale.toLowerCase().includes(q);
-            return matchName || matchSlug || matchRationale;
+            return matchName || matchSlug || matchDesc || matchRationale;
           }
           return true;
         });
@@ -215,7 +266,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
               <div className="relative w-full sm:w-64">
                 <input
                   type="text"
-                  placeholder="Filtrer par nom, slug..."
+                  placeholder="Filtrer par nom, description, slug..."
                   value={selectedSearch}
                   onChange={(e) => setSelectedSearch(e.target.value)}
                   className="w-full px-3 py-1.5 pl-8 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -269,7 +320,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                     key={comp.slug}
                     className="p-4 rounded-lg bg-slate-50 hover:bg-slate-100/70 border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs transition-colors"
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`font-mono text-xs px-2 py-0.5 rounded font-bold ${
@@ -294,9 +345,21 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                         <span className="font-semibold text-slate-900 text-sm">{comp.name}</span>
                         <span className="text-slate-400 font-mono text-[11px]">({comp.slug})</span>
                       </div>
-                      <p className="text-slate-600">
-                        <strong>Justification :</strong> {comp.rationale}
+
+                      {/* Description de ce que fait le composant */}
+                      <p className="text-slate-600 text-xs leading-relaxed">
+                        <strong className="text-slate-700">Rôle :</strong> {getComponentDescription(comp)}
                       </p>
+
+                      {/* Détails rétractables pour la justification de sélection */}
+                      <details className="text-[11px] pt-0.5">
+                        <summary className="text-slate-400 hover:text-indigo-600 cursor-pointer select-none transition-colors">
+                          🔍 Pourquoi ce composant a-t-il été retenu ?
+                        </summary>
+                        <div className="mt-1 pl-2.5 border-l-2 border-indigo-200 text-slate-500 text-[11px] italic">
+                          {comp.rationale}
+                        </div>
+                      </details>
                     </div>
 
                     <div className="flex items-center space-x-3 shrink-0 self-start sm:self-auto">

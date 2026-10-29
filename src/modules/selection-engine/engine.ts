@@ -364,6 +364,7 @@ export class SelectionEngine {
         slug: item.slug,
         name: item.name,
         kind: item.kind,
+        description: item.description || '',
         origin: 'ECC_ADAPTED',
         sourceRelativePath: item.sourceRelativePath,
         sourceUrl: item.sourceUrl,

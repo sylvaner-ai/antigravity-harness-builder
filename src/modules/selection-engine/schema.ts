@@ -32,6 +32,7 @@ export const SelectedComponentSchema = z.object({
   name: z.string().min(1),
   kind: ComponentKindSchema,
   origin: ComponentOriginSchema,
+  description: z.string().default(''),
   sourceRelativePath: z.string().optional(),
   sourceUrl: z.string().optional(),
   license: z.string().default('MIT'),
