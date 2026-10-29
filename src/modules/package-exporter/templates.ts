@@ -178,6 +178,17 @@ ${selectedSkills.map((s) => `- **\`${s.slug}\`** (\`.agents/skills/${s.slug}/SKI
 ### Sous-agents spécialisés (\`.agents/agents/\`)
 Déléguez les sous-tâches indépendantes ou les revues critiques conformément à \`docs/ORCHESTRATION.md\` :
 ${selectedSubagents.map((a) => `- **\`${a.slug}\`** (\`.agents/agents/${a.slug}.md\`, modèle : \`${a.frontmatter.model}\`) : ${a.frontmatter.description}`).join('\n')}
+
+## 4. Recommandation Proactive des Commandes Slash à l'Utilisateur
+
+L'utilisateur ne peut pas exécuter lui-même des commandes complexes sans y penser. Vous devez donc **lui suggérer proactivement** les commandes slash pertinentes dans vos réponses dès que sa demande s'y prête :
+
+- **\`/goal\`** : Dès que l'utilisateur vous confie un jalon complet, un chantier au long cours ou une mission complexe nécessitant de multiples étapes sans interruption (ex : *"Vous pouvez utiliser la commande \`/goal\` pour que j'exécute ce jalon en autonomie jusqu'au bout"*).
+- **\`/plan\`** : Dès qu'une tâche complexe nécessite d'aligner l'architecture ou la décomposition multi-étapes avant d'écrire du code (ex : *"Vous pouvez taper \`/plan\` si vous souhaitez affiner et valider la feuille de route ensemble avant l'implémentation"*).
+- **\`/teamwork\`** : Dès qu'une tâche nécessite de mobiliser conjointement plusieurs sous-agents (architecte + expert base de données + reviewer) selon \`docs/ORCHESTRATION.md\` (ex : *"Vous pouvez lancer \`/teamwork\` pour organiser une concertation structurée entre nos sous-agents spécialisés"*).
+- **\`/compact\`** : Dès que l'historique de conversation devient dense ou après la clôture d'un jalon majeur pour libérer le contexte.
+- **\`/boost\`** : Pour un problème algorithmique particulièrement ardu nécessitant un raisonnement multi-perspectives approfondi.
+- **\`/learn\`** : Lorsque l'utilisateur vous donne une directive réutilisable ou corrige une convention sur le projet afin de la mémoriser durablement.
 `;
 }
 
@@ -399,6 +410,16 @@ ${agentsTable}
 Les skills utilisent la **divulgation progressive** d'Antigravity : seuls leur nom et leur description sont chargés initialement. L'agent principal ou les sous-agents doivent activer explicitement le skill approprié lors des tâches suivantes :
 
 ${selectedSkills.map((s) => `- **\`${s.slug}\`** (\`.agents/skills/${s.slug}/SKILL.md\`) : ${s.frontmatter.description}\n  - *Raison de sélection :* ${s.selectionRationale}`).join('\n')}
+
+---
+
+## 4. Recommandations Proactives des Commandes Slash dans le Dialogue
+
+L'agent principal doit assister l'utilisateur en lui recommandant proactivement les commandes slash adaptées au cours du dialogue :
+- Si la tâche demandée nécessite une exécution autonome prolongée sur un jalon complet, suggérer d'utiliser \`/goal\`.
+- Si la tâche requiert une concertation formelle entre sous-agents (architecte, BDD, reviewer), suggérer d'utiliser \`/teamwork\`.
+- Si la tâche requiert un cadrage et une validation d'étapes préalables, suggérer d'utiliser \`/plan\`.
+- Si le contexte de conversation devient très long, suggérer \`/compact\`.
 `;
 }
 
