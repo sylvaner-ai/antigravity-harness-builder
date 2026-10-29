@@ -18,6 +18,11 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
   const [userIncludes, setUserIncludes] = useState<string[]>([]);
   const [userExcludes, setUserExcludes] = useState<string[]>([]);
 
+  // Filtres et exploration des candidats écartés
+  const [rejectedSearch, setRejectedSearch] = useState('');
+  const [rejectedKindFilter, setRejectedKindFilter] = useState<'ALL' | 'RULE' | 'SUBAGENT' | 'SKILL' | 'COMMAND_CONVERTED'>('ALL');
+  const [rejectedDisplayLimit, setRejectedDisplayLimit] = useState(25);
+
   // Simulation / Pré-calcul de la sélection
   const calculateSelection = async () => {
     try {
@@ -201,65 +206,190 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Composants sur mesure synthétisés */}
+      {/* Composants Spécifiques au Projet (Générés Sur-Mesure) */}
       {(selection?.customComponents || []).length > 0 && (
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-            <span>Composants Sur Mesure Synthétisés</span>
-            <span className="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded font-normal">
-              Besoin non couvert par ECC
-            </span>
-          </h3>
+        <div className="bg-white p-6 rounded-xl border border-indigo-200 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                <span>Composants Générés Sur-Mesure pour ce Projet</span>
+                <span className="text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full font-medium">
+                  {selection?.customComponents?.length} composant(s) synthétisé(s)
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                <strong>Pourquoi cette section ?</strong> Le catalogue communautaire ECC ne fournit que des composants génériques. À partir de votre cahier des charges et de votre design system, le générateur synthétise automatiquement des règles et tokens dédiés pour apporter à l&apos;agent Antigravity la connaissance approfondie de votre métier et de votre charte graphique.
+              </p>
+            </div>
+          </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             {selection?.customComponents?.map((custom) => (
-              <div key={custom.slug} className="p-4 rounded-lg bg-indigo-50/40 border border-indigo-200 text-xs space-y-1">
+              <div key={custom.slug} className="p-4 rounded-lg bg-indigo-50/30 border border-indigo-200 text-xs space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 text-sm">{custom.name}</span>
-                  <span className="text-indigo-600 font-mono">{custom.slug}</span>
+                  <span className="text-indigo-600 font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-indigo-100">{custom.slug}</span>
                 </div>
                 <p className="text-slate-600">
-                  <strong>Raison du besoin :</strong> {custom.gapReason}
+                  <strong className="text-slate-700">Rôle :</strong> {custom.gapReason}
                 </p>
+                <div className="text-[11px] text-indigo-800 bg-white/80 p-2 rounded border border-indigo-100/60 font-mono truncate">
+                  Type: {custom.kind} • Cible: .antigravity/{custom.kind === 'RULE' ? 'rules' : custom.kind === 'SKILL' ? 'skills' : 'agents'}/{custom.slug}.md
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Candidats écartés avec justifications */}
-      {(selection?.rejectedComponents || []).length > 0 && (
-        <details className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <summary className="text-sm font-semibold text-slate-700 cursor-pointer">
-            Voir les candidats écartés avec leurs motifs ({selection?.rejectedComponents?.length || 0})
-          </summary>
+      {/* Candidats écartés avec justifications et exploration complète */}
+      {(() => {
+        const rejected = selection?.rejectedComponents || [];
+        const filtered = rejected.filter((rej) => {
+          if (rejectedKindFilter !== 'ALL' && rej.kind !== rejectedKindFilter) {
+            return false;
+          }
+          if (rejectedSearch.trim()) {
+            const q = rejectedSearch.toLowerCase().trim();
+            const matchName = rej.name.toLowerCase().includes(q);
+            const matchSlug = rej.slug.toLowerCase().includes(q);
+            const matchRationale = rej.rejectedRationale.toLowerCase().includes(q);
+            return matchName || matchSlug || matchRationale;
+          }
+          return true;
+        });
 
-          <div className="space-y-2 pt-4">
-            {selection?.rejectedComponents?.slice(0, 15).map((rej) => (
-              <div
-                key={rej.slug}
-                className="p-3 rounded bg-slate-50 border border-slate-200 text-xs flex items-center justify-between"
-              >
-                <div>
-                  <span className="font-semibold text-slate-800">{rej.name}</span>
-                  <span className="text-slate-400 font-mono ml-2">({rej.slug})</span>
-                  <p className="text-slate-500 mt-0.5">{rej.rejectedRationale}</p>
+        const displayed = filtered.slice(0, rejectedDisplayLimit);
+
+        return (
+          rejected.length > 0 && (
+            <details className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4" open>
+              <summary className="text-base font-semibold text-slate-900 cursor-pointer flex items-center justify-between">
+                <span>Registre d&apos;Explicabilité : Candidats ECC écartés ({rejected.length})</span>
+                <span className="text-xs font-normal text-indigo-600 hover:underline">
+                  Cliquez pour replier / déplier
+                </span>
+              </summary>
+
+              <p className="text-xs text-slate-500 pt-2">
+                Chaque composant non retenu est consigné ci-dessous avec le motif précis de son rejet (incompatibilité de technologie, doublon fonctionnel ou quota du preset {preset}). Vous pouvez rechercher un composant ou forcer son inclusion manuelle.
+              </p>
+
+              {/* Barre de recherche et filtres de catégorie */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={rejectedSearch}
+                    onChange={(e) => {
+                      setRejectedSearch(e.target.value);
+                      setRejectedDisplayLimit(25);
+                    }}
+                    placeholder="Filtrer par nom, slug ou motif (ex: python, vue, quota, doublon)..."
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 font-sans"
+                  />
+                  {rejectedSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setRejectedSearch('')}
+                      className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-600"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUserIncludes([...userIncludes, rej.slug]);
-                    calculateSelection();
-                  }}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0 ml-4"
-                >
-                  + Forcer l inclusion
-                </button>
+
+                <div className="flex flex-wrap gap-1 text-xs">
+                  {(['ALL', 'SUBAGENT', 'RULE', 'SKILL', 'COMMAND_CONVERTED'] as const).map((k) => {
+                    const count = k === 'ALL' ? rejected.length : rejected.filter((r) => r.kind === k).length;
+                    const label = k === 'ALL' ? 'Tous' : k === 'SUBAGENT' ? 'Sous-agents' : k === 'RULE' ? 'Règles' : k === 'SKILL' ? 'Skills' : 'Commandes';
+                    const active = rejectedKindFilter === k;
+
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => {
+                          setRejectedKindFilter(k);
+                          setRejectedDisplayLimit(25);
+                        }}
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                          active
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            ))}
-          </div>
-        </details>
-      )}
+
+              {/* Compteur de résultats filtrés */}
+              <div className="text-xs text-slate-500 flex items-center justify-between">
+                <span>
+                  Affichage de <strong>{displayed.length}</strong> sur <strong>{filtered.length}</strong> candidat(s) correspondant(s)
+                </span>
+                {filtered.length > rejectedDisplayLimit && (
+                  <button
+                    type="button"
+                    onClick={() => setRejectedDisplayLimit(filtered.length)}
+                    className="text-indigo-600 hover:underline font-medium"
+                  >
+                    Tout afficher ({filtered.length})
+                  </button>
+                )}
+              </div>
+
+              {/* Liste des cartes de candidats écartés */}
+              <div className="space-y-2 pt-1 max-h-[600px] overflow-y-auto pr-1">
+                {displayed.map((rej) => (
+                  <div
+                    key={rej.slug}
+                    className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100/70 border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-colors"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800">{rej.name}</span>
+                        <span className="text-slate-400 font-mono text-[11px]">({rej.slug})</span>
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
+                          {rej.kind}
+                        </span>
+                      </div>
+                      <p className="text-slate-600">{rej.rejectedRationale}</p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserIncludes([...userIncludes, rej.slug]);
+                        calculateSelection();
+                      }}
+                      className="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700 border border-indigo-200 rounded font-medium text-xs shrink-0 self-start sm:self-auto shadow-sm transition-colors"
+                    >
+                      + Forcer l&apos;inclusion
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bouton pagination si plus d'éléments */}
+              {filtered.length > displayed.length && (
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setRejectedDisplayLimit((prev) => prev + 50)}
+                    className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-medium border border-slate-300 transition-colors"
+                  >
+                    Afficher 50 candidats de plus ({filtered.length - displayed.length} restants)
+                  </button>
+                </div>
+              )}
+            </details>
+          )
+        );
+      })()}
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-4 border-t border-slate-200">

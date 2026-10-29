@@ -31,7 +31,57 @@ export interface SelectionEngineOptions {
   customComponents?: CustomComponentSpec[];
 }
 
+const KNOWN_EXCLUSIVE_TECH = [
+  'perl',
+  'python',
+  'ruby',
+  'php',
+  'csharp',
+  'cpp',
+  'c++',
+  'rust',
+  'go',
+  'golang',
+  'java',
+  'kotlin',
+  'swift',
+  'dart',
+  'flutter',
+  'elixir',
+  'clojure',
+  'scala',
+  'haskell',
+  'arkts',
+  'react-native',
+  'vue',
+  'angular',
+  'django',
+  'fastapi',
+  'rails',
+  'laravel',
+  'spring',
+  'springboot',
+  'quarkus',
+  'android',
+  'ios',
+  'harmonyos',
+  'fsharp',
+  'pytorch',
+  'gan',
+];
+
 export class SelectionEngine {
+  private getSubagentRoleArchetype(slug: string): string {
+    const s = slug.toLowerCase();
+    if (s.includes('architect')) return 'architect';
+    if (s.includes('database') || s.includes('sql') || s.includes('postgres')) return 'database';
+    if (s.includes('e2e') || s.includes('test') || s.includes('tdd')) return 'test-qa';
+    if (s.includes('security')) return 'security-auditor';
+    if (s.includes('performance') || s.includes('optimizer')) return 'performance';
+    if (s.includes('reviewer') || s.includes('review')) return 'code-reviewer';
+    return slug;
+  }
+
   /**
    * Exécute la sélection explicable en 3 passes (§7 FR-05 & §15.1 Jalon 4) :
    * 1. Filtres bloquants (compatibilité stack, surface, sécurité).
@@ -49,9 +99,9 @@ export class SelectionEngine {
 
     // Seuils selon le preset
     const thresholds = {
-      MINIMAL: { minScore: 40, maxRules: 6, maxSubagents: 2 },
-      BALANCED: { minScore: 25, maxRules: 12, maxSubagents: 4 },
-      THOROUGH: { minScore: 15, maxRules: 24, maxSubagents: 6 },
+      MINIMAL: { minScore: 40, maxRules: 6, maxSubagents: 2, maxSkills: 4 },
+      BALANCED: { minScore: 25, maxRules: 12, maxSubagents: 4, maxSkills: 8 },
+      THOROUGH: { minScore: 15, maxRules: 24, maxSubagents: 6, maxSkills: 16 },
     }[preset];
 
     const projectLangs = (profile.techStack?.languages ?? []).map((l) => l.toLowerCase());
@@ -127,19 +177,56 @@ export class SelectionEngine {
         }
       }
 
+      // Filtre bloquant sur technologies étrangères exclusives (ex: perl, arkts, react-native, flutter, ruby, php, etc.)
+      const slugLower = item.slug.toLowerCase();
+      const familyLower = (item.parsedMeta.family ?? '').toLowerCase();
+      let foreignTechDetected: string | null = null;
+
+      for (const tech of KNOWN_EXCLUSIVE_TECH) {
+        const isTechInProject =
+          projectLangs.some((l) => l.includes(tech)) ||
+          projectFrameworks.some((f) => f.includes(tech));
+
+        if (!isTechInProject) {
+          if (
+            familyLower === tech ||
+            slugLower === tech ||
+            slugLower.startsWith(`${tech}-`) ||
+            slugLower.endsWith(`-${tech}`) ||
+            slugLower.includes(`/${tech}/`)
+          ) {
+            foreignTechDetected = tech;
+            break;
+          }
+        }
+      }
+
+      if (foreignTechDetected) {
+        rejectedList.push({
+          slug: item.slug,
+          name: item.name,
+          kind: item.kind,
+          rejectedRationale: `Technologie spécifique [${foreignTechDetected}] non utilisée dans la stack de ce projet.`,
+          rejectionReason: 'STACK_INCOMPATIBLE',
+          rawScore: 0,
+        });
+        continue;
+      }
+
       // Compatibilité frameworks : si le composant est spécifique à un framework et qu'aucun ne correspond
-      const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase());
+      const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
+      const normProjectFrameworks = projectFrameworks.map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
       if (itemFrameworks.length > 0) {
         const hasMatchingFramework = itemFrameworks.some((fw) =>
-          projectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))
+          normProjectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))
         );
         // Si le composant est strictement typé framework (ex: react vs django) et non généraliste
-        if (!hasMatchingFramework && projectFrameworks.length > 0) {
+        if (!hasMatchingFramework && normProjectFrameworks.length > 0) {
           rejectedList.push({
             slug: item.slug,
             name: item.name,
             kind: item.kind,
-            rejectedRationale: `Framework non ciblé : composant prévu pour [${itemFrameworks.join(', ')}] non présent dans la stack [${projectFrameworks.join(', ')}].`,
+            rejectedRationale: `Framework non ciblé : composant prévu pour [${(item.parsedMeta.frameworks ?? []).join(', ')}] non présent dans la stack [${projectFrameworks.join(', ')}].`,
             rejectionReason: 'STACK_INCOMPATIBLE',
             rawScore: 0,
           });
@@ -166,6 +253,7 @@ export class SelectionEngine {
     const familyWinners = new Map<string, string>(); // family -> winnerSlug
     let rulesCount = 0;
     let subagentsCount = 0;
+    let skillsCount = 0;
 
     for (const { item, score } of scoredCandidates) {
       const isForced = userIncludes.has(item.slug);
@@ -206,19 +294,41 @@ export class SelectionEngine {
           });
           continue;
         }
+        if (item.kind === 'SKILL' && skillsCount >= thresholds.maxSkills) {
+          rejectedList.push({
+            slug: item.slug,
+            name: item.name,
+            kind: item.kind,
+            rejectedRationale: `Quota maximum de compétences / skills (${thresholds.maxSkills}) atteint pour le preset ${preset}.`,
+            rejectionReason: 'SCORE_BELOW_PRESET_THRESHOLD',
+            rawScore: score.totalScore,
+          });
+          continue;
+        }
       }
 
-      // Déduplication par famille au sein du même KIND (ex: RULE vs SUBAGENT)
-      const family = item.parsedMeta.family;
-      if (family && family !== 'common' && family !== 'general') {
-        const dedupeKey = `${item.kind}:${family}`;
+      // Déduplication fonctionnelle :
+      // - Pour les sous-agents : par archétype de rôle (architecte, base de données, testeur, reviewer)
+      // - Pour les autres composants : par famille (hors familles génériques comme 'common', 'general', 'agent', 'skill')
+      let dedupeKey: string | null = null;
+      if (item.kind === 'SUBAGENT') {
+        const archetype = this.getSubagentRoleArchetype(item.slug);
+        dedupeKey = `SUBAGENT:${archetype}`;
+      } else {
+        const family = item.parsedMeta.family;
+        if (family && family !== 'common' && family !== 'general' && family !== 'agent' && family !== 'skill') {
+          dedupeKey = `${item.kind}:${family}`;
+        }
+      }
+
+      if (dedupeKey) {
         const existingWinner = familyWinners.get(dedupeKey);
         if (existingWinner && !isForced) {
           rejectedList.push({
             slug: item.slug,
             name: item.name,
             kind: item.kind,
-            rejectedRationale: `Doublon fonctionnel évité : la famille "${family}" (${item.kind}) est déjà couverte par le composant prioritaire "${existingWinner}".`,
+            rejectedRationale: `Doublon fonctionnel évité : le rôle/famille "${dedupeKey}" est déjà couvert par le composant prioritaire "${existingWinner}".`,
             rejectionReason: 'DEDUPLICATED_FAMILY_OVERRIDDEN',
             rawScore: score.totalScore,
             supersededBySlug: existingWinner,
@@ -260,7 +370,7 @@ export class SelectionEngine {
         license: item.license ?? 'MIT',
         acceptedRationale: rationaleParts.join(' ') || `Score élevé (${score.totalScore}/100) pour le profil du projet.`,
         score,
-        family,
+        family: item.parsedMeta.family,
         dependencies: item.parsedMeta.dependencies ?? [],
         adaptedContent: item.adaptedContent,
         userModified: isForced,
@@ -268,6 +378,7 @@ export class SelectionEngine {
 
       if (item.kind === 'RULE') rulesCount++;
       if (item.kind === 'SUBAGENT') subagentsCount++;
+      if (item.kind === 'SKILL') skillsCount++;
     }
 
     // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC (Composants sur mesure §7 FR-05) ---
@@ -410,19 +521,26 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     let coreBaseBonus = 0;
     const matchingKeywords: string[] = [];
 
+    // Normalisation des langages et frameworks
+    const normProjectLangs = projectLangs.map((l) => l.toLowerCase().replace(/[.\-_]/g, ''));
+    if (normProjectLangs.includes('typescript') && !normProjectLangs.includes('javascript')) {
+      normProjectLangs.push('javascript', 'js');
+    }
+    const normProjectFrameworks = projectFrameworks.map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
+
     // Langages (+35 pts max)
-    const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase());
+    const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase().replace(/[.\-_]/g, ''));
     for (const lang of itemLangs) {
-      if (projectLangs.some((pLang) => pLang.includes(lang) || lang.includes(pLang))) {
+      if (normProjectLangs.some((pLang) => pLang.includes(lang) || lang.includes(pLang))) {
         languageMatch = Math.max(languageMatch, 35);
         matchingKeywords.push(`lang:${lang}`);
       }
     }
 
     // Frameworks (+30 pts max)
-    const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase());
+    const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
     for (const fw of itemFrameworks) {
-      if (projectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))) {
+      if (normProjectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))) {
         frameworkMatch = Math.max(frameworkMatch, 30);
         matchingKeywords.push(`framework:${fw}`);
       }
@@ -460,6 +578,27 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     ) {
       architectureSecurityMatch += 20;
       matchingKeywords.push('testing_focus');
+    }
+
+    // Rôles clés pour sous-agents (Architecte, Base de données, QA/Tests, Reviewer)
+    if (item.kind === 'SUBAGENT') {
+      const s = item.slug.toLowerCase();
+      if (s === 'architect' || s === 'code-architect') {
+        architectureSecurityMatch += 35;
+        matchingKeywords.push('role:system_architect');
+      } else if (s.includes('database') || s.includes('sql') || s.includes('postgres')) {
+        architectureSecurityMatch += 35;
+        matchingKeywords.push('role:database_specialist');
+      } else if (s.includes('e2e') || s.includes('test') || s.includes('tdd')) {
+        architectureSecurityMatch += 30;
+        matchingKeywords.push('role:qa_testing');
+      } else if (s.includes('security')) {
+        architectureSecurityMatch += 25;
+        matchingKeywords.push('role:security_auditor');
+      } else if (s.includes('reviewer') || s.includes('review')) {
+        coreBaseBonus += 25;
+        matchingKeywords.push('role:code_reviewer');
+      }
     }
 
     // Règles transverses ou de style propre / git (+15 pts bonus)

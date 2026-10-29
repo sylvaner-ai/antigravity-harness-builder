@@ -1,7 +1,7 @@
 import { gzipSync, strToU8 } from 'fflate';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { closeDbPool, eccComponents, eccSyncs, getDb, jobs } from '../src/db';
+import { closeDbPool, eccComponents, eccSyncs, getDb, jobs, harnessGenerations, generatedArtifacts } from '../src/db';
 import {
   PostgresJobQueue,
   sanitizeErrorMessage,
@@ -161,6 +161,8 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
   const db = getDb();
 
   beforeEach(async () => {
+    await db.delete(generatedArtifacts);
+    await db.delete(harnessGenerations);
     await db.delete(eccComponents);
     await db.delete(eccSyncs);
   });
