@@ -190,13 +190,17 @@ export class HarnessBuilderService {
         selectionRationale: comp.acceptedRationale,
         originStatus: 'ecc_adapted',
         eccProvenance: {
-          repositoryUrl: 'https://github.com/affaan-m/ECC',
+          repositoryUrl: comp.sourceUrl?.includes('emilkowalski')
+            ? 'https://github.com/emilkowalski/skills'
+            : 'https://github.com/affaan-m/ECC',
           commitSha: eccCommitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `skills/${comp.slug}/SKILL.md`,
-          sourceUrl: comp.sourceUrl ?? `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/skills/${comp.slug}/SKILL.md`,
+          sourceUrl:
+            comp.sourceUrl ??
+            `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/skills/${comp.slug}/SKILL.md`,
           license: comp.license ?? 'MIT',
-          author: 'Affaan Mustafa',
+          author: comp.sourceUrl?.includes('emilkowalski') ? 'Emil Kowalski' : 'Affaan Mustafa',
           adaptationNotes: ['Adapté vers les standards de compétences Google Antigravity'],
         },
       });

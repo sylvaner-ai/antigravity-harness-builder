@@ -50,18 +50,22 @@ export default function EccAdminSyncPage() {
   }, []);
 
   const handleTriggerSync = async () => {
-    if (!confirm('Déclencher une synchronisation réelle avec le dépôt GitHub affaan-m/ECC ?')) return;
+    if (!confirm('Déclencher la synchronisation multi-sources (affaan-m/ECC + emilkowalski/skills) depuis GitHub ?')) return;
 
     setError(null);
     setMessage(null);
     setSyncing(true);
 
     try {
-      const res = await fetch('/api/admin/ecc/sync', { method: 'POST' });
+      const res = await fetch('/api/admin/ecc/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ includeEmilKowalskiSkills: true }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la synchronisation');
 
-      setMessage(`Synchronisation réussie ! ${data.componentCount} composants indexés depuis le commit ${data.commitSha.slice(0, 8)}.`);
+      setMessage(`Synchronisation multi-sources réussie ! ${data.componentCount} composants indexés depuis GitHub (ECC + emilkowalski/skills).`);
       await fetchCatalogData();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur de synchronisation');
@@ -79,10 +83,10 @@ export default function EccAdminSyncPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Écran 8 — Diagnostic & Synchronisation du Catalogue ECC
+            Écran 8 — Diagnostic & Synchronisation Multi-Catalogues
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Gestion du catalogue de référence <code>affaan-m/ECC</code> avec provenance et conformité Antigravity.
+            Gestion des catalogues de référence <code>affaan-m/ECC</code> et <code>emilkowalski/skills</code> avec conformité Antigravity.
           </p>
         </div>
 
@@ -91,8 +95,31 @@ export default function EccAdminSyncPage() {
           disabled={syncing}
           className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
         >
-          {syncing ? 'Synchronisation GitHub en cours...' : '🔄 Synchroniser depuis GitHub'}
+          {syncing ? 'Synchronisation GitHub en cours...' : '🔄 Synchroniser Multi-Sources (ECC + Emil)'}
         </button>
+      </div>
+
+      {/* Sources intégrées */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-slate-900 text-sm">affaan-m/ECC</span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">Catalogue Général</span>
+          </div>
+          <p className="text-xs text-slate-500">
+            Socle d&apos;ingénierie logicielle : règles TypeScript/SQL/Testing, sous-agents d&apos;architecture et workflows convertis.
+          </p>
+        </div>
+
+        <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-slate-900 text-sm">emilkowalski/skills</span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-semibold">Design Engineering</span>
+          </div>
+          <p className="text-xs text-slate-500">
+            Excellence UI & Motion : micro-interactions, animations GPU fluides, polish d&apos;interface et transitions naturelles.
+          </p>
+        </div>
       </div>
 
       {message && (

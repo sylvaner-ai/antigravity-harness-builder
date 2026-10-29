@@ -143,6 +143,7 @@ export class EccCatalogService {
     repo?: string;
     ref?: string;
     forceResync?: boolean;
+    includeEmilKowalskiSkills?: boolean;
   }): Promise<EccSyncRecord> {
     const owner = options?.owner ?? process.env.ECC_REPO_OWNER ?? 'affaan-m';
     const repo = options?.repo ?? process.env.ECC_REPO_NAME ?? 'ECC';
@@ -181,16 +182,48 @@ export class EccCatalogService {
         );
       }
 
+      // Téléchargement et qualification complémentaire des skills de Design Engineering (emilkowalski/skills)
+      const allComponents = [...parsedCatalog.components];
+      let versionTag = parsedCatalog.versionTag;
+
+      if (options?.includeEmilKowalskiSkills) {
+        try {
+          const emilSha = await this.fetcher.resolveRefCommitSha('emilkowalski', 'skills', 'main');
+          const emilBytes = await this.fetcher.downloadRepositoryTarball('emilkowalski', 'skills', emilSha);
+          const emilEntries = extractTarGzTextFilesInMemory(emilBytes);
+          const emilParsed = parseAndQualifyEccRepositoryEntries(
+            emilEntries,
+            emilSha,
+            'https://github.com/emilkowalski/skills'
+          );
+
+          for (const comp of emilParsed.components) {
+            comp.parsedMeta.tags.push('design-engineering', 'ui-polish', 'animation', 'emil-kowalski');
+            if (!comp.parsedMeta.frameworks.includes('react')) comp.parsedMeta.frameworks.push('react');
+            if (!comp.parsedMeta.frameworks.includes('nextjs')) comp.parsedMeta.frameworks.push('nextjs');
+            if (!comp.parsedMeta.languages.includes('typescript')) comp.parsedMeta.languages.push('typescript');
+            if (!comp.parsedMeta.languages.includes('javascript')) comp.parsedMeta.languages.push('javascript');
+
+            if (!allComponents.some((c) => c.slug === comp.slug)) {
+              allComponents.push(comp);
+            }
+          }
+          versionTag = `${parsedCatalog.versionTag} + emilkowalski/skills@${emilSha.slice(0, 7)}`;
+        } catch (emilErr) {
+          console.warn('Note : synchronisation complémentaire de emilkowalski/skills ignorée :', emilErr);
+        }
+      }
+
       // Transaction atomique : insertion du nouveau snapshot + insertion par lots des composants + bascule du catalogue actif
       const committedSync = await this.db.transaction(async (tx) => {
         const [newSync] = await tx
           .insert(eccSyncs)
           .values({
             commitSha: resolvedSha,
-            versionTag: parsedCatalog.versionTag,
+            versionTag,
             status: 'VALID',
             isActiveCatalog: false,
-            componentCount: parsedCatalog.components.length,
+            componentCount: allComponents.length,
             catalogSha256: parsedCatalog.catalogSha256,
             errorDetails: null,
           })
@@ -202,8 +235,8 @@ export class EccCatalogService {
 
         // Insertion par lots de 50 composants pour éviter de dépasser la limite de paramètres PostgreSQL
         const batchSize = 50;
-        for (let i = 0; i < parsedCatalog.components.length; i += batchSize) {
-          const batch = parsedCatalog.components.slice(i, i + batchSize);
+        for (let i = 0; i < allComponents.length; i += batchSize) {
+          const batch = allComponents.slice(i, i + batchSize);
           await tx.insert(eccComponents).values(
             batch.map((c) => ({
               eccSyncId: newSync.id,

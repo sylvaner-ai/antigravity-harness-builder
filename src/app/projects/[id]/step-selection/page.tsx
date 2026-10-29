@@ -30,6 +30,18 @@ const ECC_DESCRIPTIONS_FR: Record<string, string> = {
   'codebase-onboarding': 'Cartographie et guide d’onboarding pour explorer rapidement une base de code et comprendre son architecture.',
   'react-build': 'Résolution incrémentale des échecs de build React (Vite, Next.js, webpack) et typages JSX/TSX.',
 
+  // Skills de Design Engineering & Motion UI (Emil Kowalski)
+  'emil-design-eng': 'Design Engineering UI : finitions d’interface, micro-interactions, cohérence des composants et détails invisibles qui rendent le logiciel agréable.',
+  'animate': 'Conception d’animations web fluides et performantes (courbes cubic-bezier précises, durées < 300ms, transitions légères).',
+  'animate-expo': 'Animations et micro-interactions React Native & Expo (gestes, haptiques et transitions d’écrans fluides).',
+  'review-animations': 'Revue critique du motion design (audit anti-saccades, élimination des transitions lentes et des shifts de layout).',
+  'improve-animations': 'Plan d’optimisation priorisé pour moderniser et fluidifier les animations existantes d’une application.',
+  'animation-performance': 'Diagnostic et résolution des chutes de framerate (accélération GPU, optimisation des repaints).',
+  'apple-design': 'Principes de design Apple adaptés au web : physique fluide, profondeur de matière et transitions naturelles.',
+  'mobile-native': 'Optimisations ergonomiques pour rendre une application web aussi fluide qu’une application mobile native (touch, scroll, safe areas).',
+  'pick-ui-library': 'Guide de sélection rigoureux de bibliothèques d’interface et de composants headless adaptés.',
+  'prototype': 'Génération rapide de variantes interactives de design pour comparaison visuelle en direct.',
+
   // Règles projet sur-mesure
   'project-design-system-tokens': 'Application stricte des tokens visuels (palette de couleurs, typographies, règles UX) du projet.',
   'project-security-compliance-guard': 'Application impérative des règles de conformité et des contraintes de sécurité spécifiques au projet.',

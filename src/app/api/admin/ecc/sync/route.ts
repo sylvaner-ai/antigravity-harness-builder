@@ -14,8 +14,12 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getDb();
+    const body = await req.json().catch(() => ({}));
     const service = new EccCatalogService(db);
-    const syncRecord = await service.synchronizeCatalog();
+    const syncRecord = await service.synchronizeCatalog({
+      forceResync: true,
+      includeEmilKowalskiSkills: body.includeEmilKowalskiSkills !== false,
+    });
 
     return NextResponse.json({
       success: true,
