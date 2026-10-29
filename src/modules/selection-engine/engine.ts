@@ -63,6 +63,7 @@ const KNOWN_EXCLUSIVE_TECH = [
   'springboot',
   'quarkus',
   'android',
+  'expo',
   'ios',
   'harmonyos',
   'fsharp',
@@ -602,6 +603,16 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
         coreBaseBonus += 25;
         matchingKeywords.push('role:code_reviewer');
       }
+    }
+
+    // Bonus pour compétences d'excellence UI / Design Engineering si le projet a un volet interface
+    if (
+      (item.parsedMeta.tags?.includes('design-engineering') || item.parsedMeta.tags?.includes('ui-polish') || item.slug.includes('emil') || item.slug.includes('animate')) &&
+      (normProjectFrameworks.includes('react') || normProjectFrameworks.includes('nextjs') || normProjectFrameworks.includes('vue') || domainText.includes('design') || domainText.includes('ui'))
+    ) {
+      architectureSecurityMatch += 15;
+      coreBaseBonus += 10;
+      matchingKeywords.push('design_engineering_excellence');
     }
 
     // Règles transverses ou de style propre / git (+15 pts bonus)
