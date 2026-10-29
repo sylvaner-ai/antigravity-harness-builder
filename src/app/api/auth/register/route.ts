@@ -14,10 +14,12 @@ export async function POST(req: NextRequest) {
     const auth = new AuthService();
     const session = await auth.register(email, password);
 
+    const isSecure = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
+
     const res = NextResponse.json({ success: true, user: { email: session.email, role: session.role } });
     res.cookies.set('ahb_session', session.sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: 30 * 24 * 60 * 60,

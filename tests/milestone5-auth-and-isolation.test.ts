@@ -23,8 +23,8 @@ describe('Jalon 5 — Authentification & Isolation Stricte Multi-Utilisateurs (�
     // Vérifie que le mot de passe n'est pas stocké en clair
     const [aliceDb] = await db.select().from(users).where(eq(users.email, 'alice@example.com'));
     expect(aliceDb).toBeDefined();
-    expect(aliceDb.passwordHash).not.toContain('SuperPassword123!');
-    expect(aliceDb.passwordHash).toContain(':'); // salt:key
+    expect(aliceDb!.passwordHash).not.toContain('SuperPassword123!');
+    expect(aliceDb!.passwordHash).toContain(':'); // salt:key
   });
 
   it('2. Connexion avec mot de passe valide et rejet des mauvais identifiants', async () => {
@@ -49,11 +49,12 @@ describe('Jalon 5 — Authentification & Isolation Stricte Multi-Utilisateurs (�
       })
       .returning();
 
+    expect(projectAlice).toBeDefined();
     // Alice a accès à son propre projet
-    await expect(auth.assertProjectOwnership(projectAlice.id, sessionAlice.userId)).resolves.not.toThrow();
+    await expect(auth.assertProjectOwnership(projectAlice!.id, sessionAlice.userId)).resolves.not.toThrow();
 
     // Bob tente d'accéder au projet d'Alice -> BLOQUÉ IMMÉDIATEMENT
-    await expect(auth.assertProjectOwnership(projectAlice.id, sessionBob.userId)).rejects.toThrow(
+    await expect(auth.assertProjectOwnership(projectAlice!.id, sessionBob.userId)).rejects.toThrow(
       'Accès refusé'
     );
   });
@@ -61,9 +62,10 @@ describe('Jalon 5 — Authentification & Isolation Stricte Multi-Utilisateurs (�
   it('4. Rôle ADMIN : Un administrateur dispose du droit de supervision', async () => {
     const sessionAdmin = await auth.register('admin@example.com', 'AdminPassword999!', 'ADMIN');
     const [projectAlice] = await db.select().from(projects).where(eq(projects.name, 'Projet Secret Alice'));
+    expect(projectAlice).toBeDefined();
 
     // L'administrateur peut superviser le projet
-    await expect(auth.assertProjectOwnership(projectAlice.id, sessionAdmin.userId)).resolves.not.toThrow();
+    await expect(auth.assertProjectOwnership(projectAlice!.id, sessionAdmin.userId)).resolves.not.toThrow();
   });
 
   it('5. Révocation de session lors de la déconnexion', async () => {

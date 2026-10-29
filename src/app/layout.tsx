@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import React from 'react';
 import './globals.css';
+import { UserNav } from '@/components/UserNav';
 
 export const metadata: Metadata = {
   title: 'Antigravity Harness Builder',
@@ -41,12 +42,7 @@ export default function RootLayout({
               <a href="/admin/ecc-sync" className="text-slate-600 hover:text-slate-900 transition-colors">
                 Catalogue ECC
               </a>
-              <a
-                href="/login"
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
-              >
-                Compte
-              </a>
+              <UserNav />
             </nav>
           </div>
         </header>

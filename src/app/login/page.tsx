@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +27,7 @@ export default function LoginPage() {
         throw new Error(data.error || 'Erreur d authentification');
       }
 
-      router.push('/projects');
-      router.refresh();
+      window.location.href = '/projects';
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur inattendue');
     } finally {
