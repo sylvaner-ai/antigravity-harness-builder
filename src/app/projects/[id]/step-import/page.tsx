@@ -137,7 +137,7 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
 
       <div>
         <h1 className="text-2xl font-bold text-slate-900">
-          Étape 2 — Import des Documents Sources ({project?.name})
+          Étape 1 — Import des Documents Sources ({project?.name})
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Surface cible : <strong className="text-slate-700">Antigravity {project?.targetSurface}</strong>.

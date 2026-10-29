@@ -19,23 +19,38 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     fetch(`/api/projects/${projectId}`)
       .then((r) => r.json())
       .then((d) => {
         const latestGen = d.generations?.[0];
+        const artifacts = d.artifacts || [];
         if (latestGen && latestGen.manifestData) {
           setManifest(latestGen.manifestData);
           const manifestFiles: FileItem[] = (latestGen.manifestData.filesInventory || []).map(
-            (inv: any) => ({
-              relativePath: inv.relativePath,
-              sizeBytes: inv.sizeBytes,
-              sha256: inv.sha256,
-              content: '',
-            })
+            (inv: any) => {
+              const matched = artifacts.find((a: any) => a.relativePath === inv.relativePath);
+              return {
+                relativePath: inv.relativePath,
+                sizeBytes: inv.sizeBytes,
+                sha256: inv.sha256,
+                content:
+                  matched?.content ||
+                  (inv.relativePath.endsWith('manifest.json')
+                    ? JSON.stringify(latestGen.manifestData, null, 2)
+                    : ''),
+              };
+            }
           );
           setFiles(manifestFiles);
-          setSelectedFile(manifestFiles.find((f) => f.relativePath === 'START_HERE.md') || manifestFiles[0] || null);
+          setSelectedFile(
+            manifestFiles.find((f) => f.relativePath === 'START_HERE.md') ||
+              manifestFiles.find((f) => f.relativePath === 'AGENTS.md') ||
+              manifestFiles[0] ||
+              null
+          );
         } else {
           setError('Aucune génération disponible. Veuillez lancer la composition à l étape précédente.');
         }
@@ -79,9 +94,9 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Étape 5 — Prévisualisation de l Arborescence</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Étape 4 — Prévisualisation de l&apos;Arborescence & Code</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Inspection de l arborescence native Google Antigravity ({files.length} fichiers générés).
+            Inspection de l&apos;arborescence native Google Antigravity ({files.length} fichiers générés).
           </p>
         </div>
 
@@ -93,71 +108,93 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* Explorateur et lecteur */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm min-h-[500px]">
-        {/* Volet gauche : Liste des fichiers */}
-        <div className="border-r border-slate-200 bg-slate-50 p-4 space-y-2 overflow-y-auto max-h-[600px]">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-            Arborescence du Harnais
-          </h3>
-          {files.map((file) => (
-            <button
-              key={file.relativePath}
-              onClick={() => setSelectedFile(file)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono transition-colors flex items-center justify-between ${
-                selectedFile?.relativePath === file.relativePath
-                  ? 'bg-indigo-600 text-white font-semibold'
-                  : 'hover:bg-slate-200/60 text-slate-700'
-              }`}
-            >
-              <span className="truncate">{file.relativePath}</span>
-              <span className="text-[10px] opacity-75 shrink-0 ml-2">
-                {Math.round(file.sizeBytes / 1024) || 1} Ko
-              </span>
-            </button>
-          ))}
-        </div>
+      {(() => {
+        const displayedContent =
+          selectedFile?.content && selectedFile.content.trim().length > 0
+            ? selectedFile.content
+            : selectedFile?.relativePath.includes('manifest.json')
+              ? JSON.stringify(manifest, null, 2)
+              : selectedFile?.relativePath === 'START_HERE.md'
+                ? `# Guide d'Installation Antigravity\n\n1. Décompressez l'archive harness.zip dans votre répertoire de projet.\n2. Ouvrez Google Antigravity (${manifest?.targetSurface || 'IDE'}).\n3. Les règles de .agents/rules/ et compétences de .agents/skills/ sont activées nativement.`
+                : `# Fichier certifié conforme Google Antigravity\n\nChemin : ${selectedFile?.relativePath}\nEmpreinte d'intégrité : ${selectedFile?.sha256}\n\nCe fichier est inclus dans l'archive harness.zip téléchargeable.`;
 
-        {/* Volet droit : Lecteur de fichier */}
-        <div className="md:col-span-2 p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm min-h-[500px]">
+            {/* Volet gauche : Liste des fichiers */}
+            <div className="border-r border-slate-200 bg-slate-50 p-4 space-y-2 overflow-y-auto max-h-[600px]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                Arborescence du Harnais ({files.length})
+              </h3>
+              {files.map((file) => (
+                <button
+                  key={file.relativePath}
+                  onClick={() => setSelectedFile(file)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono transition-colors flex items-center justify-between ${
+                    selectedFile?.relativePath === file.relativePath
+                      ? 'bg-indigo-600 text-white font-semibold'
+                      : 'hover:bg-slate-200/60 text-slate-700'
+                  }`}
+                >
+                  <span className="truncate">{file.relativePath}</span>
+                  <span className="text-[10px] opacity-75 shrink-0 ml-2">
+                    {Math.round(file.sizeBytes / 1024) || 1} Ko
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Volet droit : Lecteur de fichier */}
+            <div className="md:col-span-2 p-6 flex flex-col justify-between">
               <div>
-                <span className="text-xs font-mono font-bold text-slate-900">
-                  {selectedFile?.relativePath}
-                </span>
-                <span className="text-xs text-slate-400 ml-3">
-                  SHA-256 : {selectedFile?.sha256.slice(0, 16)}...
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-2">
+                  <div>
+                    <span className="text-xs font-mono font-bold text-slate-900 block sm:inline">
+                      {selectedFile?.relativePath}
+                    </span>
+                    <span className="text-xs text-slate-400 sm:ml-3 block sm:inline">
+                      SHA-256 : {selectedFile?.sha256.slice(0, 16)}...
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs text-slate-500">
+                      Taille : {selectedFile?.sizeBytes} octets
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (displayedContent) {
+                          navigator.clipboard.writeText(displayedContent);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }
+                      }}
+                      className="px-2.5 py-1 text-xs font-medium rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-sm"
+                    >
+                      {copied ? '✓ Copié !' : 'Copier'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 text-slate-100 rounded-lg p-4 font-mono text-xs overflow-x-auto max-h-[480px] leading-relaxed">
+                  <pre className="whitespace-pre-wrap">{displayedContent}</pre>
+                </div>
               </div>
-              <span className="text-xs text-slate-500">
-                Taille : {selectedFile?.sizeBytes} octets
-              </span>
-            </div>
 
-            <div className="bg-slate-900 text-slate-100 rounded-lg p-4 font-mono text-xs overflow-x-auto max-h-[480px] leading-relaxed">
-              <pre className="whitespace-pre-wrap">
-                {selectedFile?.relativePath === 'START_HERE.md'
-                  ? `# Guide d'Installation Antigravity\n\n1. Décompressez l'archive harness.zip dans votre répertoire de projet.\n2. Ouvrez Google Antigravity (${manifest?.targetSurface || 'IDE'}).\n3. Les règles de .agents/rules/ et compétences de .agents/skills/ sont activées nativement.`
-                  : selectedFile?.relativePath.includes('manifest')
-                    ? JSON.stringify(manifest, null, 2)
-                    : `# Fichier certifié conforme Google Antigravity\n\nChemin : ${selectedFile?.relativePath}\nEmpreinte d'intégrité : ${selectedFile?.sha256}\n\nCe fichier est inclus dans l'archive harness.zip téléchargeable.`}
-              </pre>
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-slate-400">
+                  Validé par le moteur déterministe Antigravity
+                </span>
+                <Link
+                  href={`/projects/${projectId}/step-export`}
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
+                >
+                  Étape Suivante : Téléchargement →
+                </Link>
+              </div>
             </div>
           </div>
-
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span className="text-xs text-slate-400">
-              Validé par le moteur déterministe Antigravity
-            </span>
-            <Link
-              href={`/projects/${projectId}/step-export`}
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
-            >
-              Étape Suivante : Téléchargement →
-            </Link>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Actions bas */}
       <div className="flex items-center justify-between pt-4 border-t border-slate-200">

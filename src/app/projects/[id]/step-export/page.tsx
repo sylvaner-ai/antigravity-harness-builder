@@ -69,7 +69,7 @@ export default function StepExportPage({ params }: { params: Promise<{ id: strin
           ✓
         </div>
         <h1 className="text-2xl font-bold text-slate-900">
-          Votre Harnais Antigravity est Prêt !
+          Étape 5 — Téléchargement & Export du Harnais
         </h1>
         <p className="text-sm text-slate-500 max-w-lg mx-auto">
           Le harnais déterministe pour <strong>{project?.name}</strong> (Antigravity {project?.targetSurface}) a été assemblé et validé avec succès.

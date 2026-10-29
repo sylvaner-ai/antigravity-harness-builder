@@ -195,7 +195,7 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
 
       <div>
         <h1 className="text-2xl font-bold text-slate-900">
-          Étape 3 — Validation du Profil Structuré ({profile.projectName})
+          Étape 2 — Profil Extrait & Épistémique ({profile.projectName})
         </h1>
         <p className="text-sm text-slate-500 mt-1">
           Chaque élément a été catégorisé selon son statut épistémique (§3.3 du cahier des charges).
