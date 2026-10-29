@@ -32,6 +32,9 @@ export default function EccAdminSyncPage() {
         return;
       }
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Erreur de chargement');
+      }
       setActiveCatalog(data.activeCatalog);
       setHistory(data.history || []);
       setTotalComponents(data.totalActiveComponents || 0);

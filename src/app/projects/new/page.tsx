@@ -9,7 +9,23 @@ export default function NewProjectPage() {
   const [description, setDescription] = useState('');
   const [targetSurface, setTargetSurface] = useState<'APP' | 'IDE' | 'CLI'>('IDE');
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.user) {
+          window.location.href = '/login';
+        } else {
+          setCheckingAuth(false);
+        }
+      })
+      .catch(() => {
+        window.location.href = '/login';
+      });
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +49,10 @@ export default function NewProjectPage() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return <div className="text-center py-16 text-slate-500">Vérification de l authentification...</div>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl border border-slate-200 shadow-sm">

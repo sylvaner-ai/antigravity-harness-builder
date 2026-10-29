@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { getDb, eccSyncs, eccComponents } from '@/db';
 import { requireAuthUser } from '@/modules/auth';
 
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuthUser(req);
-    // Réservé aux administrateurs si role !== ADMIN on peut restreindre ou autoriser la lecture
     const db = getDb();
 
     const syncs = await db.select().from(eccSyncs).orderBy(desc(eccSyncs.syncedAt)).limit(10);
@@ -14,8 +13,11 @@ export async function GET(req: NextRequest) {
 
     let totalActiveComponents = 0;
     if (activeSync) {
-      const components = await db.select().from(eccComponents).where(desc(eccComponents.createdAt));
-      totalActiveComponents = components.filter((c) => c.eccSyncId === activeSync.id).length;
+      const components = await db
+        .select({ id: eccComponents.id })
+        .from(eccComponents)
+        .where(eq(eccComponents.eccSyncId, activeSync.id));
+      totalActiveComponents = components.length;
     }
 
     return NextResponse.json({
@@ -26,6 +28,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur';
-    return NextResponse.json({ error: msg }, { status: 401 });
+    const status = msg.includes('Authentification') || msg.includes('Session') ? 401 : 500;
+    return NextResponse.json({ error: msg }, { status });
   }
 }
