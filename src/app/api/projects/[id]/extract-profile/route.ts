@@ -34,8 +34,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const body = await req.json().catch(() => ({}));
     const supplementaryNotes = body.supplementaryNotes ?? {};
 
-    // Sélection de l'adaptateur LLM
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Sélection de l'adaptateur LLM (Gemini si clé fournie, sinon extraction heuristique mock)
+    const apiKey = (body.geminiApiKey as string | undefined)?.trim() || process.env.GEMINI_API_KEY;
     const llm: LLMGatewayPort = apiKey
       ? new GeminiLLMAdapter(apiKey)
       : new MockLLMAdapter();

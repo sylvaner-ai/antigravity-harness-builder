@@ -95,9 +95,8 @@ describe('Jalon 3 — Profil de projet structuré, LLM Gateway & Édition humain
   let testProjectId: string;
 
   beforeEach(async () => {
-    await db.delete(projectProfiles);
-    await db.delete(projects);
-    await db.delete(users);
+    // Nettoyage ciblé des données de ce test uniquement
+    await db.delete(users).where(eq(users.email, 'architect@test.com'));
 
     const [user] = await db
       .insert(users)

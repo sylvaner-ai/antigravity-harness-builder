@@ -41,7 +41,7 @@ Tu dois respecter SCRUPULEUSEMENT les règles suivantes (§3.3 du cahier des cha
 3. Ne simplifie pas et n'invente rien silencieusement.
 4. Réponds STRICTEMENT en JSON conforme au schéma demandé.`;
 
-    const userPrompt = `Voici les documents du projet "${input.projectName}" (Surface Antigravity ciblée: ${input.targetSurface}) :
+    const userPrompt = `Voici les documents du projet "${input.projectName}" (ID: ${input.projectId}, Surface Antigravity ciblée: ${input.targetSurface}) :
 
 --- DEBUT CAHIER DES CHARGES ---
 ${input.specDocumentText}

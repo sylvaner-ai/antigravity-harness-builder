@@ -23,6 +23,12 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
   const [extracting, setExtracting] = useState(false);
   const [uploadingRole, setUploadingRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('ahb_gemini_api_key');
+    if (saved) setGeminiApiKey(saved);
+  }, []);
 
   // Notes complémentaires
   const [notes, setNotes] = useState({
@@ -92,7 +98,10 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
       const res = await fetch(`/api/projects/${projectId}/extract-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ supplementaryNotes: notes }),
+        body: JSON.stringify({
+          supplementaryNotes: notes,
+          geminiApiKey: geminiApiKey.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l analyse IA');
@@ -270,6 +279,38 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
               className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Moteur d'Extraction & Clé IA Optionnelle */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-slate-900">Moteur d&apos;Extraction & Analyse IA</h3>
+          <span className={`text-xs px-2.5 py-1 rounded-full font-medium border ${
+            geminiApiKey.trim()
+              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          }`}>
+            {geminiApiKey.trim() ? 'Google Gemini Configuré' : 'Mode Autonome / Heuristique Déterministe'}
+          </span>
+        </div>
+        <p className="text-xs text-slate-500">
+          Par défaut, l&apos;application analyse vos documents et extrait un profil épistémique complet de manière autonome et sans surcoût. Si vous disposez d&apos;une clé API Google Gemini et souhaitez déléguer l&apos;analyse au modèle en ligne, vous pouvez la renseigner ici :
+        </p>
+        <div>
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Clé API Google Gemini (Optionnel)
+          </label>
+          <input
+            type="password"
+            value={geminiApiKey}
+            onChange={(e) => {
+              setGeminiApiKey(e.target.value);
+              localStorage.setItem('ahb_gemini_api_key', e.target.value);
+            }}
+            placeholder="AIzaSy... (Laisser vide pour utiliser l'extracteur déterministe autonome)"
+            className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500"
+          />
         </div>
       </div>
 
