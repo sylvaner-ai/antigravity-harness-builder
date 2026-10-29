@@ -50,7 +50,7 @@ export default function EccAdminSyncPage() {
   }, []);
 
   const handleTriggerSync = async () => {
-    if (!confirm('Déclencher la synchronisation multi-sources (affaan-m/ECC + emilkowalski/skills) depuis GitHub ?')) return;
+    if (!confirm('Déclencher la synchronisation des sources (affaan-m/ECC + emilkowalski/skills) depuis GitHub ?')) return;
 
     setError(null);
     setMessage(null);
@@ -65,7 +65,7 @@ export default function EccAdminSyncPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la synchronisation');
 
-      setMessage(`Synchronisation multi-sources réussie ! ${data.componentCount} composants indexés depuis GitHub (ECC + emilkowalski/skills).`);
+      setMessage(`Synchronisation réussie ! ${data.componentCount} composants indexés depuis GitHub (ECC + emilkowalski/skills).`);
       await fetchCatalogData();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur de synchronisation');
@@ -75,7 +75,7 @@ export default function EccAdminSyncPage() {
   };
 
   if (loading && !activeCatalog) {
-    return <div className="text-center py-16 text-slate-500">Chargement de l état du catalogue ECC...</div>;
+    return <div className="text-center py-16 text-slate-500">Chargement de l état du catalogue...</div>;
   }
 
   return (
@@ -83,10 +83,10 @@ export default function EccAdminSyncPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Écran 8 — Diagnostic & Synchronisation Multi-Catalogues
+            Catalogue — Diagnostic & Synchronisation des Sources
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Gestion des catalogues de référence <code>affaan-m/ECC</code> et <code>emilkowalski/skills</code> avec conformité Antigravity.
+            Gestion des bibliothèques de référence <code>affaan-m/ECC</code> et <code>emilkowalski/skills</code> avec conformité Antigravity.
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export default function EccAdminSyncPage() {
           disabled={syncing}
           className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
         >
-          {syncing ? 'Synchronisation GitHub en cours...' : '🔄 Synchroniser Multi-Sources (ECC + Emil)'}
+          {syncing ? 'Synchronisation en cours...' : 'Synchroniser les sources'}
         </button>
       </div>
 

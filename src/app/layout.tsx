@@ -40,7 +40,7 @@ export default function RootLayout({
                 Nouveau Harnais
               </a>
               <a href="/admin/ecc-sync" className="text-slate-600 hover:text-slate-900 transition-colors">
-                Catalogue ECC
+                Catalogue
               </a>
               <UserNav />
             </nav>

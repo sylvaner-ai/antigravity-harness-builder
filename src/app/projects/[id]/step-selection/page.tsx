@@ -270,7 +270,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                   <span>Composants Retenus ({retainedList.length})</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Composants validés pour le harnais (catalogue ECC adapté et règles métier sur-mesure).
+                  Composants validés pour le harnais (catalogue adapté et règles métier sur-mesure).
                 </p>
               </div>
 
