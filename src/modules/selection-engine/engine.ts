@@ -12,6 +12,22 @@ import {
   SelectionResult,
 } from './schema';
 import { synthesizeProjectCustomComponents } from './custom-rules-synthesizer';
+import {
+  ComponentClassification,
+  Methodology,
+  SlotTier,
+  buildProjectContext,
+  classifyComponent,
+  unmetRequirement,
+} from './component-classifier';
+import type { ValidationIssue } from '../antigravity-adapter/schema';
+
+/** Paliers de slots inclus par preset. */
+const PRESET_TIERS: Record<PresetMode, SlotTier[]> = {
+  MINIMAL: ['core'],
+  BALANCED: ['core', 'standard'],
+  THOROUGH: ['core', 'standard', 'extended'],
+};
 
 export interface CatalogCandidateInput {
   slug: string;
@@ -24,6 +40,7 @@ export interface CatalogCandidateInput {
   adaptedContent: string;
   parsedMeta: EccComponentParsedMeta;
   compatibilityStatus: string;
+  compatibilityIssues?: ValidationIssue[];
   searchText?: string;
 }
 
@@ -33,6 +50,8 @@ export interface SelectionEngineOptions {
   userExcludes?: string[];
   customComponents?: CustomComponentSpec[];
   excellencePacks?: ExcellencePack[];
+  /** Méthodologies retenues comme ensembles (défaut : superpowers ; + ponytail hors preset MINIMAL). */
+  methodologies?: Methodology[];
 }
 
 const KNOWN_EXCLUSIVE_TECH = [
@@ -126,23 +145,19 @@ export function matchLanguagesStrict(langA: string, langB: string): boolean {
 
 const TDD_SLUG_REGEX = /(^|-)test(ing)?(-|$)/;
 
-export class SelectionEngine {
-  private getSubagentRoleArchetype(slug: string): string {
-    const s = slug.toLowerCase();
-    if (s.includes('architect')) return 'architect';
-    if (s.includes('database') || s.includes('sql') || s.includes('postgres')) return 'database';
-    if (s.includes('e2e') || s.includes('test') || s.includes('tdd')) return 'test-qa';
-    if (s.includes('security')) return 'security-auditor';
-    if (s.includes('performance') || s.includes('optimizer')) return 'performance';
-    if (s.includes('reviewer') || s.includes('review')) return 'code-reviewer';
-    return slug;
-  }
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Recherche d'un tag en mot entier (« api » ne correspond plus à « rapide »). */
+const containsWord = (text: string, word: string) =>
+  new RegExp(`(?:^|[^a-z0-9à-ÿ])${escapeRegExp(word.toLowerCase())}(?:$|[^a-z0-9à-ÿ])`).test(text);
 
+export class SelectionEngine {
   /**
-   * Exécute la sélection explicable en 3 passes (§7 FR-05 & §15.1 Jalon 4) :
-   * 1. Filtres bloquants (compatibilité stack, surface, sécurité).
-   * 2. Scoring multicritère explicite et déduplication par famille.
-   * 3. Justifications lisibles (retenus ET candidats proches écartés) + détection des manques pour composants custom.
+   * Sélection explicable par slots fonctionnels :
+   * 1. Filtres bloquants (exclusion utilisateur, incompatibilité, outillage propre à Claude Code, stack).
+   * 2. Classification : chaque composant reçoit un slot (une fonction), un palier et des conditions d'application.
+   * 3. Un seul composant par slot : source prioritaire, puis composant le plus spécifique, puis score.
+   *    Les méthodologies (superpowers, ponytail) sont retenues comme des ensembles cohérents.
+   * Les catalogues ad hoc (sources non enregistrées) conservent le comportement historique (seuil + quotas).
    */
   selectComponents(
     profile: ProjectProfile,
@@ -151,10 +166,15 @@ export class SelectionEngine {
   ): SelectionResult {
     const preset = options.presetMode ?? 'BALANCED';
     const excellencePacks = options.excellencePacks ?? [...ALL_EXCELLENCE_PACKS];
+    const methodologies = new Set<Methodology>(
+      options.methodologies ?? (preset === 'MINIMAL' ? ['superpowers'] : ['superpowers', 'ponytail'])
+    );
     const userIncludes = new Set(options.userIncludes ?? []);
     const userExcludes = new Set(options.userExcludes ?? []);
+    const allowedTiers = new Set<SlotTier>(PRESET_TIERS[preset]);
+    const ctx = buildProjectContext(profile);
 
-    // Seuils selon le preset
+    // Seuils historiques, appliqués uniquement aux catalogues ad hoc
     const thresholds = {
       MINIMAL: { minScore: 40, maxRules: 6, maxSubagents: 2, maxSkills: 4 },
       BALANCED: { minScore: 25, maxRules: 12, maxSubagents: 4, maxSkills: 8 },
@@ -184,371 +204,139 @@ export class SelectionEngine {
 
     const selectedList: SelectedComponent[] = [];
     const rejectedList: RejectedComponent[] = [];
-    const scoredCandidates: Array<{
-      item: CatalogCandidateInput;
-      score: ScoreBreakdown;
-    }> = [];
+    const reject = (item: CatalogCandidateInput, reason: RejectedComponent['rejectionReason'], rationale: string, rawScore = 0, supersededBySlug?: string) =>
+      rejectedList.push({ slug: item.slug, name: item.name, kind: item.kind, rejectedRationale: rationale, rejectionReason: reason, rawScore, supersededBySlug });
 
-    // --- PASSE 1 : Filtres bloquants ---
+    type Candidate = { item: CatalogCandidateInput; score: ScoreBreakdown; cls: ComponentClassification; legacy: boolean; forced: boolean };
+    const candidates: Candidate[] = [];
+
+    // --- PASSE 1 : filtres bloquants et classification ---
     for (const item of catalog) {
+      const forced = userIncludes.has(item.slug);
       if (userExcludes.has(item.slug)) {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Écarté explicitement par l'utilisateur via les préférences de sélection.`,
-          rejectionReason: 'USER_EXCLUDED',
-          rawScore: 0,
-        });
+        reject(item, 'USER_EXCLUDED', `Écarté explicitement par l'utilisateur via les préférences de sélection.`);
         continue;
       }
-
       if (item.compatibilityStatus === 'INCOMPATIBLE') {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Incompatible avec Google Antigravity (dépassement de limites ou éléments non supportés).`,
-          rejectionReason: 'SECURITY_OR_SAFETY_REJECTION',
-          rawScore: 0,
-        });
+        const detail = (item.compatibilityIssues ?? []).find((i) => i.severity === 'error')?.message;
+        reject(item, 'SECURITY_OR_SAFETY_REJECTION', detail ?? `Incompatible avec Google Antigravity (dépassement de limites ou éléments non supportés).`);
         continue;
       }
 
-      // Compatibilité stack : si le composant exige des langages spécifiques et qu'aucun ne correspond
-      const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase());
-      const isGeneralMethodologySkill =
-        item.kind === 'SKILL' &&
-        (item.parsedMeta.family === 'quality' ||
-          item.parsedMeta.family === 'security' ||
-          item.parsedMeta.family === 'testing' ||
-          (item.parsedMeta.tags ?? []).some((t) =>
-            ['security', 'audit', 'yagni', 'anti-overengineering', 'sdlc', 'tdd', 'methodology', 'quality'].includes(
-              t.toLowerCase()
-            )
-          ));
+      const cls = classifyComponent(item);
+      const legacy = cls.slot?.startsWith('legacy:') ?? false;
 
-      if (itemLangs.length > 0 && !isGeneralMethodologySkill) {
-        const hasMatchingLang = itemLangs.some((lang) =>
-          projectLangs.some((pLang) => matchLanguagesStrict(lang, pLang))
-        );
-        if (!hasMatchingLang) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Incompatible avec la stack du projet : composant ciblant [${itemLangs.join(', ')}] alors que le projet utilise [${projectLangs.join(', ')}].`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
-          continue;
-        }
-      }
-
-      // Filtre bloquant d'exclusion mutuelle des bases de données
-      const slugLower = item.slug.toLowerCase();
-      const familyLower = (item.parsedMeta.family ?? '').toLowerCase();
-      const isPostgresProject = projectDatabases.some((d) => d.includes('postgres'));
-      const isMysqlProject = projectDatabases.some((d) => d.includes('mysql') || d.includes('mariadb'));
-
-      if (isPostgresProject && !isMysqlProject) {
-        if (slugLower.includes('mysql') || slugLower.includes('mariadb') || familyLower === 'mysql') {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Incompatible avec la base de données du projet : composant ciblant MySQL/MariaDB alors que le projet utilise PostgreSQL.`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
-          continue;
-        }
-      }
-
-      // Filtres bloquants sur composants hors sujet ou inadaptés aux applications web
-      if (item.slug === 'agent-security-hardening') {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Le composant 'agent-security-hardening' exclut formellement les applications web standards (réservé aux environnements d'agents purs).`,
-          rejectionReason: 'STACK_INCOMPATIBLE',
-          rawScore: 0,
-        });
+      if (cls.exclusion && !forced) {
+        reject(item, cls.exclusion.code === 'NOT_SOFTWARE_DOMAIN' ? 'NOT_APPLICABLE_TO_PROJECT' : 'PLATFORM_SPECIFIC_OR_META', cls.exclusion.reason);
         continue;
       }
 
-      if (item.slug === 'agent-payment-x402') {
-        const isCryptoProject =
-          projectDomainText.includes('x402') ||
-          projectDomainText.includes('solana') ||
-          projectDomainText.includes('crypto wallet') ||
-          projectDomainText.includes('web3');
-        if (!isCryptoProject) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Le composant 'agent-payment-x402' est spécifique aux micro-paiements crypto/web3 autonomes pour agents et ne convient pas aux applications web de paiement standard ou SEPA.`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
+      // Composants classés d'une source enregistrée : les conditions du classifieur remplacent l'inférence de stack
+      // depuis le texte (peu fiable : un skill de méthodologie cite souvent des exemples TypeScript).
+      if (!legacy && cls.slot) {
+        const unmet = forced ? null : unmetRequirement(cls.requires, ctx, excellencePacks);
+        if (unmet) {
+          const isStack = cls.requires.some((r) => ['stack', 'ui', 'database', 'backend', 'e2e', 'infra', 'mobile'].includes(r.kind)) && !/domaine|pack/.test(unmet);
+          reject(item, isStack ? 'STACK_INCOMPATIBLE' : 'NOT_APPLICABLE_TO_PROJECT', `Non applicable : ${unmet}.`);
           continue;
         }
-      }
-
-      if (item.slug === 'continuous-learning-v2') {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Le composant 'continuous-learning-v2' est une compétence méta d'apprentissage pour agents, non requise pour une application applicative de gestion.`,
-          rejectionReason: 'STACK_INCOMPATIBLE',
-          rawScore: 0,
-        });
-        continue;
-      }
-
-      if (item.slug === 'mle-workflow') {
-        const isMlProject =
-          projectDomainText.includes('machine learning') ||
-          projectDomainText.includes('mle') ||
-          projectDomainText.includes('pytorch') ||
-          projectDomainText.includes('tensorflow') ||
-          projectDomainText.includes('entraînement');
-        if (!isMlProject) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Le composant 'mle-workflow' est réservé aux projets de machine learning et à l'entraînement de modèles d'IA.`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
+      } else {
+        const legacyRejection = forced ? null : this.legacyStackRejection(item, profile, projectLangs, projectFrameworks, projectDatabases, projectInfra, projectDomainText);
+        if (legacyRejection) {
+          reject(item, 'STACK_INCOMPATIBLE', legacyRejection);
           continue;
         }
-      }
-
-      if (item.slug === 'flox-environments') {
-        const hasFlox = projectInfra.some((i) => i.includes('flox')) || projectDomainText.includes('flox');
-        if (!hasFlox) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Le composant 'flox-environments' requiert l'outillage Flox non présent dans l'infrastructure du projet.`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
-          continue;
-        }
-      }
-
-      // Filtre bloquant sur technologies étrangères exclusives (ex: perl, arkts, react-native, flutter, ruby, php, etc.)
-      let foreignTechDetected: string | null = null;
-
-      for (const tech of KNOWN_EXCLUSIVE_TECH) {
-        const isTechInProject =
-          projectLangs.some((l) => matchLanguagesStrict(l, tech)) ||
-          projectFrameworks.some((f) => f.toLowerCase().trim() === tech || f.toLowerCase().includes(`/${tech}/`)) ||
-          projectDatabases.some((d) => d.toLowerCase().trim() === tech) ||
-          projectInfra.some((i) => i.toLowerCase().trim() === tech) ||
-          (profile.techStack?.ormAndDataLayer ?? []).some((o) => o.toLowerCase().trim() === tech);
-
-        if (!isTechInProject) {
-          if (
-            familyLower === tech ||
-            slugLower === tech ||
-            slugLower.startsWith(`${tech}-`) ||
-            slugLower.endsWith(`-${tech}`) ||
-            slugLower.includes(`/${tech}/`) ||
-            slugLower.includes(`-${tech}-`)
-          ) {
-            foreignTechDetected = tech;
-            break;
+        if (!forced) {
+          const unmet = unmetRequirement(cls.requires, ctx, excellencePacks);
+          if (unmet) {
+            reject(item, 'NOT_APPLICABLE_TO_PROJECT', `Non applicable : ${unmet}.`);
+            continue;
           }
         }
       }
 
-      if (foreignTechDetected) {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Technologie spécifique [${foreignTechDetected}] non utilisée dans la stack de ce projet.`,
-          rejectionReason: 'STACK_INCOMPATIBLE',
-          rawScore: 0,
-        });
-        continue;
-      }
-
-      // Compatibilité frameworks : si le composant est spécifique à un framework et qu'aucun ne correspond
-      const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
-      const normProjectFrameworks = projectFrameworks.map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
-      if (itemFrameworks.length > 0 && !isGeneralMethodologySkill) {
-        const hasMatchingFramework = itemFrameworks.some((fw) =>
-          normProjectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))
-        );
-        // Si le composant est strictement typé framework (ex: react vs django) et non généraliste
-        if (!hasMatchingFramework && normProjectFrameworks.length > 0) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Framework non ciblé : composant prévu pour [${(item.parsedMeta.frameworks ?? []).join(', ')}] non présent dans la stack [${projectFrameworks.join(', ')}].`,
-            rejectionReason: 'STACK_INCOMPATIBLE',
-            rawScore: 0,
-          });
-          continue;
-        }
-      }
-
-      // --- PASSE 2 : Calcul du score multicritère ---
-      const score = this.calculateCandidateScore(
-        item,
-        projectLangs,
-        projectFrameworks,
-        projectDomainText,
-        userIncludes.has(item.slug),
-        excellencePacks,
-        profile
-      );
-
-      scoredCandidates.push({ item, score });
+      const score = this.calculateCandidateScore(item, projectLangs, projectFrameworks, projectDomainText, forced, excellencePacks, profile);
+      candidates.push({ item, score, cls, legacy, forced });
     }
 
-    // Tri par score décroissant
-    scoredCandidates.sort((a, b) => b.score.totalScore - a.score.totalScore);
-
-    // Déduplication par famille fonctionnelle et respect des quotas du preset
-    const familyWinners = new Map<string, string>(); // family -> winnerSlug
-    let rulesCount = 0;
-    let subagentsCount = 0;
-    let skillsCount = 0;
-
-    for (const { item, score } of scoredCandidates) {
-      const isForced = userIncludes.has(item.slug);
-
-      if (!isForced && score.totalScore < thresholds.minScore) {
-        rejectedList.push({
-          slug: item.slug,
-          name: item.name,
-          kind: item.kind,
-          rejectedRationale: `Score de pertinence (${score.totalScore}/100) inférieur au seuil requis (${thresholds.minScore}/100) pour le preset ${preset}.`,
-          rejectionReason: 'SCORE_BELOW_PRESET_THRESHOLD',
-          rawScore: score.totalScore,
-        });
+    // --- PASSE 2 : paliers, méthodologies et slots ---
+    const eligible: Candidate[] = [];
+    for (const c of candidates) {
+      if (c.forced) {
+        eligible.push(c);
         continue;
       }
+      if (!c.cls.slot) {
+        reject(c.item, 'NO_FUNCTIONAL_SLOT', `Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.`, c.score.totalScore);
+        continue;
+      }
+      if (c.cls.methodology && !methodologies.has(c.cls.methodology)) {
+        reject(c.item, 'METHODOLOGY_DISABLED', `Méthodologie « ${c.cls.methodology} » non activée pour ce harnais.`, c.score.totalScore);
+        continue;
+      }
+      if (!c.legacy && !allowedTiers.has(c.cls.tier)) {
+        reject(c.item, 'TIER_NOT_IN_PRESET', `Composant de palier « ${c.cls.tier} », non inclus dans le preset ${preset}.`, c.score.totalScore);
+        continue;
+      }
+      if (c.legacy && c.score.totalScore < thresholds.minScore) {
+        reject(c.item, 'SCORE_BELOW_PRESET_THRESHOLD', `Score de pertinence (${c.score.totalScore}/100) inférieur au seuil requis (${thresholds.minScore}/100) pour le preset ${preset}.`, c.score.totalScore);
+        continue;
+      }
+      eligible.push(c);
+    }
 
-      // Quotas par type
-      if (!isForced) {
-        if (item.kind === 'RULE' && rulesCount >= thresholds.maxRules) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Quota maximum de règles (${thresholds.maxRules}) atteint pour le preset ${preset}.`,
-            rejectionReason: 'SCORE_BELOW_PRESET_THRESHOLD',
-            rawScore: score.totalScore,
-          });
+    const bySlot = new Map<string, Candidate[]>();
+    const winners: Array<{ c: Candidate; supersedes: Candidate[] }> = [];
+    for (const c of eligible) {
+      if (c.forced || !c.cls.slot) {
+        winners.push({ c, supersedes: [] });
+        continue;
+      }
+      const list = bySlot.get(c.cls.slot) ?? [];
+      list.push(c);
+      bySlot.set(c.cls.slot, list);
+    }
+    const forcedSlots = new Set(eligible.filter((c) => c.forced && c.cls.slot).map((c) => c.cls.slot!));
+    for (const [slot, list] of bySlot) {
+      list.sort(
+        (a, b) =>
+          b.cls.sourcePriority - a.cls.sourcePriority ||
+          b.cls.specificity - a.cls.specificity ||
+          b.score.totalScore - a.score.totalScore ||
+          a.item.slug.localeCompare(b.item.slug)
+      );
+      if (forcedSlots.has(slot)) {
+        const forcedWinner = eligible.find((c) => c.forced && c.cls.slot === slot)!;
+        for (const loser of list) {
+          reject(loser.item, 'DEDUPLICATED_FAMILY_OVERRIDDEN', `Fonction « ${slot} » déjà couverte par « ${forcedWinner.item.slug} », choisi par l'utilisateur.`, loser.score.totalScore, forcedWinner.item.slug);
+        }
+        continue;
+      }
+      const [winner, ...losers] = list;
+      for (const loser of losers) {
+        reject(loser.item, 'DEDUPLICATED_FAMILY_OVERRIDDEN', `Doublon fonctionnel évité : la fonction « ${slot} » est couverte par « ${winner!.item.slug} » (source ${winner!.cls.sourceId}, priorité ${winner!.cls.sourcePriority}).`, loser.score.totalScore, winner!.item.slug);
+      }
+      winners.push({ c: winner!, supersedes: losers });
+    }
+
+    // Ordre de sortie stable : score décroissant puis slug
+    winners.sort((a, b) => b.c.score.totalScore - a.c.score.totalScore || a.c.item.slug.localeCompare(b.c.item.slug));
+
+    // Quotas historiques pour les catalogues ad hoc uniquement
+    const legacyCounts = { RULE: 0, SUBAGENT: 0, SKILL: 0, COMMAND_CONVERTED: 0 } as Record<ComponentKind, number>;
+    const legacyMax: Partial<Record<ComponentKind, number>> = { RULE: thresholds.maxRules, SUBAGENT: thresholds.maxSubagents, SKILL: thresholds.maxSkills };
+
+    for (const { c, supersedes } of winners) {
+      const { item, score, cls, forced } = c;
+      if (c.legacy && !forced) {
+        const max = legacyMax[item.kind];
+        if (max !== undefined && legacyCounts[item.kind] >= max) {
+          const label = item.kind === 'RULE' ? 'règles' : item.kind === 'SUBAGENT' ? 'sous-agents' : 'compétences / skills';
+          reject(item, 'SCORE_BELOW_PRESET_THRESHOLD', `Quota maximum de ${label} (${max}) atteint pour le preset ${preset}.`, score.totalScore);
           continue;
         }
-        if (item.kind === 'SUBAGENT' && subagentsCount >= thresholds.maxSubagents) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Quota maximum de sous-agents (${thresholds.maxSubagents}) atteint pour le preset ${preset}.`,
-            rejectionReason: 'SCORE_BELOW_PRESET_THRESHOLD',
-            rawScore: score.totalScore,
-          });
-          continue;
-        }
-        if (item.kind === 'SKILL' && skillsCount >= thresholds.maxSkills) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Quota maximum de compétences / skills (${thresholds.maxSkills}) atteint pour le preset ${preset}.`,
-            rejectionReason: 'SCORE_BELOW_PRESET_THRESHOLD',
-            rawScore: score.totalScore,
-          });
-          continue;
-        }
+        legacyCounts[item.kind]++;
       }
-
-      // Déduplication fonctionnelle :
-      // - Pour les sous-agents : par archétype de rôle (architecte, base de données, testeur, reviewer)
-      // - Pour les autres composants : par famille (hors familles génériques comme 'common', 'general', 'agent', 'skill')
-      let dedupeKey: string | null = null;
-      if (item.kind === 'SUBAGENT') {
-        const archetype = this.getSubagentRoleArchetype(item.slug);
-        dedupeKey = `SUBAGENT:${archetype}`;
-      } else {
-        const family = item.parsedMeta.family;
-        if (family && family !== 'common' && family !== 'general' && family !== 'agent' && family !== 'skill') {
-          dedupeKey = `${item.kind}:${family}`;
-        }
-      }
-
-      if (dedupeKey) {
-        const existingWinner = familyWinners.get(dedupeKey);
-        if (existingWinner && !isForced) {
-          rejectedList.push({
-            slug: item.slug,
-            name: item.name,
-            kind: item.kind,
-            rejectedRationale: `Doublon fonctionnel évité : le rôle/famille "${dedupeKey}" est déjà couvert par le composant prioritaire "${existingWinner}".`,
-            rejectionReason: 'DEDUPLICATED_FAMILY_OVERRIDDEN',
-            rawScore: score.totalScore,
-            supersededBySlug: existingWinner,
-          });
-          continue;
-        }
-        familyWinners.set(dedupeKey, item.slug);
-      }
-
-      // --- PASSE 3 : Construction de la justification explicable ---
-      const rationaleParts: string[] = [];
-      if (isForced) {
-        rationaleParts.push(`Sélectionné expressément par l'utilisateur.`);
-      } else {
-        if (score.languageMatch > 0) {
-          rationaleParts.push(`Correspondance directe avec les langages [${projectLangs.join(', ')}].`);
-        }
-        if (score.frameworkMatch > 0) {
-          rationaleParts.push(`Adapté aux frameworks utilisés [${projectFrameworks.join(', ')}].`);
-        }
-        if (score.matchingKeywords.length > 0) {
-          rationaleParts.push(`Mots-clés pertinents détectés : ${score.matchingKeywords.slice(0, 4).join(', ')}.`);
-        }
-        if (score.architectureSecurityMatch > 0) {
-          rationaleParts.push(`Répond aux contraintes d'architecture ou de sécurité spécifiées.`);
-        }
-        if (score.coreBaseBonus > 0) {
-          rationaleParts.push(`Règle transverse fondamentale de qualité logicielle.`);
-        }
-        if (score.excellenceBonus > 0) {
-          if (score.matchingKeywords.includes('pack:security-hardened')) {
-            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).`);
-          }
-          if (score.matchingKeywords.includes('pack:design-craft-polish')) {
-            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité).`);
-          }
-          if (score.matchingKeywords.includes('pack:extreme-tdd-anti-bug')) {
-            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).`);
-          }
-        }
-        if (score.synergyBonus > 0) {
-          rationaleParts.push(`Synergie d'écosystème renforcée avec la stack et les outils du projet.`);
-        }
-      }
-
-      const adaptedModelTier =
-        item.parsedMeta.adaptedModel === 'flash' || item.parsedMeta.adaptedModel === 'pro'
-          ? item.parsedMeta.adaptedModel
-          : undefined;
 
       selectedList.push({
         slug: item.slug,
@@ -559,19 +347,23 @@ export class SelectionEngine {
         sourceRelativePath: item.sourceRelativePath,
         sourceUrl: item.sourceUrl,
         license: item.license ?? 'MIT',
-        acceptedRationale: rationaleParts.join(' ') || `Score élevé (${score.totalScore}/100) pour le profil du projet.`,
+        acceptedRationale: this.buildRationale(score, forced, projectLangs, projectFrameworks, cls, supersedes.map((s) => s.item.slug)),
         score,
         family: item.parsedMeta.family,
+        slot: cls.slot,
+        sourceId: cls.sourceId,
+        methodology: cls.methodology,
         dependencies: item.parsedMeta.dependencies ?? [],
         adaptedContent: item.adaptedContent,
-        recommendedModelTier: adaptedModelTier,
+        resources:
+          item.kind === 'SKILL' && (item.parsedMeta.resourcesList ?? []).length > 0
+            ? item.parsedMeta.resourcesList.map((r) => ({ relativeSubPath: r.relativeSubPath, content: r.content }))
+            : undefined,
+        recommendedModelTier:
+          item.parsedMeta.adaptedModel === 'flash' || item.parsedMeta.adaptedModel === 'pro' ? item.parsedMeta.adaptedModel : undefined,
         recommendedEffort: item.parsedMeta.recommendedEffort,
-        userModified: isForced,
+        userModified: forced,
       });
-
-      if (item.kind === 'RULE') rulesCount++;
-      if (item.kind === 'SUBAGENT') subagentsCount++;
-      if (item.kind === 'SKILL') skillsCount++;
     }
 
     // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC & GOUVERNANCE AUTOMATIQUE (§7 FR-05) ---
@@ -635,6 +427,110 @@ export class SelectionEngine {
     };
   }
 
+  /** Filtres de stack historiques, utilisés pour les composants non classés par une source enregistrée. */
+  private legacyStackRejection(
+    item: CatalogCandidateInput,
+    profile: ProjectProfile,
+    projectLangs: string[],
+    projectFrameworks: string[],
+    projectDatabases: string[],
+    projectInfra: string[],
+    projectDomainText: string
+  ): string | null {
+    const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase());
+    const isGeneralMethodologySkill =
+      item.kind === 'SKILL' &&
+      (item.parsedMeta.family === 'quality' ||
+        item.parsedMeta.family === 'security' ||
+        item.parsedMeta.family === 'testing' ||
+        (item.parsedMeta.tags ?? []).some((t) =>
+          ['security', 'audit', 'yagni', 'anti-overengineering', 'sdlc', 'tdd', 'methodology', 'quality'].includes(t.toLowerCase())
+        ));
+
+    if (itemLangs.length > 0 && !isGeneralMethodologySkill) {
+      const hasMatchingLang = itemLangs.some((lang) => projectLangs.some((pLang) => matchLanguagesStrict(lang, pLang)));
+      if (!hasMatchingLang) {
+        return `Incompatible avec la stack du projet : composant ciblant [${itemLangs.join(', ')}] alors que le projet utilise [${projectLangs.join(', ')}].`;
+      }
+    }
+
+    const slugLower = item.slug.toLowerCase();
+    const familyLower = (item.parsedMeta.family ?? '').toLowerCase();
+    const isPostgresProject = projectDatabases.some((d) => d.includes('postgres'));
+    const isMysqlProject = projectDatabases.some((d) => d.includes('mysql') || d.includes('mariadb'));
+    if (isPostgresProject && !isMysqlProject && (slugLower.includes('mysql') || slugLower.includes('mariadb') || familyLower === 'mysql')) {
+      return `Incompatible avec la base de données du projet : composant ciblant MySQL/MariaDB alors que le projet utilise PostgreSQL.`;
+    }
+
+    if (item.slug === 'agent-payment-x402' && !/\bx402\b|\bsolana\b|crypto wallet|\bweb3\b/.test(projectDomainText)) {
+      return `Le composant 'agent-payment-x402' est spécifique aux micro-paiements crypto/web3 autonomes pour agents et ne convient pas aux applications web de paiement standard ou SEPA.`;
+    }
+    if (item.slug === 'flox-environments' && !/\bflox\b/.test(`${projectInfra.join(' ')} ${projectDomainText}`)) {
+      return `Le composant 'flox-environments' requiert l'outillage Flox non présent dans l'infrastructure du projet.`;
+    }
+
+    for (const tech of KNOWN_EXCLUSIVE_TECH) {
+      const isTechInProject =
+        projectLangs.some((l) => matchLanguagesStrict(l, tech)) ||
+        projectFrameworks.some((f) => f.trim() === tech || f.includes(`/${tech}/`)) ||
+        projectDatabases.some((d) => d.trim() === tech) ||
+        projectInfra.some((i) => i.trim() === tech) ||
+        (profile.techStack?.ormAndDataLayer ?? []).some((o) => o.toLowerCase().trim() === tech);
+      if (
+        !isTechInProject &&
+        (familyLower === tech ||
+          slugLower === tech ||
+          slugLower.startsWith(`${tech}-`) ||
+          slugLower.endsWith(`-${tech}`) ||
+          slugLower.includes(`/${tech}/`) ||
+          slugLower.includes(`-${tech}-`))
+      ) {
+        return `Technologie spécifique [${tech}] non utilisée dans la stack de ce projet.`;
+      }
+    }
+
+    const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
+    const normProjectFrameworks = projectFrameworks.map((f) => f.replace(/[.\-_]/g, ''));
+    if (itemFrameworks.length > 0 && !isGeneralMethodologySkill && normProjectFrameworks.length > 0) {
+      const hasMatchingFramework = itemFrameworks.some((fw) => normProjectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw)));
+      if (!hasMatchingFramework) {
+        return `Framework non ciblé : composant prévu pour [${(item.parsedMeta.frameworks ?? []).join(', ')}] non présent dans la stack [${projectFrameworks.join(', ')}].`;
+      }
+    }
+    return null;
+  }
+
+  private buildRationale(
+    score: ScoreBreakdown,
+    forced: boolean,
+    projectLangs: string[],
+    projectFrameworks: string[],
+    cls: ComponentClassification,
+    supersededSlugs: string[]
+  ): string {
+    if (forced) return `Sélectionné expressément par l'utilisateur.`;
+    const parts: string[] = [];
+    if (cls.slot && !cls.slot.startsWith('legacy:')) {
+      parts.push(`Fonction « ${cls.slot} » (source ${cls.sourceId}${cls.methodology ? `, méthodologie ${cls.methodology}` : ''}).`);
+      if (supersededSlugs.length > 0) parts.push(`Préféré à : ${supersededSlugs.slice(0, 4).join(', ')}.`);
+    }
+    if (score.languageMatch > 0) parts.push(`Correspondance directe avec les langages [${projectLangs.join(', ')}].`);
+    if (score.frameworkMatch > 0) parts.push(`Adapté aux frameworks utilisés [${projectFrameworks.join(', ')}].`);
+    if (score.matchingKeywords.length > 0) parts.push(`Mots-clés pertinents détectés : ${score.matchingKeywords.slice(0, 4).join(', ')}.`);
+    if (score.architectureSecurityMatch > 0) parts.push(`Répond aux contraintes d'architecture ou de sécurité spécifiées.`);
+    if (score.coreBaseBonus > 0) parts.push(`Règle transverse fondamentale de qualité logicielle.`);
+    if (score.excellenceBonus > 0) {
+      if (score.matchingKeywords.includes('pack:security-hardened'))
+        parts.push(`Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).`);
+      if (score.matchingKeywords.includes('pack:design-craft-polish'))
+        parts.push(`Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité).`);
+      if (score.matchingKeywords.includes('pack:extreme-tdd-anti-bug'))
+        parts.push(`Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).`);
+    }
+    if (score.synergyBonus > 0) parts.push(`Synergie d'écosystème renforcée avec la stack et les outils du projet.`);
+    return parts.join(' ') || `Score élevé (${score.totalScore}/100) pour le profil du projet.`;
+  }
+
   private calculateCandidateScore(
     item: CatalogCandidateInput,
     projectLangs: string[],
@@ -695,7 +591,7 @@ export class SelectionEngine {
     // Tags & Mots-clés dans la description ou search text (+20 pts max)
     const tags = item.parsedMeta.tags ?? [];
     for (const tag of tags) {
-      if (tag.length > 2 && domainText.includes(tag.toLowerCase())) {
+      if (tag.length > 2 && containsWord(domainText, tag)) {
         domainTagMatch = Math.min(20, domainTagMatch + 7);
         matchingKeywords.push(tag);
       }

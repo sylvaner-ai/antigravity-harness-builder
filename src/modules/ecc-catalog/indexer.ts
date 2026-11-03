@@ -163,7 +163,7 @@ function inferTagsAndStack(text: string, family?: string): {
     }
   }
   for (const tag of DOMAIN_TAGS) {
-    if (lower.includes(tag)) {
+    if (new RegExp(`(?:^|[^a-z0-9])${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:$|[^a-z0-9])`).test(lower)) {
       tags.add(tag);
     }
   }

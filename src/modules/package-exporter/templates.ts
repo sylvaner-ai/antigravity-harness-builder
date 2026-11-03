@@ -1,6 +1,7 @@
 import { DeterministicPackageInput } from './schema';
 import { EpistemicStatus, TraceableString } from '../project-profile/schema';
 import { formatModelEffortCouple } from './governance-template';
+import { GENERATOR_REPOSITORY_URL } from '../ecc-catalog/catalog-sources';
 
 export { formatModelEffortCouple, renderModelEffortGovernanceRuleBody } from './governance-template';
 
@@ -128,6 +129,27 @@ Produisez un rapport structuré présentant à l'utilisateur :
 `;
 }
 
+function truncateOneLine(text: string, max: number): string {
+  const one = text.replace(/\s+/g, ' ').trim();
+  return one.length > max ? `${one.slice(0, max - 1).trimEnd()}…` : one;
+}
+
+/** Index compact des règles : les règles `always_on` sont nommées, les autres regroupées par déclencheur. */
+function renderRuleIndex(rules: DeterministicPackageInput['selectedRules']): string {
+  const groups = new Map<string, string[]>();
+  for (const r of rules) {
+    const key = r.frontmatter.trigger;
+    groups.set(key, [...(groups.get(key) ?? []), `\`${r.slug}\``]);
+  }
+  const label: Record<string, string> = {
+    always_on: 'Toujours actives',
+    glob: 'Activées selon les fichiers modifiés',
+    model_decision: 'Activées selon la tâche',
+    manual: 'Sur demande',
+  };
+  return [...groups.entries()].map(([k, v]) => `- **${label[k] ?? k}** : ${v.join(', ')}`).join('\n');
+}
+
 /**
  * 2. Génère `AGENTS.md` — Instructions générales à la racine du projet cible.
  * IMPORTANT : Ne doit contenir aucun frontmatter YAML (spécification Antigravity docs/rules.md)
@@ -204,15 +226,15 @@ ${
 ## ${hasExcellence ? '4' : '3'}. Règles, Skills et Sous-agents du Harnais (\`.agents/\`)
 
 ### Règles actives (\`.agents/rules/\`)
-${selectedRules.map((r) => `- \`.agents/rules/${r.slug}.md\` (\`trigger: ${r.frontmatter.trigger}\`) : ${r.title}`).join('\n')}
+${renderRuleIndex(selectedRules)}
 
 ### Skills disponibles à la demande (\`.agents/skills/\`)
-Activez ces skills dès que votre tâche correspond à leur description :
-${selectedSkills.map((s) => `- **\`${s.slug}\`** (\`.agents/skills/${s.slug}/SKILL.md\`) : ${s.frontmatter.description}`).join('\n')}
+Antigravity affiche nativement la description de chaque skill ; activez celui qui correspond à votre tâche :
+${selectedSkills.length > 0 ? selectedSkills.map((s) => `\`${s.slug}\``).join(', ') : '*(aucun)*'}
 
 ### Sous-agents spécialisés (\`.agents/agents/\`)
 Déléguez les sous-tâches indépendantes ou les revues critiques conformément à \`docs/ORCHESTRATION.md\` et \`.agents/rules/model-effort-governance.md\` (aucun modèle n'est figé dans leur frontmatter YAML) :
-${selectedSubagents.map((a) => `- **\`${a.slug}\`** (\`.agents/agents/${a.slug}.md\`) : ${a.frontmatter.description}`).join('\n')}
+${selectedSubagents.map((a) => `- **\`${a.slug}\`** : ${truncateOneLine(a.frontmatter.description, 160)}`).join('\n')}
 
 ## ${hasExcellence ? '5' : '4'}. Recommandation Proactive des Commandes Slash à l'Utilisateur
 
@@ -685,6 +707,45 @@ ${nonExplicitFields.length > 0 ? nonExplicitFields.join('\n') : '- *(Tous les au
 `;
 }
 
+const MIT_TEXT = `Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
+
+/** Attribution par dépôt d'origine réellement utilisé (une mention de copyright par source, texte MIT reproduit). */
+function renderAttributions(provs: Array<{ repositoryUrl: string; author: string; license: string; commitSha: string }>): string {
+  const byRepo = new Map<string, { author: string; license: string; commits: Set<string>; count: number }>();
+  for (const p of provs) {
+    if (p.repositoryUrl === GENERATOR_REPOSITORY_URL) continue;
+    const e = byRepo.get(p.repositoryUrl) ?? { author: p.author, license: p.license, commits: new Set<string>(), count: 0 };
+    e.commits.add(p.commitSha.slice(0, 8));
+    e.count++;
+    byRepo.set(p.repositoryUrl, e);
+  }
+  if (byRepo.size === 0) return '*(Aucun composant tiers : tous les composants sont propres à ce harnais.)*';
+  const lines = [...byRepo.entries()].map(
+    ([url, e]) => `- **${e.author}** — [${url}](${url}) — licence **${e.license}** — commit \`${[...e.commits].join(', ')}\` — ${e.count} composant(s)`
+  );
+  const mitHolders = [...byRepo.values()].filter((e) => e.license === 'MIT').map((e) => `Copyright (c) ${e.author}`);
+  return `${lines.join('\n')}
+
+Les composants marqués \`curated\` sont écrits pour ce générateur.
+${mitHolders.length > 0 ? `\nTexte de la licence MIT, applicable aux dépôts ci-dessus sous cette licence :\n\n\`\`\`text\nMIT License\n\n${mitHolders.join('\n')}\n\n${MIT_TEXT}\n\`\`\`` : ''}`;
+}
+
 /**
  * 10. Génère `docs/ECC_SOURCES.md` — Provenance, statut d'adaptation et Licence MIT d'ECC (§4.5 CDC).
  */
@@ -762,7 +823,7 @@ Le tableau ci-dessous distingue explicitement :
 - \`ecc_adapted\` : composant issu d'ECC adapté pour la compatibilité native Google Antigravity et le projet ;
 - \`project_custom\` : composant généré spécifiquement pour le projet cible.
 
-| Type | Chemin dans le paquet | Statut d'origine | Source officielle ECC & Commit | Raison de sélection | Adaptations appliquées |
+| Type | Chemin dans le paquet | Statut d'origine | Source & commit | Raison de sélection | Adaptations appliquées |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 ${tableRows}
 
@@ -774,33 +835,9 @@ ${discardedSection}
 
 ---
 
-## 3. Licence et Attribution Obligatoire (Everything Claude Code — MIT License)
+## 3. Licences et attributions
 
-Les composants marqués \`ecc_verbatim\` ou \`ecc_adapted\` proviennent du projet open-source **Everything Claude Code (ECC)** créé par **Affaan Mustafa** ([https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)), distribué sous licence **MIT** :
-
-\`\`\`text
-MIT License
-
-Copyright (c) 2026 Affaan Mustafa
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-\`\`\`
+${renderAttributions(allComponents.map((c) => c.prov).filter((p): p is NonNullable<typeof p> => Boolean(p)))}
 `;
 }
 

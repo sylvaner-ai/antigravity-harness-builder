@@ -52,8 +52,8 @@ export const SkillResourceFileSchema = z.object({
   relativeSubPath: z
     .string()
     .regex(
-      /^(?:references|resources|examples)\/[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/,
-      "Une ressource de skill doit résider dans references/, resources/ ou examples/ avec une extension sûre."
+      /^(?:(?:references|resources|examples)\/)?[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/,
+      "Une ressource de skill doit résider à la racine du skill ou dans references/, resources/, examples/, avec une extension sûre."
     ),
   content: z.string().min(1),
 });
