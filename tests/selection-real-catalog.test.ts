@@ -186,6 +186,16 @@ describe('Harnais complet généré depuis le catalogue réel', () => {
         expect(Buffer.byteLength(agentsMd.content, 'utf8')).toBeLessThan(24_000);
         expect(agentsMd.content).not.toMatch(/\/compact|PROACTIVELY|MUST BE USED/);
 
+        // Option C : AGENTS.md (toujours lu) annonce chaque règle chargée à la demande, avec son chemin
+        const onDemandRules = pkg.files.filter(
+          (f) => f.relativePath.startsWith('.agents/rules/') && !/^trigger:\s*always_on/m.test(f.content.slice(0, 300))
+        );
+        for (const f of onDemandRules) {
+          const slug = f.relativePath.replace('.agents/rules/', '').replace(/\.md$/, '');
+          expect(agentsMd.content, `${f.relativePath} absent d'AGENTS.md`).toContain(slug);
+        }
+        if (onDemandRules.length > 0) expect(agentsMd.content).toMatch(/Règles à lire avant certaines tâches/);
+
         const alwaysOn = pkg.files.filter(
           (f) => f.relativePath.startsWith('.agents/rules/') && /^trigger:\s*always_on/m.test(f.content.slice(0, 300))
         );

@@ -61,3 +61,23 @@ Les résultats T10 et T11 du tour 1 venaient de l'ancienne règle `model-effort-
 2. À refaire dans un projet portant la règle corrigée : T6 (sans arrêt préalable), T10, T11.
 3. À refaire dans une conversation neuve : T2, T3, T4, en exigeant le jeton exact tel qu'écrit dans le fichier.
 4. Le champ `model` n'est toujours pas écrit dans les sous-agents générés.
+
+---
+
+# Tour 3 (série RS49NV, 3 novembre 2026)
+
+| Test | Résultat | Lecture |
+| :--- | :--- | :--- |
+| T2 règle par fichier | Description du fichier, pas de jeton | Échec ; trace de lecture `selftest-target.txt#L1` visible cette fois |
+| T3 règle à la décision | Réponse sur la « pomme bleue », pas de jeton | Échec ; un essai exact sur trois |
+| T4 skill | `SKILL-OK-RS49NV` | **Établi** |
+| T6 sous-agent `selftest-flash` | `FLASH-OK-RS49NV` | Sous-agent chargé et appelé. L'effet de `model: flash` n'est pas prouvé : le nom de modèle annoncé par l'agent (« Gemini 2.5 Flash ») ne correspond pas au sélecteur (« Gemini 3.8 Flash ») |
+| T10, T11 (premier essai) | Comportement de l'ancienne règle | Le dossier testé n'avait pas été mis à jour (règle de 5 647 octets) |
+| T10, T11 (après `git pull`, règle de 3 263 octets) | T10 : exécution directe, aucun commentaire (le titre ne contenait pas de faute). T11 : « Réglage conseillé pour cette tâche : Pro — Effort High. Je poursuis avec le réglage actuel. », puis plan complet, sans arrêt ni modification | **Conformes** |
+
+## Décisions
+
+1. La règle de gouvernance n'est pas modifiée.
+2. Les règles `glob` et `model_decision` étant peu fiables, option C retenue : `AGENTS.md` annonce chaque règle chargée à la demande (chemin, sujet, consigne de lecture avant la tâche). Voir `docs/GOUVERNANCE_CONTEXTE.md`.
+3. À mesurer ensuite : une tâche qui relève d'une règle rétrogradée, dans un projet généré par cette version, pour vérifier que l'agent ouvre le fichier annoncé.
+

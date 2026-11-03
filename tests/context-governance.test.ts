@@ -7,6 +7,7 @@ import {
   restrictReviewerTools,
 } from '../src/modules/harness-builder/context-budget';
 import { HarnessBuilderService } from '../src/modules/harness-builder';
+import { renderAgentsMarkdown } from '../src/modules/package-exporter/templates';
 import { renderModelEffortGovernanceRuleBody } from '../src/modules/package-exporter/governance-template';
 import { NATIVE_SLASH_COMMANDS, renderSlashCommandBullets } from '../src/modules/package-exporter/slash-commands';
 import { getBuiltinCuratedExcellenceComponents } from '../src/modules/ecc-catalog/curated-excellence';
@@ -194,5 +195,55 @@ describe('Lot 3 — règle modèle/effort et commandes natives', () => {
     const agents = pkg.files.find((x) => x.relativePath === 'AGENTS.md')!;
     expect(agents.content).toMatch(/\/grill-me/);
     expect(agents.content).toMatch(/pas des workflows/);
+  });
+});
+
+describe('Option C — AGENTS.md annonce les règles chargées à la demande', () => {
+  const withTriggers = (rules: SelectedRuleSpec[]) => ({ ...createSampleDeterministicInput(), selectedRules: rules });
+  const onDemand = (slug: string, trigger: 'model_decision' | 'glob', description: string, globs?: string): SelectedRuleSpec =>
+    ({
+      slug,
+      title: slug,
+      frontmatter: { trigger, description, ...(globs ? { globs } : {}) },
+      markdownBody: 'x'.repeat(500),
+      selectionRationale: 'test',
+      originStatus: 'ecc_adapted',
+    }) as SelectedRuleSpec;
+
+  it('liste chaque règle rétrogradée avec son chemin, son sujet et la consigne de la lire avant la tâche', () => {
+    const demoted = enforceAlwaysOnBudget(
+      [rule('model-effort-governance', 2400, 'project_custom'), rule('common-coding-style', 9000), rule('common-security', 900)],
+      'MINIMAL'
+    );
+    const md = renderAgentsMarkdown(withTriggers(demoted.rules));
+    expect(md).toMatch(/### Règles à lire avant certaines tâches/);
+    expect(md).toContain('`.agents/rules/common-coding-style.md` : coding style');
+    expect(md).toMatch(/Avant de commencer une tâche qui correspond à l'une d'elles, ouvrez le fichier indiqué/);
+    expect(md).toMatch(/\*\*Toujours actives\*\* : `model-effort-governance`, `common-security`/);
+    expect(md).not.toContain('`.agents/rules/common-security.md`');
+  });
+
+  it('indique les motifs de fichiers d’une règle glob', () => {
+    const md = renderAgentsMarkdown(withTriggers([onDemand('react-patterns', 'glob', 'Motifs React', '**/*.tsx')]));
+    expect(md).toContain('`.agents/rules/react-patterns.md` : Motifs React (fichiers : `**/*.tsx`)');
+  });
+
+  it('n’ajoute aucune section quand toutes les règles sont toujours actives', () => {
+    expect(renderAgentsMarkdown(withTriggers([rule('common-security', 800)]))).not.toMatch(/Règles à lire avant certaines tâches/);
+  });
+
+  it('passe en liste compacte et reste sous 24 000 octets avec un très grand nombre de règles', () => {
+    const many = Array.from({ length: 80 }, (_, i) =>
+      onDemand(`regle-numero-${i}-avec-un-nom-assez-long`, 'model_decision', `À consulter lorsque la tâche concerne : sujet ${i} assez détaillé pour occuper de la place.`)
+    );
+    const md = renderAgentsMarkdown(withTriggers(many));
+    expect(Buffer.byteLength(md, 'utf8')).toBeLessThan(24_000);
+    expect(md).toMatch(/Fichiers : `regle-numero-0-/);
+    expect(md).toContain('`regle-numero-79-avec-un-nom-assez-long`');
+  });
+
+  it('est déterministe', () => {
+    const input = withTriggers([onDemand('a-rule', 'model_decision', 'Sujet A'), onDemand('b-rule', 'glob', 'Sujet B', '**/*.ts')]);
+    expect(renderAgentsMarkdown(input)).toBe(renderAgentsMarkdown(input));
   });
 });
