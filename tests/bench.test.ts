@@ -25,8 +25,9 @@ if (process.env.FAKE_AGY_LOG) fs.appendFileSync(process.env.FAKE_AGY_LOG, JSON.s
 if (args[0] === '--version') { console.log('1.4.12'); process.exit(0); }
 const prompt = args[args.indexOf('-p') + 1];
 const tokenIn = (file, prefix) => { try { return (fs.readFileSync(file, 'utf8').match(new RegExp(prefix + '-[A-Z0-9]{6}')) || [''])[0]; } catch { return ''; } };
-const out = (response, status = 'SUCCESS') => { console.log(JSON.stringify({ conversation_id: 'c1', status, response, duration_seconds: 1.5, num_turns: 2, usage: { input_tokens: 100, output_tokens: 20 } })); process.exit(status === 'SUCCESS' ? 0 : 1); };
+const out = (response, status = 'SUCCESS', error) => { console.log(JSON.stringify({ conversation_id: 'c1', status, response, ...(error ? { error } : {}), duration_seconds: 1.5, num_turns: 2, usage: { input_tokens: 100, output_tokens: 20 } })); process.exit(status === 'SUCCESS' ? 0 : 1); };
 if (process.env.FAKE_AGY_FAIL) out('', 'ERROR');
+if (process.env.FAKE_AGY_503) out('', 'ERROR', 'API error: UNAVAILABLE (code 503): The service is currently unavailable.');
 if (process.env.FAKE_AGY_SLEEP) setTimeout(() => out('trop tard'), 60000);
 else if (prompt.includes('SELFTEST-A')) out(tokenIn('.agents/rules/selftest-always.md', 'ALWAYS-OK'));
 else if (prompt.includes('selftest-target.txt')) out('Résumé. ' + tokenIn('.agents/rules/selftest-glob.md', 'GLOB-OK'));
@@ -34,7 +35,7 @@ else if (prompt.includes('pomme-bleue')) {
   const agents = fs.existsSync('AGENTS.md') ? fs.readFileSync('AGENTS.md', 'utf8') : '';
   out(process.env.FAKE_AGY_FOLLOW_POINTER && agents.includes('selftest-decision.md') ? 'La pomme-bleue. ' + tokenIn('.agents/rules/selftest-decision.md', 'MD-OK') : 'La pomme-bleue est un fruit imaginaire.');
 }
-else if (prompt.includes('SELFTEST-SKILL')) out(tokenIn('.agents/skills/selftest-skill/SKILL.md', 'SKILL-OK'));
+else if (prompt.includes('SELFTEST-SKILL') || prompt.includes('/selftest-skill')) out(tokenIn('.agents/skills/selftest-skill/SKILL.md', 'SKILL-OK'));
 else if (prompt.includes('selftest-probe')) out(tokenIn('.agents/agents/selftest-probe.md', 'AGENT-OK'));
 else if (prompt.includes('selftest-flash')) out(tokenIn('.agents/agents/selftest-flash.md', 'FLASH-OK') + ' Gemini 2.5 Flash');
 else if (prompt.includes('/selftest-wf')) out(tokenIn('.agents/workflows/selftest-wf.md', 'WF-RAN'));
@@ -93,10 +94,11 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     const records = await bench(null);
     delete process.env.FAKE_AGY_FOLLOW_POINTER;
 
-    expect(records).toHaveLength(10);
+    expect(records).toHaveLength(13);
     // C3 (sans pointeur) échoue : l’agent simulé n’ouvre la règle que si AGENTS.md la lui annonce (mesure de l’option C)
-    for (const r of records.filter((x) => x.scenarioId !== 'C3-decision')) expect(r.verdict.pass, `${r.scenarioId} : ${r.verdict.detail}`).toBe(true);
-    expect(records.find((r) => r.scenarioId === 'C3-decision')!.verdict.pass).toBe(false);
+    const withoutPointer = ['C3-decision', 'C3n-decision-sans-lecture'];
+    for (const r of records.filter((x) => !withoutPointer.includes(x.scenarioId))) expect(r.verdict.pass, `${r.scenarioId} : ${r.verdict.detail}`).toBe(true);
+    for (const id of withoutPointer) expect(records.find((r) => r.scenarioId === id)!.verdict.pass).toBe(false);
     expect(changedFiles(before, snapshotFiles(project))).toEqual([]);
     expect(listBenchTemps()).toEqual(tempsBefore);
   });
@@ -151,7 +153,31 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     delete process.env.FAKE_AGY_FAIL;
     expect(r!.result.ok).toBe(false);
     expect(r!.result.status).toBe('ERROR');
-    expect(r!.verdict).toEqual({ pass: false, detail: expect.stringContaining('ERROR') });
+    expect(r!.verdict).toMatchObject({ pass: false, detail: expect.stringContaining('ERROR') });
+  });
+
+  it('une erreur du service (503) est indéterminée et exclue des taux, une vraie erreur reste un échec', async () => {
+    process.env.FAKE_AGY_503 = '1';
+    const records = await bench(['C1-always-on'], { runs: 2 });
+    delete process.env.FAKE_AGY_503;
+    expect(records.every((r) => r.verdict.inconclusive)).toBe(true);
+    const md = renderSummary(records, { project: 'p', runs: 2, generatedAt: 'd' });
+    expect(md).toMatch(/\| C1-always-on \| 0\/0 \(\+2 indéterminé\)/);
+    expect(md).toContain('## Essais indéterminés');
+    expect(md).not.toContain('## Détail des échecs');
+
+    process.env.FAKE_AGY_FAIL = '1';
+    const [hard] = await bench(['C1-always-on']);
+    delete process.env.FAKE_AGY_FAIL;
+    expect(hard!.verdict.inconclusive).toBeFalsy();
+  });
+
+  it('les sondes de skill et de règle à la décision ne demandent pas de ne lire aucun fichier', () => {
+    const byId = new Map(buildBenchScenarios(NONCE).map((s) => [s.id, s]));
+    expect(byId.get('C4-skill')!.prompt).not.toMatch(/aucun fichier/);
+    expect(byId.get('C3-decision')!.prompt).not.toMatch(/aucun fichier/);
+    expect(byId.get('C3n-decision-sans-lecture')!.prompt).toMatch(/aucun fichier/);
+    expect(byId.get('C4b-skill-slash')!.prompt).toBe('/selftest-skill');
   });
 
   it('un exécutable introuvable donne SPAWN_ERROR sans planter', async () => {
@@ -211,7 +237,7 @@ describe('Lot 5 — ligne de commande', () => {
     expect(cli(['--project', project, '--scenarios', 'ZZ']).stderr).toMatch(/inconnu\(s\) : ZZ/);
     const dry = cli(['--project', project, '--runs', '2', '--config', 'a:low', '--config', 'b:high', '--dry-run']);
     expect(dry.status).toBe(0);
-    expect(dry.stdout).toMatch(/Exécutions prévues : 40 appels/);
+    expect(dry.stdout).toMatch(/Exécutions prévues : 52 appels/);
   });
 
   it('s’arrête avec un message clair si agy n’est pas utilisable (contrôle préalable)', () => {

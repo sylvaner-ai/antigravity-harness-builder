@@ -17,7 +17,7 @@ npx tsx scripts/bench-antigravity.mts --project /chemin/du/projet --dry-run
 npx tsx scripts/bench-antigravity.mts --project /chemin/du/projet --runs 3
 ```
 
-`--dry-run` annonce le nombre d'appels sans rien lancer. Chaque appel consomme votre quota : 10 scénarios × 3 répétitions = 30 appels pour une configuration.
+`--dry-run` annonce le nombre d'appels sans rien lancer. Chaque appel consomme votre quota : 13 scénarios × 3 répétitions = 39 appels pour une configuration.
 
 Options :
 
@@ -43,13 +43,18 @@ Comparer le rapport coût/performance : `--config <modèle A>:low --config <mod�
 | `C1-always-on` | Règle `always_on` chargée | jeton `ALWAYS-OK-<série>` |
 | `C2-glob` | Règle `glob` appliquée à la lecture d'un fichier | jeton `GLOB-OK-<série>` |
 | `C3-decision` | Règle `model_decision` sans pointeur dans `AGENTS.md` | jeton `MD-OK-<série>` |
+| `C2b-glob-pointeur` | Même règle `glob`, annoncée par `AGENTS.md` | jeton `GLOB-OK-<série>` |
+| `C3n-decision-sans-lecture` | Règle `model_decision` avec la consigne « n'ouvre aucun fichier » (ancienne sonde T3) | jeton `MD-OK-<série>` |
 | `C3b-decision-pointeur` | Même règle, annoncée par la section « Règles à lire avant certaines tâches » (texte produit par le générateur) | jeton `MD-OK-<série>` |
 | `C4-skill` | Skill découvert | jeton `SKILL-OK-<série>` |
+| `C4b-skill-slash` | Skill appelé par `/selftest-skill` | jeton `SKILL-OK-<série>` |
 | `C5-subagent` | Sous-agent de `.agents/agents/` appelé | jeton `AGENT-OK-<série>` |
 | `C6-model-flash` | Sous-agent avec `model: flash` appelé | jeton `FLASH-OK-<série>` (l'effet du champ n'est pas vérifiable ici) |
 | `W1-workflow` | Workflow hérité encore exécuté (informatif) | jeton `WF-RAN-<série>` |
 | `G1-tache-courte` | Titre fautif corrigé, aucun commentaire sur le modèle | fichier corrigé et absence de formules sur le réglage |
 | `G2-tache-longue` | Plan livré (1 200 caractères au moins), sans attente de l'utilisateur ni modification de fichier | heuristique |
+
+Les erreurs du service (indisponibilité 503, quota 429, délai dépassé) sont classées « indéterminées » : elles sont exclues des taux et listées à part, car elles ne disent rien du harnais.
 
 La différence entre `C3-decision` et `C3b-decision-pointeur` mesure directement l'effet de l'option C.
 
