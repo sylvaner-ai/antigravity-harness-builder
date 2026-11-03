@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 import { getDb, projects, harnessGenerations, generatedArtifacts } from '@/db';
 import { buildTarGzBase64 } from '@/modules/package-exporter/exporter';
+import { renderSafeInstallScript } from '@/modules/package-exporter/deploy-script';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -70,44 +71,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         content: a.content,
       }));
 
-    const base64Payload = buildTarGzBase64(files);
-    const safeProjectName = project.name.replace(/["`$\\\r\n']/g, '');
-
-    const script = `#!/usr/bin/env bash
-set -e
-echo "🚀 Déploiement sécurisé du harnais Antigravity pour '${safeProjectName}'..."
-
-# 1. Sauvegarde automatique préalable (Snapshot Guard)
-TS=$(date +%Y%m%d-%H%M%S)
-if [ -d ".agents" ]; then
-  cp -r .agents ".agents.backup-$TS"
-  echo "✓ Dossier .agents sauvegardé dans .agents.backup-$TS"
-fi
-if [ -f "AGENTS.md" ]; then
-  cp AGENTS.md "AGENTS.md.backup-$TS"
-  echo "✓ AGENTS.md sauvegardé dans AGENTS.md.backup-$TS"
-fi
-
-# 2. Décompression directe du harnais complet
-echo "${base64Payload}" | base64 -d | tar -xz
-echo "✓ ${files.length} fichiers du harnais installés avec succès."
-
-# 3. Alignement des sous-agents préexistants (suppression de tout model: résiduel dans le frontmatter YAML) & archivage des workflows dépréciés
-if [ -d ".agents/agents" ]; then
-  for ag_file in .agents/agents/*.md; do
-    [ -f "$ag_file" ] || continue
-    awk 'NR==1 && /^---[[:space:]]*$/ {in_fm=1; print; next} in_fm && /^---[[:space:]]*$/ {in_fm=0; print; next} in_fm && /^model:[[:space:]]*/ {next} {print}' "$ag_file" > "$ag_file.tmp" && mv "$ag_file.tmp" "$ag_file"
-  done
-  echo "✓ Sous-agents alignés sur .agents/rules/model-effort-governance.md (zéro model: YAML)"
-fi
-if [ -d ".agents/workflows" ]; then
-  mkdir -p .agents/deprecated
-  mv .agents/workflows .agents/deprecated/workflows
-  echo "✓ Anciens workflows archivés dans .agents/deprecated/workflows"
-fi
-
-echo "✅ Harnais Antigravity déployé et opérationnel !"
-`;
+    const script = renderSafeInstallScript({
+      projectName: project.name,
+      base64Payload: buildTarGzBase64(files),
+    });
 
     return new NextResponse(script, {
       headers: {

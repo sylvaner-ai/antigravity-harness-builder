@@ -3,6 +3,8 @@
  * Extrait de templates.ts pour maintenir la cohésion et respecter le plafond de 800 lignes.
  */
 
+import { renderSafeInstallScript } from './deploy-script';
+
 /**
  * Assainit et valide la commande de smoke test issue de l'audit
  * pour empêcher toute injection de commandes shell hostiles (;, &&, ||, `, $(), etc.)
@@ -182,17 +184,16 @@ ${fence}`;
 
 ### Phase 1 — Sauvegarde automatique préalable (Snapshot Guard)
 Avant toute modification ou création :
-1. Crée un dossier de sauvegarde horodaté à la racine : \`.agents.backup-<YYYYMMDD-HHMMSS>/\`.
-2. Si un fichier \`AGENTS.md\` existe à la racine, copie-le également vers \`AGENTS.md.backup-<YYYYMMDD-HHMMSS>\`.
-3. Si le dossier \`.agents/\` existe, copie son contenu complet dans le dossier de sauvegarde.
-4. Vérifie l'état Git (\`git status --porcelain\`). Si des changements non commités existent, signale-les avant de continuer.
+1. Crée un dossier de sauvegarde horodaté : \`.agents/.harness-backup/<YYYYMMDD-HHMMSS>/\`.
+2. Avant de modifier ou de retirer un fichier existant (dont \`AGENTS.md\`), copie-le dans ce dossier en conservant son chemin relatif. Ne sauvegarde que les fichiers que tu vas réellement modifier.
+3. Vérifie l'état Git (\`git status --porcelain\`). Si des changements non commités existent, signale-les avant de continuer.
 
 ### Phase 2 — Mode Simulation préalable (Dry-Run d'Impact)
 Inspecte l'arborescence actuelle et présente un tableau récapitulatif des actions prévues :
 - **\`[KEEP / PRESERVE]\`** : Fichiers et règles personnalisées rédigées par l'équipe qui ne font pas partie du catalogue géré — **Ne jamais écraser**.
 - **\`[CREATE]\`** : Nouveaux composants inexistants dans le projet — **À créer**.
 - **\`[SMART MERGE]\`** : Fichier \`AGENTS.md\` existant — **Fusionner uniquement dans les balises délimitées**.
-- **\`[ARCHIVE / DEPRECATE]\`** : Dossier obsolète \`.agents/workflows/\` si détecté — **Déplacer vers \`.agents/deprecated/workflows/\`**.
+- **\`[REPORT]\`** : Dossier obsolète \`.agents/workflows/\` si détecté — **Le signaler à l'utilisateur sans le déplacer ni le modifier** (proposer sa migration vers \`.agents/skills/\`).
 
 Demande explicitement confirmation à l'utilisateur avant d'engager les écritures de la Phase 3.
 
@@ -211,22 +212,23 @@ Demande explicitement confirmation à l'utilisateur avant d'engager les écritur
 2. **Règles modulaires (\`.agents/rules/\`)** :
    - Écris ou mets à jour les règles répertoriées dans la liste des fichiers gérés.
    - Préserve toute règle tierce ou propre à l'équipe déjà présente dans \`.agents/rules/\`.
+   - Si un fichier géré existe déjà avec un contenu différent, **ne l'écrase pas** : présente la différence à l'utilisateur et demande-lui de choisir (conserver, fusionner ou remplacer).
 
 3. **Compétences (\`.agents/skills/\`) & Sous-agents (\`.agents/agents/\`)** :
    - Déploie les nouveaux skills et agents définis ci-dessous.
    - Assure-toi que chaque skill possède son \`SKILL.md\` avec frontmatter YAML valide.
-   - Vérifie qu'aucun sous-agent dans \`.agents/agents/*.md\` (y compris les agents personnalisés préexistants du projet) ne conserve de clé \`model\` dans son frontmatter YAML : le choix du couple Modèle / Niveau d'effort est désormais piloté automatiquement par \`.agents/rules/model-effort-governance.md\` (\`trigger: always_on\`).
+   - **Ne modifie jamais** un sous-agent, une règle ou un skill préexistant du projet qui ne figure pas dans la liste des fichiers gérés (y compris son frontmatter YAML et sa clé \`model\`).
 
-### Phase 4 — Gestion et Archivage des Éléments Obsolètes
-- Si des fichiers \`.agents/agents/*.md\` préexistants contenaient encore une ligne \`model: ...\` dans leur frontmatter YAML, supprime cette ligne afin de déléguer le choix coût/performance à \`.agents/rules/model-effort-governance.md\`.
-- Si le répertoire obsolète \`.agents/workflows/\` est présent, déplace-le vers \`.agents/deprecated/workflows/\` en informant l'utilisateur de sa dépréciation dans Antigravity 2.0.
+### Phase 4 — Éléments obsolètes
+- Si le répertoire obsolète \`.agents/workflows/\` est présent, **signale-le** à l'utilisateur (dépréciation dans Antigravity 2.0) et propose-lui de le migrer vers \`.agents/skills/\`. Ne le déplace pas sans son accord.
+- Ne supprime aucun fichier existant sans l'avoir sauvegardé puis signalé.
 - Aucun fichier de code applicatif (\`src/\`, \`lib/\`, \`app/\`, \`.env\`) ne doit être touché.
 
 ### Phase 5 — Validation finale & Smoke Test
 1. Vérifie la syntaxe de tous les fichiers créés ou modifiés.
 2. Vérifie la validité des liens de documentation dans \`docs/\`.
 ${smokeTestInstructions}
-4. Affiche un rapport de fin d'intervention récapitulant les composants modernisés, les éléments préservés et le chemin de la sauvegarde de sécurité.
+4. Affiche un rapport de fin d'intervention récapitulant les composants modernisés, les éléments préservés et le chemin de la sauvegarde (\`.agents/.harness-backup/\`).
 
 ---
 
@@ -255,48 +257,22 @@ export function renderBase64OneLinerPrompt(params: {
 }): string {
   const { projectName, targetSurface = 'IDE', base64Payload, filesCount, operationalTestCommand } = params;
 
-  const safeSmokeTest = sanitizeOperationalTestCommand(operationalTestCommand);
-  const smokeTestCmd = safeSmokeTest
-    ? `\n# 4. Smoke test de non-régression\necho "🧪 Exécution du test de validation..."\n${safeSmokeTest}`
-    : '';
+  const installScript = renderSafeInstallScript({
+    projectName,
+    base64Payload,
+    smokeTestCommand: sanitizeOperationalTestCommand(operationalTestCommand),
+  });
 
   return `# 🚀 Déploiement Direct du Harnais Antigravity — ${projectName}
 
 > **Instructions pour l'agent Google Antigravity (${targetSurface})** :
-> Déploie et active l'intégralité du harnais de développement (${filesCount} composants : règles, compétences, sous-agents et directives) en exécutant la commande bash ci-dessous dans le terminal de ce workspace.
+> Installe le harnais de développement (${filesCount} composants : règles, compétences, sous-agents et directives) en exécutant le script bash ci-dessous dans le terminal de ce workspace, **tel quel**.
+> Le script n'écrase jamais un fichier modifié ou non géré, ne modifie aucun de vos agents, sauvegarde ce qu'il remplace dans \`.agents/.harness-backup/\` et vérifie l'installation.
+> Pour voir le plan sans rien écrire, ajoute \`--dry-run\` (\`bash deploy.sh --dry-run\` après avoir enregistré le script dans un fichier \`deploy.sh\`).
+> Après exécution, rends compte à l'utilisateur des conflits signalés (fichiers proposés dans \`.agents/.harness-proposed/\`) sans les résoudre sans son accord.
 
 \`\`\`bash
-# 1. Sauvegarde automatique préalable (Snapshot Guard)
-TS=$(date +%Y%m%d-%H%M%S)
-if [ -d ".agents" ]; then
-  cp -r .agents ".agents.backup-$TS"
-  echo "✓ Sauvegarde créée dans .agents.backup-$TS"
-fi
-if [ -f "AGENTS.md" ]; then
-  cp AGENTS.md "AGENTS.md.backup-$TS"
-  echo "✓ Sauvegarde créée dans AGENTS.md.backup-$TS"
-fi
-
-# 2. Décompression directe du harnais complet
-echo "${base64Payload}" | base64 -d | tar -xz
-echo "✓ Composants déployés avec succès"
-
-# 3. Alignement des sous-agents préexistants (suppression de tout model: résiduel dans le frontmatter YAML) & nettoyage des workflows obsolètes
-if [ -d ".agents/agents" ]; then
-  for ag_file in .agents/agents/*.md; do
-    [ -f "$ag_file" ] || continue
-    awk 'NR==1 && /^---[[:space:]]*$/ {in_fm=1; print; next} in_fm && /^---[[:space:]]*$/ {in_fm=0; print; next} in_fm && /^model:[[:space:]]*/ {next} {print}' "$ag_file" > "$ag_file.tmp" && mv "$ag_file.tmp" "$ag_file"
-  done
-  echo "✓ Sous-agents alignés sur .agents/rules/model-effort-governance.md (zéro model: YAML)"
-fi
-if [ -d ".agents/workflows" ]; then
-  mkdir -p .agents/deprecated
-  mv .agents/workflows .agents/deprecated/workflows
-  echo "✓ Anciens workflows archivés dans .agents/deprecated/workflows"
-fi${smokeTestCmd}
-
-echo "✅ Harnais Antigravity 100% opérationnel !"
-\`\`\`
+${installScript}\`\`\`
 `;
 }
 

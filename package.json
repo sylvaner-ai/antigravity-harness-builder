@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@google/genai": "^0.2.0",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "^0.45.4",
     "fflate": "^0.8.2",
     "isomorphic-dompurify": "^2.21.0",
     "js-yaml": "^4.1.0",
@@ -37,7 +37,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.30.5",
+    "drizzle-kit": "^0.31.11",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.3",

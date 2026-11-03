@@ -351,7 +351,7 @@ export function extractProfileFromAuditReport(options: AuditExtractionOptions): 
         ],
         acceptanceCriteria: [
           'Le script de mise à niveau s\'exécute sans régression de build.',
-          'Une sauvegarde automatique .agents.backup-* est créée avant toute écriture.',
+          'Les fichiers remplacés ou retirés sont sauvegardés dans .agents/.harness-backup/ et aucun fichier modifié par l\'équipe n\'est écrasé.',
         ],
         epistemicStatus: 'explicit',
         confidence: 'high',

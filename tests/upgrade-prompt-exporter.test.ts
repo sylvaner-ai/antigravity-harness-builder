@@ -38,8 +38,7 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
 
     // 1. Snapshot guard
     expect(prompt).toContain('Phase 1 — Sauvegarde automatique préalable');
-    expect(prompt).toContain('.agents.backup-');
-    expect(prompt).toContain('AGENTS.md.backup-');
+    expect(prompt).toContain('.agents/.harness-backup/');
 
     // 2. Dry run
     expect(prompt).toContain('Phase 2 — Mode Simulation préalable');
@@ -52,8 +51,12 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
     expect(prompt).toContain('<!-- END ANTIGRAVITY HARNESS BUILDER MANAGED -->');
 
     // 4. Deprecations
-    expect(prompt).toContain('Phase 4 — Gestion et Archivage des Éléments Obsolètes');
-    expect(prompt).toContain('.agents/deprecated/workflows/');
+    expect(prompt).toContain('Phase 4 — Éléments obsolètes');
+    expect(prompt).toContain('.agents/workflows/');
+    expect(prompt).toContain('Ne le déplace pas sans son accord');
+    // Aucune instruction de modifier les agents de l'utilisateur
+    expect(prompt).not.toContain('supprime cette ligne');
+    expect(prompt).toContain('Ne modifie jamais');
 
     // 5. Smoke test
     expect(prompt).toContain('Phase 5 — Validation finale & Smoke Test');
@@ -104,16 +107,18 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
 
     // Instructions pour l'agent Antigravity
     expect(oneLiner).toContain('AcmePortal');
-    expect(oneLiner).toContain('echo "');
     expect(oneLiner).toContain('base64 -d');
-    expect(oneLiner).toContain('tar -xz');
+    expect(oneLiner).toContain('tar -xzf');
 
     // Sauvegarde préalable
-    expect(oneLiner).toContain('cp -r .agents ".agents.backup-');
-    expect(oneLiner).toContain('cp AGENTS.md "AGENTS.md.backup-');
+    expect(oneLiner).toContain('.agents/.harness-backup/');
+    expect(oneLiner).toContain('--dry-run');
+    // Aucune suppression de model: ni déplacement de dossier
+    expect(oneLiner).not.toContain('^model:');
+    expect(oneLiner).not.toContain('mv .agents/workflows');
 
     // Dépréciations
-    expect(oneLiner).toContain('.agents/deprecated/workflows');
+    expect(oneLiner).toContain('.agents/workflows');
     expect(oneLiner).toContain('npm test');
   });
 
