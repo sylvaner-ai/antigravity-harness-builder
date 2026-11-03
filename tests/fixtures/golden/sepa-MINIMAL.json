@@ -1,0 +1,223 @@
+{
+ "total": 32,
+ "bySource": {
+  "cloudflare-security-audit": 1,
+  "curated": 4,
+  "ecc-official": 14,
+  "obra-superpowers": 13
+ },
+ "selected": [
+  {
+   "kind": "RULE",
+   "slug": "api-security-guards",
+   "slot": "rule:pack:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-coding-style",
+   "slot": "rule:common:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-security",
+   "slot": "rule:common:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-testing",
+   "slot": "rule:common:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "plan-first-and-anti-omissions",
+   "slot": "rule:pack:workflow",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-coding-style",
+   "slot": "rule:stack:react:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-security",
+   "slot": "rule:stack:react:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-testing",
+   "slot": "rule:stack:react:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-coding-style",
+   "slot": "rule:stack:typescript:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-security",
+   "slot": "rule:stack:typescript:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-testing",
+   "slot": "rule:stack:typescript:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "ui-craft-and-5-states",
+   "slot": "rule:pack:ui-craft",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-coding-style",
+   "slot": "rule:web:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-security",
+   "slot": "rule:web:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-testing",
+   "slot": "rule:web:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "brainstorming",
+   "slot": "skill:workflow:design-exploration",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "dispatching-parallel-agents",
+   "slot": "skill:workflow:parallel-agents",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "executing-plans",
+   "slot": "skill:workflow:plan-execution",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "finishing-a-development-branch",
+   "slot": "skill:workflow:branch-finish",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "receiving-code-review",
+   "slot": "skill:workflow:review-reception",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "requesting-code-review",
+   "slot": "skill:workflow:review-request",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-audit",
+   "slot": "skill:security:audit",
+   "sourceId": "cloudflare-security-audit"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-review",
+   "slot": "skill:security:review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "subagent-driven-development",
+   "slot": "skill:workflow:subagent-development",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "systematic-debugging",
+   "slot": "skill:workflow:debugging",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "test-driven-development",
+   "slot": "skill:workflow:tdd",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-git-worktrees",
+   "slot": "skill:workflow:worktrees",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-superpowers",
+   "slot": "skill:workflow:bootstrap",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "verification-before-completion",
+   "slot": "skill:workflow:verification",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "writing-plans",
+   "slot": "skill:workflow:planning",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "code-reviewer",
+   "slot": "agent:review:general",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "security-auditor",
+   "slot": "agent:security",
+   "sourceId": "curated"
+  }
+ ],
+ "custom": [
+  "model-effort-governance",
+  "project-design-system-tokens",
+  "project-documenso-signing-guard",
+  "project-sepa-iso20022-guard",
+  "project-storage-r2-guard"
+ ]
+}
