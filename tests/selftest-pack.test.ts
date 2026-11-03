@@ -95,6 +95,15 @@ describe('Pack d’auto-test — contenu', () => {
     expect(pack.probes.find((p) => p.id === 'T6')!.warning).toMatch(/selftest\.sh remove/);
   });
 
+  it('demande un modèle Pro pour T6, la source exacte pour T7, l’effet de /compact pour T8 et le relevé des lectures de fichier', () => {
+    const guide = renderSelfTestGuide(pack);
+    expect(pack.probes.find((p) => p.id === 'T6')!.prompt).toMatch(/modèle Pro/);
+    expect(pack.probes.find((p) => p.id === 'T7')!.expected).toMatch(/source/);
+    expect(pack.probes.find((p) => p.id === 'T8')!.expected).toMatch(/effet observable/);
+    expect(guide).toContain('Fichier lu ?');
+    expect(guide).toContain('version d\'Antigravity');
+  });
+
   it('le guide contient les jetons attendus, la grille et la consigne de le garder hors du projet', () => {
     const guide = renderSelfTestGuide(pack);
     expect(guide).toContain(`ALWAYS-OK-${NONCE}`);

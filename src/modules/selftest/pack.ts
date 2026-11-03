@@ -202,8 +202,8 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
       id: 'T6',
       title: 'Champ model: flash dans un sous-agent',
       prompt:
-        'Délègue à l’agent selftest-flash et recopie mot pour mot sa réponse. Ne lis pas son fichier.',
-      expected: `La réponse contient ${t('FLASH-OK')} et la trajectoire de l’agent indique un modèle de type Flash (à lire dans l’interface, pas dans le texte de la réponse).`,
+        'Délègue à l’agent selftest-flash et recopie mot pour mot sa réponse. Ne lis pas son fichier. (Avant d’envoyer : sélectionnez un modèle Pro pour la conversation, pas Flash.)',
+      expected: `La conversation principale étant sur un modèle Pro, la réponse contient ${t('FLASH-OK')} ET l’interface (trajectoire ou panneau du sous-agent) indique que le sous-agent a tourné sur un modèle Flash. Notez le nom exact du modèle affiché pour la conversation et pour le sous-agent.`,
       ifFails:
         'Si l’agent n’est pas chargé ou si le modèle affiché ne change pas, le champ `model` est ignoré ou refusé : la gouvernance du modèle doit rester une simple recommandation à l’utilisateur. Si le modèle Flash est bien utilisé, le champ peut être activé pour les rôles légers.',
       newConversation: false,
@@ -217,7 +217,7 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
       prompt:
         'Quel est le modèle et le niveau d’effort actifs de cette session ? Cite la source exacte dans ton contexte (nom de balise ou de réglage), ou réponds INCONNU. N’invente rien.',
       expected:
-        'Soit une source précise (balise ou réglage cité mot pour mot), soit INCONNU. Les deux sont des résultats valides : notez lequel.',
+        'Soit une source précise, citée mot pour mot (nom de la balise ou du réglage), soit INCONNU. Les deux sont valides : recopiez la réponse intégrale, source comprise. Une réponse sans source citée est notée « ? ».',
       ifFails:
         'Si la réponse est INCONNU, l’agent ne peut pas comparer le réglage actif au couple conseillé : la règle modèle/effort doit se limiter à recommander (c’est déjà le comportement prévu pour un réglage inconnu). Si une source précise existe, la règle pourra la citer.',
       newConversation: true,
@@ -225,8 +225,8 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
     {
       id: 'T8',
       title: 'Commandes slash : /grill-me et /learn existent, /compact non',
-      prompt: 'Tapez successivement /grill-me, /learn puis /compact (annulez après chaque réponse).',
-      expected: '/grill-me et /learn sont reconnues ; /compact n’est pas reconnue (ou absente de la liste de saisie).',
+      prompt: 'Tapez successivement /grill-me, /learn puis /compact. Pour /compact, ne l’annulez pas : notez ce qui se passe.',
+      expected: '/grill-me et /learn sont reconnues. Pour /compact (absente de la documentation), notez si elle est reconnue et son effet observable en une phrase (résumé de la conversation ? libération du contexte ? aucun effet visible ?).',
       ifFails:
         'Si /compact existe dans votre version, la documentation officielle est en retard : on pourra la réintroduire. Si /grill-me ou /learn n’existent pas, les retirer des recommandations.',
       newConversation: false,
@@ -295,11 +295,11 @@ ${p.prompt}
     })
     .join('\n');
 
-  const grid = pack.probes.map((p) => `| ${p.id} | ${p.title} |  |  |`).join('\n');
+  const grid = pack.probes.map((p) => `| ${p.id} | ${p.title} |  |  |  |`).join('\n');
 
   return `# Auto-test Antigravity — guide
 
-Durée : environ 20 minutes. Jeton de cette série : \`${pack.nonce}\`. **Ne placez pas ce guide dans le projet testé** : il contient les jetons attendus.
+Durée : environ 20 minutes (seconde manche possible : T6, T7 et T8 uniquement). Jeton de cette série : \`${pack.nonce}\`. **Ne placez pas ce guide dans le projet testé** : il contient les jetons attendus.
 
 ## 1. Installation
 
@@ -323,10 +323,14 @@ Le script ne crée que des fichiers dont le nom commence par \`selftest-\` (et \
 ${rows}
 ## 4. Grille de résultats
 
-Recopiez-la et complétez-la (✅ attendu observé, ❌ non, ? incertain). Indiquez aussi la version d'Antigravity (surface IDE ou CLI) et le modèle sélectionné.
+Recopiez-la et complétez-la (✅ attendu observé, ❌ non, ? incertain).
 
-| Test | Sujet | Résultat | Observation (texte exact si utile) |
-| :--- | :--- | :--- | :--- |
+Renseignez d'abord : **version d'Antigravity** (menu À propos), **surface** (IDE, application ou CLI), **modèle et effort sélectionnés**.
+
+La colonne « Fichier lu ? » est indispensable pour T1 à T6 : indiquez oui si la trajectoire de l'agent montre l'ouverture d'un fichier \`selftest-*\`, non sinon. Un jeton obtenu après lecture du fichier ne prouve pas le chargement automatique.
+
+| Test | Sujet | Résultat | Fichier lu ? | Observation (texte exact si utile) |
+| :--- | :--- | :--- | :--- | :--- |
 ${grid}
 
 ## 5. Nettoyage
