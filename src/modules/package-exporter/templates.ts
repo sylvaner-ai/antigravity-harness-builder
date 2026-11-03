@@ -152,7 +152,7 @@ function onDemandTopic(rule: DeterministicPackageInput['selectedRules'][number])
  * chargée à la demande (`glob`, `model_decision`, `manual`) y est annoncée avec son chemin et la consigne de
  * l'ouvrir avant la tâche concernée, car son chargement automatique n'est pas garanti (auto-test T2 et T3).
  */
-function renderRuleIndex(rules: DeterministicPackageInput['selectedRules']): string {
+export function renderRuleIndex(rules: DeterministicPackageInput['selectedRules']): string {
   const always = rules.filter((r) => r.frontmatter.trigger === 'always_on');
   const onDemand = rules.filter((r) => r.frontmatter.trigger !== 'always_on');
   const lines = [`- **Toujours actives** : ${always.length > 0 ? always.map((r) => `\`${r.slug}\``).join(', ') : '*(aucune)*'}`];

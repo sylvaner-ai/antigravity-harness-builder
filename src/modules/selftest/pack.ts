@@ -235,7 +235,7 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
       id: 'T9',
       title: 'Workflow hérité (.agents/workflows)',
       prompt: '/selftest-wf',
-      expected: `Aucune exécution : le jeton ${t('WF-RAN')} n’apparaît pas (workflows non exécutables depuis le 19 octobre 2026).`,
+      expected: `Informatif : la documentation annonce l’arrêt des workflows (19 octobre 2026), mais le jeton ${t('WF-RAN')} peut encore apparaître selon la version. Notez simplement si le jeton apparaît.`,
       ifFails:
         'Si le jeton apparaît, votre version exécute encore les workflows : notez le numéro de version ; le choix « skills uniquement » reste valable mais n’est pas obligatoire.',
       newConversation: false,

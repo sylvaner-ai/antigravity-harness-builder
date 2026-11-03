@@ -40,3 +40,5 @@ Le guide contient les jetons attendus : ne pas le placer dans le projet testé.
 - Un agent peut lire un fichier du dépôt au lieu de le « tenir en contexte » : les invites demandent de ne rien ouvrir et le guide indique de noter « ? » si la trajectoire montre une lecture.
 - T6 écrit un champ `model` non vérifié dans un sous-agent : un champ non reconnu peut bloquer l'IDE (`bash selftest.sh remove` rétablit la situation).
 - Les résultats valent pour la version d'Antigravity utilisée ; à refaire après une mise à jour majeure.
+
+Pour répéter ces sondes automatiquement avec `agy -p` et mesurer leur stabilité, voir `docs/BANC_ESSAI_ANTIGRAVITY.md`.
