@@ -246,7 +246,7 @@ model: pro
       expect(govFile?.content).toContain('`Flash — Effort Low`');
     });
 
-    it('embarque automatiquement la gouvernance Modèle / Effort et la purge des `model:` YAML obsolètes dans tous les formats de déploiement (ZIP, Base64 compact, Markdown allégé, Upgrade)', async () => {
+    it('embarque automatiquement la gouvernance Modèle / Effort sans jamais modifier les agents existants de l’utilisateur, dans tous les formats de déploiement (ZIP, Base64 compact, Markdown allégé, Upgrade)', async () => {
       const sample = createSampleDeterministicInput();
       const engine = new SelectionEngine();
       const selection = engine.selectComponents(
@@ -264,12 +264,13 @@ model: pro
       expect(pkg.lightweightUpgradePromptMarkdown).toContain('docs/ORCHESTRATION.md');
       expect(pkg.lightweightUpgradePromptMarkdown).toContain('AGENTS.md');
 
-      // 2. Prompt d'upgrade 5 phases : ordonne la purge de tout `model:` résiduel dans le YAML des sous-agents préexistants
-      expect(pkg.upgradePromptMarkdown).toMatch(/frontmatter YAML.*model/i);
+      // 2. Prompt d'upgrade 5 phases : ne modifie jamais les agents existants de l'utilisateur
+      expect(pkg.upgradePromptMarkdown).toContain('Ne modifie jamais');
 
-      // 3. One-liner Base64 : nettoie automatiquement les lignes `model:` résiduelles dans le frontmatter de .agents/agents/*.md
+      // 3. One-liner Base64 : script sûr, sans suppression de `model:` ni déplacement de dossier
       expect(pkg.compactOneLinerPrompt).toContain('.agents/agents');
-      expect(pkg.compactOneLinerPrompt).toContain('model:');
+      expect(pkg.compactOneLinerPrompt).not.toContain('^model:');
+      expect(pkg.compactOneLinerPrompt).toContain('--dry-run');
     });
   });
 

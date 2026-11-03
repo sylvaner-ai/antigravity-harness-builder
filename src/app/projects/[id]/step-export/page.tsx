@@ -231,7 +231,7 @@ export default function StepExportPage({ params }: { params: Promise<{ id: strin
           </div>
 
           <p className="text-xs text-slate-600 leading-relaxed">
-            Collez simplement cette unique ligne dans le chat de votre projet Antigravity. L'agent l'exécute dans son terminal, crée la sauvegarde <code className="bg-white px-1.5 py-0.5 rounded text-indigo-700 font-mono border border-indigo-100">.agents.backup-*</code> et déploie l'ensemble des règles et compétences :
+            Collez cette commande dans le chat de votre projet Antigravity. L'agent l'exécute dans son terminal : le script n'écrase jamais un fichier modifié ou non géré, sauvegarde ce qu'il remplace dans <code className="bg-white px-1.5 py-0.5 rounded text-indigo-700 font-mono border border-indigo-100">.agents/.harness-backup/</code> et vérifie l'installation :
           </p>
 
           {/* Terminal / Code Box avec bouton copier intégré */}
@@ -491,7 +491,7 @@ export default function StepExportPage({ params }: { params: Promise<{ id: strin
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600">
           <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
             <strong className="text-slate-900 block font-semibold mb-1">1. Sauvegarde automatique</strong>
-            <span>Avant toute écriture, une copie horodatée <code className="bg-white px-1 py-0.5 rounded">.agents.backup-*</code> et <code className="bg-white px-1 py-0.5 rounded">AGENTS.md.backup-*</code> est créée.</span>
+            <span>Avant de remplacer ou retirer un fichier, une copie horodatée est créée dans <code className="bg-white px-1 py-0.5 rounded">.agents/.harness-backup/</code>. Un fichier modifié ou non géré n'est jamais écrasé.</span>
           </div>
 
           <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">

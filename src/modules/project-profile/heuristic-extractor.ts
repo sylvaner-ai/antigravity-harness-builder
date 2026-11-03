@@ -1,6 +1,14 @@
 import { ProjectProfile } from './schema';
 import { AntigravitySurface } from '../antigravity-adapter/schema';
 
+/**
+ * Extracteur heuristique de profil (mode hors-ligne, sans LLM).
+ *
+ * Principe : ne rien inventer. Chaque information du profil provient du texte fourni ; ce qui n'est pas trouvé est
+ * marqué « À définir » (statut `missing_or_contradictory`) et remonte en incertitude à valider par l'utilisateur à
+ * l'étape 2. Aucune technologie, aucun rôle, aucune règle métier ni aucun design token n'est ajouté par défaut.
+ */
+
 export interface HeuristicExtractionParams {
   projectId: string;
   projectName: string;
@@ -10,386 +18,449 @@ export interface HeuristicExtractionParams {
   supplementaryNotes?: Record<string, string>;
 }
 
+const TBD = 'À définir';
+
+interface Detector {
+  label: string;
+  /** Appliqué au texte en minuscules ; toujours avec des frontières de mots pour éviter les faux positifs. */
+  pattern: RegExp;
+}
+
+const LANGUAGES: Detector[] = [
+  { label: 'TypeScript', pattern: /\btypescript\b|\btsx\b/ },
+  { label: 'JavaScript', pattern: /\bjavascript\b|\bnode\.?js\b/ },
+  { label: 'Python', pattern: /\bpython\b/ },
+  { label: 'Go', pattern: /\bgolang\b|\blangage go\b|\bgo 1\.\d+\b/ },
+  { label: 'Rust', pattern: /\brust\b/ },
+  { label: 'Java', pattern: /\bjava\b/ },
+  { label: 'Kotlin', pattern: /\bkotlin\b/ },
+  { label: 'Swift', pattern: /\bswift(?:ui)?\b/ },
+  { label: 'C#', pattern: /\bcsharp\b|(?:^|\W)c#|(?:^|\W)\.net\b/ },
+  { label: 'PHP', pattern: /\bphp\b/ },
+  { label: 'Ruby', pattern: /\bruby\b/ },
+  { label: 'SQL', pattern: /\bsql\b/ },
+  { label: 'HTML/CSS', pattern: /\bhtml\b|\bcss\b|\btailwind/ },
+];
+
+const FRAMEWORKS: Detector[] = [
+  { label: 'Next.js', pattern: /\bnext\.?js\b/ },
+  { label: 'React', pattern: /\breact\b(?!\s*native)/ },
+  { label: 'React Native', pattern: /\breact native\b/ },
+  { label: 'Expo', pattern: /\bexpo\b/ },
+  { label: 'Vue', pattern: /\bvue(?:\.js)?\b/ },
+  { label: 'Nuxt', pattern: /\bnuxt\b/ },
+  { label: 'Svelte', pattern: /\bsvelte(?:kit)?\b/ },
+  { label: 'Angular', pattern: /\bangular\b/ },
+  { label: 'Tailwind CSS', pattern: /\btailwind(?:\s?css)?\b/ },
+  { label: 'FastAPI', pattern: /\bfastapi\b/ },
+  { label: 'Django', pattern: /\bdjango\b/ },
+  { label: 'Flask', pattern: /\bflask\b/ },
+  { label: 'Pydantic', pattern: /\bpydantic\b/ },
+  { label: 'Express', pattern: /\bexpress\.js\b|\bexpressjs\b/ },
+  { label: 'NestJS', pattern: /\bnest\.?js\b/ },
+  { label: 'Fastify', pattern: /\bfastify\b/ },
+  { label: 'Spring Boot', pattern: /\bspring boot\b/ },
+  { label: 'Laravel', pattern: /\blaravel\b/ },
+  { label: 'Ruby on Rails', pattern: /\bruby on rails\b|\brails\b/ },
+  { label: 'SwiftUI', pattern: /\bswiftui\b/ },
+  { label: 'Tauri', pattern: /\btauri\b/ },
+  { label: 'Electron', pattern: /\belectron\b/ },
+  { label: 'Flutter', pattern: /\bflutter\b/ },
+  { label: 'pdf-lib', pattern: /\bpdf-lib\b/ },
+  { label: 'Zod', pattern: /\bzod\b/ },
+];
+
+const DATABASES: Detector[] = [
+  { label: 'PostgreSQL', pattern: /\bpostgres(?:ql)?\b/ },
+  { label: 'MySQL', pattern: /\bmysql\b/ },
+  { label: 'MariaDB', pattern: /\bmariadb\b/ },
+  { label: 'SQLite', pattern: /\bsqlite\b/ },
+  { label: 'MongoDB', pattern: /\bmongo(?:db)?\b/ },
+  { label: 'Redis', pattern: /\bredis\b/ },
+  { label: 'SQL Server', pattern: /\bsql server\b|\bmssql\b/ },
+];
+
+const ORMS: Detector[] = [
+  { label: 'Drizzle ORM', pattern: /\bdrizzle\b/ },
+  { label: 'Prisma ORM', pattern: /\bprisma\b/ },
+  { label: 'Kysely', pattern: /\bkysely\b/ },
+  { label: 'TypeORM', pattern: /\btypeorm\b/ },
+  { label: 'Sequelize', pattern: /\bsequelize\b/ },
+  { label: 'Mongoose', pattern: /\bmongoose\b/ },
+  { label: 'SQLAlchemy', pattern: /\bsqlalchemy\b/ },
+  { label: 'SQLModel', pattern: /\bsqlmodel\b/ },
+  { label: 'Alembic', pattern: /\balembic\b/ },
+  { label: 'Hibernate', pattern: /\bhibernate\b/ },
+  { label: 'GORM', pattern: /\bgorm\b/ },
+];
+
+const STATE_MANAGEMENT: Detector[] = [
+  { label: 'TanStack Query', pattern: /\btanstack\b|\breact[- ]query\b/ },
+  { label: 'Zustand', pattern: /\bzustand\b/ },
+  { label: 'Redux Toolkit', pattern: /\bredux\b/ },
+];
+
+const INFRASTRUCTURE: Detector[] = [
+  { label: 'Docker', pattern: /\bdocker\b/ },
+  { label: 'Docker Compose', pattern: /\bdocker[- ]compose\b/ },
+  { label: 'Coolify', pattern: /\bcoolify\b/ },
+  { label: 'Kubernetes', pattern: /\bkubernetes\b|\bk8s\b/ },
+  { label: 'Cloudflare R2', pattern: /\bcloudflare r2\b|\br2\b/ },
+  { label: 'S3 compatible', pattern: /\bs3\b/ },
+  { label: 'AWS', pattern: /\baws\b/ },
+  { label: 'Vercel', pattern: /\bvercel\b/ },
+  { label: 'Netlify', pattern: /\bnetlify\b/ },
+  { label: 'Fly.io', pattern: /\bfly\.io\b/ },
+  { label: 'Supabase', pattern: /\bsupabase\b/ },
+  { label: 'Firebase', pattern: /\bfirebase\b/ },
+  { label: 'Nginx', pattern: /\bnginx\b/ },
+  { label: 'GitHub Actions', pattern: /\bgithub actions\b/ },
+  { label: 'GitLab CI', pattern: /\bgitlab[- ]ci\b/ },
+  { label: 'Documenso', pattern: /\bdocumenso\b/ },
+  { label: 'Resend', pattern: /\bresend\b/ },
+];
+
+const TESTING: Detector[] = [
+  { label: 'Vitest', pattern: /\bvitest\b/ },
+  { label: 'Playwright', pattern: /\bplaywright\b/ },
+  { label: 'Jest', pattern: /\bjest\b/ },
+  { label: 'Cypress', pattern: /\bcypress\b/ },
+  { label: 'pytest', pattern: /\bpytest\b/ },
+  { label: 'Testing Library', pattern: /\btesting library\b/ },
+  { label: 'axe-core', pattern: /\baxe-core\b|\bjest-axe\b|\bvitest-axe\b/ },
+  { label: 'MSW', pattern: /\bmsw\b/ },
+  { label: 'XCTest', pattern: /\bxctest\b/ },
+  { label: 'JUnit', pattern: /\bjunit\b/ },
+  { label: 'go test', pattern: /\bgo test\b/ },
+  { label: 'cargo test', pattern: /\bcargo test\b/ },
+];
+
+const COMPLIANCE: Detector[] = [
+  { label: 'RGPD', pattern: /\brgpd\b|\bgdpr\b/ },
+  { label: 'HDS', pattern: /\bhds\b/ },
+  { label: 'PCI-DSS', pattern: /\bpci[- ]dss\b/ },
+  { label: 'ISO 27001', pattern: /\biso[- ]?27001\b/ },
+  { label: 'SOC 2', pattern: /\bsoc ?2\b/ },
+  { label: 'NIS 2', pattern: /\bnis ?2\b/ },
+  { label: 'eIDAS', pattern: /\beidas\b/ },
+  { label: 'RGAA', pattern: /\brgaa\b/ },
+];
+
+function detect(text: string, table: Detector[]): string[] {
+  return table.filter((d) => d.pattern.test(text)).map((d) => d.label);
+}
+
+function detectWcag(text: string): string[] {
+  const m = text.match(/\bwcag\s*(2\.[0-2])?(?:\s*(?:niveau|level)?\s*(aaa|aa|a)\b)?/);
+  if (!m) return [];
+  return [['WCAG', m[1], m[2]?.toUpperCase()].filter(Boolean).join(' ')];
+}
+
+function detectApiStyle(text: string): string | undefined {
+  if (/\btrpc\b/.test(text)) return 'tRPC';
+  if (/\bgraphql\b/.test(text)) return 'GraphQL';
+  if (/\bgrpc\b/.test(text)) return 'gRPC';
+  if (/\bserver actions?\b/.test(text)) return 'Server Actions';
+  if (/\brest(?:ful)?\b/.test(text)) return 'REST';
+  return undefined;
+}
+
+const SPEC_REF = (location: string) => [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location }];
+
+const cleanInline = (s: string) => s.replace(/[*_#`]/g, '').trim();
+
+/** Puces d'une section dont le titre (ligne commençant par #) correspond au motif. */
+function collectSectionBullets(
+  lines: string[],
+  headingPattern: RegExp,
+  max = 6
+): { items: string[]; heading: string } | null {
+  const idx = lines.findIndex((l) => l.startsWith('#') && headingPattern.test(l.toLowerCase()));
+  if (idx === -1) return null;
+  const items: string[] = [];
+  for (let i = idx + 1; i < lines.length && items.length < max; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    if (line.startsWith('#')) break;
+    if (/^[-*]\s+/.test(line)) items.push(cleanInline(line.replace(/^[-*]\s+/, '')));
+  }
+  const heading = (lines[idx] ?? '').replace(/^#+\s*/, '').trim();
+  return items.length > 0 ? { items, heading } : null;
+}
+
 export function extractHeuristicProjectProfile(params: HeuristicExtractionParams): ProjectProfile {
   const spec = params.specText || '';
   const ds = params.designSystemText || '';
   const specLines = spec.split('\n').map((l) => l.trim().replace(/\+$/, '').trim()).filter(Boolean);
   const textLower = spec.toLowerCase();
 
-  // 1. Domaine & Objectif
-  let domain = 'Plateforme applicative de gestion métier et d\'exploitation.';
-  const contextIdx = specLines.findIndex(
-    (l) => l.toLowerCase().includes('contexte') || l.toLowerCase().includes('identité') || l.toLowerCase().includes('présentation')
-  );
+  // 1. Domaine et objectif : texte du cahier des charges, sinon « À définir »
+  let domain: string | undefined;
+  const contextIdx = specLines.findIndex((l) => {
+    const low = l.toLowerCase();
+    return low.includes('contexte') || low.includes('identité') || low.includes('présentation');
+  });
   const rawCandidate = contextIdx !== -1 ? specLines[contextIdx + 1] : undefined;
-  if (rawCandidate) {
-    const rawDesc = rawCandidate.replace(/[*_#`]/g, '').trim();
-    if (rawDesc.length > 20) {
-      domain = rawDesc;
-    }
-  } else if (specLines.length > 1) {
-    const firstP = specLines.find((l) => !l.startsWith('#') && l.length > 30);
-    if (firstP) {
-      domain = firstP.replace(/[*_#`]/g, '').trim();
-    }
+  if (rawCandidate && !rawCandidate.startsWith('#')) {
+    const rawDesc = cleanInline(rawCandidate);
+    if (rawDesc.length > 20) domain = rawDesc;
   }
+  if (!domain) {
+    const firstParagraph = specLines.find((l) => !l.startsWith('#') && !/^[-*|]/.test(l) && l.length > 30);
+    if (firstParagraph) domain = cleanInline(firstParagraph);
+  }
+  const domainFound = Boolean(domain);
+  const domainText = domain ?? `${TBD} : l'objectif du projet n'est pas identifiable dans le cahier des charges fourni.`;
 
-  // 2. Rôles & Personas
+  // 2. Rôles et personas : uniquement ceux décrits dans le document
   const roles: ProjectProfile['personasAndRoles'] = [];
   const rolesIdx = specLines.findIndex(
-    (l) => l.toLowerCase().includes('rôles & sécurité') || l.toLowerCase().includes('rbac') || l.toLowerCase().includes('utilisateurs')
+    (l) => l.startsWith('#') && /\brôles?\b|\broles?\b|\brbac\b|\bprofils?\b|\bacteurs\b|\bpersonas?\b|\butilisateurs\b/.test(l.toLowerCase())
   );
   if (rolesIdx !== -1) {
     for (let i = rolesIdx + 1; i < Math.min(rolesIdx + 40, specLines.length); i++) {
       const line = specLines[i];
       if (!line) continue;
-      if (line.startsWith('## ') && !line.toLowerCase().includes('rôle')) break;
+      if (line.startsWith('#')) break;
       const m = line.match(/^[-*]\s*\*\*(.*?)\*\*\s*[:–-]?\s*(.*)/);
       if (m && m[1]) {
         roles.push({
           id: `role-${roles.length + 1}`,
           value: `${m[1].trim()} : ${(m[2] || m[1]).trim()}`,
           epistemicStatus: 'explicit',
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Section Rôles' }],
+          sourceRefs: SPEC_REF('Section Rôles'),
           userEdited: false,
         });
       }
     }
   }
-
-  if (roles.length === 0) {
-    roles.push(
-      {
-        id: 'role-admin',
-        value: 'Administrateur / Direction : supervision globale, validation financière et paramétrage.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Section Rôles' }],
-        userEdited: false,
-      },
-      {
-        id: 'role-operator',
-        value: 'Opérateur / Gestionnaire : gestion opérationnelle des flux métiers au quotidien.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Section Rôles' }],
-        userEdited: false,
-      }
-    );
-  }
-
-  // Ajout obligatoire d'un rôle déduit avec confiance forte (§3.3 & §15.1 Jalon 3)
-  roles.push({
-    id: 'role-auditor',
-    value: 'Auditeur / Expert-comptable externe : consultation des écritures financières, factures certifiées et pièces justificatives.',
-    epistemicStatus: 'deduced',
-    confidence: 'high',
-    rationale: 'Déduit des exigences légales de conservation, de traçabilité et de conformité comptable.',
-    sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Conformité' }],
-    userEdited: false,
-  });
-
-  // 3. Fonctionnalités & Modules
-  const features: ProjectProfile['features'] = [];
-  
-  for (let i = 0; i < specLines.length; i++) {
-    const line = specLines[i];
-    if (!line) continue;
-    if (line.startsWith('### Module ') || (line.startsWith('## ') && /^[0-9]+\./.test(line.replace('## ', '').trim()))) {
-      const heading = line.replace(/^#{2,3}\s*/, '').trim();
-      const title = heading.replace(/^[0-9.]+\s*/, '').replace(/^Module\s*[0-9]*\s*[:–-]?\s*/i, '').trim();
-      if (!title || title.toLowerCase().includes('contexte') || title.toLowerCase().includes('rôles') || title.toLowerCase().includes('erd') || title.toLowerCase().includes('roadmap')) {
-        continue;
-      }
-
-      // Collecter les puces ou phrases suivantes
-      const rules: string[] = [];
-      for (let j = i + 1; j < Math.min(i + 15, specLines.length); j++) {
-        const sub = specLines[j];
-        if (!sub) continue;
-        if (sub.startsWith('#')) break;
-        if (sub.startsWith('- ') || sub.startsWith('* ')) {
-          rules.push(sub.replace(/^[-*]\s*/, '').replace(/[*_#`]/g, '').trim());
-        }
-      }
-
-      features.push({
-        id: `FEAT-${String(features.length + 1).padStart(2, '0')}`,
-        title,
-        description: `Gestion opérationnelle et exécution du module : ${title}.`,
-        priority: features.length < 4 ? 'P0' : 'P1',
-        businessRules: rules.length > 0 ? rules.slice(0, 5) : [`Règles d'intégrité et validation conforme aux spécifications de ${title}.`],
-        acceptanceCriteria: [
-          `Le module ${title} est pleinement opérationnel et conforme aux règles métiers spécifiées.`,
-          `Les données du module ${title} sont auditables et persistées avec intégrité.`
-        ],
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: heading }],
-      });
-
-      if (features.length >= 8) break;
-    }
-  }
-
-  if (features.length === 0) {
-    features.push({
-      id: 'FEAT-01',
-      title: 'Gestion Métier & Suivi des Opérations',
-      description: 'Module principal de gestion et de traitement des flux du projet.',
-      priority: 'P0',
-      businessRules: ['Toute opération doit être validée et tracée avec horodatage.'],
-      acceptanceCriteria: ['Les opérations principales s\'exécutent sans régression et avec validation des saisies.'],
-      epistemicStatus: 'explicit',
-      sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Spécifications générales' }],
+  const rolesFound = roles.length > 0;
+  if (!rolesFound) {
+    roles.push({
+      id: 'role-tbd',
+      value: `${TBD} : les rôles et profils d'utilisateurs ne sont pas précisés dans le cahier des charges.`,
+      epistemicStatus: 'missing_or_contradictory',
+      sourceRefs: [],
+      userEdited: false,
     });
   }
 
-  // 4. Détection Stack Technique
-  const languages = ['TypeScript', 'SQL', 'HTML/CSS'];
-  if (textLower.includes('python')) languages.push('Python');
+  // 3. Fonctionnalités : modules décrits dans le document, rien d'ajouté
+  const features: ProjectProfile['features'] = [];
+  for (let i = 0; i < specLines.length; i++) {
+    const line = specLines[i];
+    if (!line) continue;
+    const isModuleHeading =
+      line.startsWith('### Module ') || (line.startsWith('## ') && /^[0-9]+\./.test(line.replace('## ', '').trim()));
+    if (!isModuleHeading) continue;
 
-  const frameworks: string[] = [];
-  if (textLower.includes('next.js') || textLower.includes('nextjs')) frameworks.push('Next.js');
-  if (textLower.includes('react')) frameworks.push('React');
-  if (textLower.includes('tailwind')) frameworks.push('Tailwind CSS');
-  if (textLower.includes('pdf-lib') || textLower.includes('factur-x')) frameworks.push('pdf-lib (Factur-X)');
-  if (frameworks.length === 0) frameworks.push('Next.js', 'React', 'Tailwind CSS');
+    const heading = line.replace(/^#{2,3}\s*/, '').trim();
+    const title = heading.replace(/^[0-9.]+\s*/, '').replace(/^Module\s*[0-9]*\s*[:–-]?\s*/i, '').trim();
+    const lowTitle = title.toLowerCase();
+    if (!title || lowTitle.includes('contexte') || lowTitle.includes('rôles') || lowTitle.includes('erd') || lowTitle.includes('roadmap')) {
+      continue;
+    }
 
-  const databases: string[] = [];
-  if (textLower.includes('postgres')) databases.push('PostgreSQL');
-  if (textLower.includes('sqlite')) databases.push('SQLite');
-  if (databases.length === 0) databases.push('PostgreSQL');
+    const rules: string[] = [];
+    let summary: string | undefined;
+    for (let j = i + 1; j < Math.min(i + 15, specLines.length); j++) {
+      const sub = specLines[j];
+      if (!sub) continue;
+      if (sub.startsWith('#')) break;
+      if (sub.startsWith('- ') || sub.startsWith('* ')) {
+        rules.push(cleanInline(sub.replace(/^[-*]\s*/, '')));
+      } else if (!summary && !sub.startsWith('|') && sub.length > 20) {
+        summary = cleanInline(sub);
+      }
+    }
 
-  const infra: string[] = [];
-  if (textLower.includes('docker')) infra.push('Docker Multi-Stage');
-  if (textLower.includes('coolify')) infra.push('Coolify');
-  if (textLower.includes('cloudflare') || textLower.includes('r2')) infra.push('Cloudflare R2');
-  if (textLower.includes('documenso')) infra.push('Documenso');
-  if (textLower.includes('resend')) infra.push('Resend');
-  if (infra.length === 0) infra.push('Docker', 'Ubuntu VPS');
-
-  // Détection fine ORM, State, API Style, Testing et Conformité
-  const ormAndDataLayer: string[] = [];
-  if (textLower.includes('drizzle')) ormAndDataLayer.push('Drizzle ORM');
-  if (textLower.includes('prisma')) ormAndDataLayer.push('Prisma ORM');
-  if (textLower.includes('kysely')) ormAndDataLayer.push('Kysely');
-  if (textLower.includes('typeorm')) ormAndDataLayer.push('TypeORM');
-
-  const stateManagement: string[] = [];
-  if (textLower.includes('tanstack') || textLower.includes('react-query') || textLower.includes('react query')) {
-    stateManagement.push('TanStack Query');
+    features.push({
+      id: `FEAT-${String(features.length + 1).padStart(2, '0')}`,
+      title,
+      description: summary ?? `Module « ${title} » décrit dans le cahier des charges.`,
+      priority: features.length < 4 ? 'P0' : 'P1',
+      businessRules: rules.slice(0, 5),
+      acceptanceCriteria: [`${TBD} : critères d'acceptation du module « ${title} » non fournis dans le cahier des charges.`],
+      epistemicStatus: 'explicit',
+      sourceRefs: SPEC_REF(heading),
+    });
+    if (features.length >= 8) break;
   }
-  if (textLower.includes('zustand')) stateManagement.push('Zustand');
-  if (textLower.includes('redux')) stateManagement.push('Redux Toolkit');
-
-  let apiStyle = 'REST';
-  if (textLower.includes('trpc')) apiStyle = 'tRPC';
-  else if (textLower.includes('graphql')) apiStyle = 'GraphQL';
-  else if (textLower.includes('server action') || textLower.includes('server actions')) apiStyle = 'Server Actions';
-
-  const testingTools: string[] = [];
-  if (textLower.includes('vitest')) testingTools.push('Vitest');
-  if (textLower.includes('playwright')) testingTools.push('Playwright');
-  if (textLower.includes('jest')) testingTools.push('Jest');
-  if (textLower.includes('cypress')) testingTools.push('Cypress');
-  if (textLower.includes('axe') || textLower.includes('axe-core')) testingTools.push('axe-core');
-  if (textLower.includes('msw')) testingTools.push('MSW');
-  if (testingTools.length === 0) testingTools.push('Vitest', 'Playwright', 'TypeScript Strict');
-
-  const complianceStandards: string[] = [];
-  if (textLower.includes('hds')) complianceStandards.push('HDS');
-  if (textLower.includes('pci-dss') || textLower.includes('pci dss')) complianceStandards.push('PCI-DSS');
-  if (textLower.includes('rgpd') || textLower.includes('gdpr')) complianceStandards.push('RGPD');
-  if (textLower.includes('wcag 2.2') || textLower.includes('wcag aaa') || textLower.includes('aaa')) {
-    complianceStandards.push('WCAG 2.2 AAA');
-  } else if (textLower.includes('wcag') || textLower.includes('aa') || textLower.includes('accessibilité')) {
-    complianceStandards.push('WCAG 2.1 AA');
+  const featuresFound = features.length > 0;
+  if (!featuresFound) {
+    features.push({
+      id: 'FEAT-01',
+      title: `${TBD} : fonctionnalités`,
+      description: "Aucune fonctionnalité structurée (module ou section numérotée) n'a été détectée dans le cahier des charges.",
+      priority: 'P0',
+      businessRules: [],
+      acceptanceCriteria: [`${TBD} avec l'utilisateur à l'étape 2.`],
+      epistemicStatus: 'missing_or_contradictory',
+      sourceRefs: [],
+    });
   }
 
-  // 5. Design System Parsing
+  // 4. Pile technique : uniquement ce qui est écrit dans le document
+  const languages = detect(textLower, LANGUAGES);
+  const frameworks = detect(textLower, FRAMEWORKS);
+  const databases = detect(textLower, DATABASES);
+  const infra = detect(textLower, INFRASTRUCTURE);
+  const ormAndDataLayer = detect(textLower, ORMS);
+  const stateManagement = detect(textLower, STATE_MANAGEMENT);
+  const testingTools = detect(textLower, TESTING);
+  const complianceStandards = [...detect(textLower, COMPLIANCE), ...detectWcag(textLower)];
+  const apiStyle = detectApiStyle(textLower);
+  const stackFound = languages.length > 0;
+
+  // 5. Design system : tokens lus dans le document, jamais inventés
   const colorTokens: Record<string, string> = {};
   const dsLines = ds.split('\n').map((l) => l.trim().replace(/\+$/, '').trim());
-
-  // Extraction tableau Markdown de couleurs: | Name | `#hex` |
   for (const line of dsLines) {
     const tableMatch = line.match(/\|\s*([a-zA-Z0-9_\-\s]+)\s*\|\s*`?(#[a-fA-F0-9]{3,8})`?\s*\|/);
     if (tableMatch && tableMatch[1] && tableMatch[2]) {
-      const tokenName = tableMatch[1].trim().toLowerCase().replace(/\s+/g, '-');
-      // Ignorer les tokens propriétaires ou tiers comme Cursor parchment / ember / cursorgothic
-      if (!tokenName.includes('parchment') && !tokenName.includes('ember') && !tokenName.includes('cursorgothic')) {
-        colorTokens[tokenName] = tableMatch[2].trim();
-      }
+      colorTokens[tableMatch[1].trim().toLowerCase().replace(/\s+/g, '-')] = tableMatch[2].trim();
     }
   }
-
-  // Si pas de tokens ou si le document source était pollué par Cursor
-  const isCursorPolluted = ds.toLowerCase().includes('cursor') || Object.keys(colorTokens).length === 0;
-  if (isCursorPolluted || Object.keys(colorTokens).length === 0) {
-    colorTokens['primary'] = '#0f172a';
-    colorTokens['secondary'] = '#2563eb';
-    colorTokens['accent'] = '#3b82f6';
-    colorTokens['background'] = '#f8fafc';
-    colorTokens['surface'] = '#ffffff';
-    colorTokens['text-primary'] = '#0f172a';
-    colorTokens['text-secondary'] = '#475569';
-    colorTokens['border'] = '#e2e8f0';
-    colorTokens['success'] = '#10b981';
-    colorTokens['warning'] = '#f59e0b';
-    colorTokens['danger'] = '#ef4444';
+  const fontFamilies: Record<string, string> = {};
+  for (const line of dsLines) {
+    const cssVar = line.match(/--font-([a-z0-9-]+)\s*:\s*([^;]+);?/i);
+    if (cssVar && cssVar[1] && cssVar[2]) fontFamilies[cssVar[1].toLowerCase()] = cssVar[2].trim();
   }
+  const tokensFound = Object.keys(colorTokens).length > 0;
 
-  const rawFirstLine = (ds.split('\n')[0] ?? '').replace(/[*_#`]/g, '').trim();
-  const rawBrand = ds.length > 50 ? rawFirstLine : '';
-  const cleanBrand =
-    rawBrand && !rawBrand.toLowerCase().includes('cursor') && !rawBrand.toLowerCase().includes('style reference')
-      ? rawBrand
-      : `${params.projectName || 'Projet'} Design System`;
+  const rawFirstLine = cleanInline(ds.split('\n')[0] ?? '');
+  const brandIdentity =
+    ds.length > 50 && rawFirstLine ? rawFirstLine : `${params.projectName || 'Projet'} Design System (${TBD.toLowerCase()})`;
 
+  const wcag = complianceStandards.find((c) => c.startsWith('WCAG'));
   const dsProfile: ProjectProfile['designSystem'] = {
-    brandIdentity: cleanBrand,
+    brandIdentity,
     colorTokens,
-    typography: {
-      fontFamilies: {
-        display: 'Inter, system-ui, sans-serif',
-        body: 'Inter, system-ui, sans-serif',
-        mono: 'JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-      },
-      scaleNotes: 'Hiérarchie claire, sobre et accessible avec contrastes typographiques soignés (WCAG 2.1 AA).',
-    },
-    spacingAndLayout: 'Grille fluide 4px/8px adaptée au mobile-first de terrain et aux écrans larges de bureau.',
-    componentGuidelines: [
-      'Surfaces épurées et structurées avec bordures neutres 1px et contrastes WCAG 2.1 AA',
-      'Couleur d\'accentuation vive réservée aux boutons d\'action primaires, indicateurs d\'état et focus clavier',
-      'Composants de formulaires réactifs avec validation inline immédiate, gestion des 5 états UI et validation native Zod',
-      'Mise en page fluide adaptée aux terminaux mobiles de terrain (états des lieux) et aux postes de travail de bureau'
-    ],
-    uxAndAccessibilityRules: [
-      'Contraste AA (>= 4.5:1) strictement respecté entre le texte principal et le fond de page',
-      'Navigation au clavier intégrale avec indicateurs de focus visibles et cibles tactiles >= 44x44px'
-    ],
-    epistemicStatus: ds.length > 20 && !isCursorPolluted ? 'explicit' : 'deduced',
-    sourceRefs: [{ documentId: 'ds-doc', documentName: 'DESIGN.md', location: 'Tokens' }],
+    typography: { fontFamilies, scaleNotes: '' },
+    spacingAndLayout: '',
+    componentGuidelines: [],
+    uxAndAccessibilityRules: wcag ? [`Conformité ${wcag} exigée par le cahier des charges.`] : [],
+    epistemicStatus: tokensFound ? 'explicit' : 'missing_or_contradictory',
+    sourceRefs: ds.trim() ? [{ documentId: 'ds-doc', documentName: 'DESIGN.md', location: 'Tokens' }] : [],
   };
 
-  const isBillingOrTransport =
-    textLower.includes('factur') ||
-    textLower.includes('location') ||
-    textLower.includes('véhicule') ||
-    textLower.includes('sepa') ||
-    textLower.includes('felicicar');
+  // 6. Contraintes tirées des sections du document (rien d'ajouté en dehors)
+  const toTraceable = (
+    prefix: string,
+    section: { items: string[]; heading: string } | null
+  ): ProjectProfile['architectureConstraints'] =>
+    (section?.items ?? []).map((value, index) => ({
+      id: `${prefix}-${index + 1}`,
+      value,
+      epistemicStatus: 'explicit' as const,
+      sourceRefs: SPEC_REF(section?.heading ?? ''),
+      userEdited: false,
+    }));
+  const architectureConstraints = toTraceable('arch', collectSectionBullets(specLines, /architecture/));
+  const securityAndCompliance = toTraceable('sec', collectSectionBullets(specLines, /sécurité|securite|security|conformité/));
+  const qualityAndTestingStrategy = toTraceable('qa', collectSectionBullets(specLines, /qualité|qualite|tests?\b/));
 
-  const uncertainties: ProjectProfile['uncertainties'] = isBillingOrTransport
-    ? [
-        {
-          id: 'unc-1',
-          category: 'missing_information',
-          topic: 'Réconciliation des prélèvements SEPA et traitement des rejets (pain.002 / camt.054)',
-          statement:
-            'Le cahier des charges mentionne la génération de lots SEPA PAIN.008 sans expliciter le traitement des flux de retour bancaire (pain.002 pour rejets immédiats, camt.054 pour avis de débit). Sans ce flux retour, le portail ne peut pas rapprocher automatiquement les factures et détecter les impayés.',
-          impact: 'high',
-          proposedFallback:
-            'Adopter la version ISO 20022 pain.008.001.08 pour l\'émission et intégrer un parseur de fichiers pain.002 / camt.054 pour marquer automatiquement les factures impayées.',
-          requiresHumanDecision: true,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Finances & Prélèvements' }],
-        },
-        {
-          id: 'unc-2',
-          category: 'missing_information',
-          topic: 'Durées légales de conservation documentaire et articulation RGPD',
-          statement:
-            'Les pièces comptables et factures doivent obligatoirement être conservées 10 ans (Code de commerce, art. L123-22), tandis que les données personnelles (permis de conduire, pièces d\'identité des conducteurs) doivent être purgées selon une durée proportionnée à la finalité contractuelle sous peine de non-conformité RGPD.',
-          impact: 'high',
-          proposedFallback:
-            'Conserver les factures Factur-X / PDF-A3 pendant 10 ans sous archivage immuable, et planifier la purge ou l\'anonymisation des permis de conduire 3 ans après la clôture du dossier contractuel.',
-          requiresHumanDecision: true,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Conformité & Juridique' }],
-        },
-        {
-          id: 'unc-3',
-          category: 'missing_information',
-          topic: 'Réforme de la facturation électronique 2026/2027 (Obligation PDP / PPF & e-reporting)',
-          statement:
-            'Depuis le 1er septembre 2026, toutes les entreprises ont l\'obligation légale de pouvoir recevoir des factures électroniques via une Plateforme de Dématérialisation Partenaire (PDP) ou le Portail Public de Facturation (PPF). L\'obligation d\'émission pour les PME s\'applique au 1er septembre 2027. L\'envoi de factures Factur-X uniquement par email (Resend) ne sera pas conforme en B2B domestique sans plateforme agréée.',
-          impact: 'critical',
-          proposedFallback:
-            'Générer des factures mixtes conformes Factur-X (profil EN 16931) et concevoir une couche d\'abstraction (connecteur PDP/PPF) pour télétransmettre le statut du cycle de vie et les flux d\'e-reporting exigés par la DGFIP.',
-          requiresHumanDecision: true,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Facturation Factur-X' }],
-        },
-        {
-          id: 'unc-4',
-          category: 'missing_information',
-          topic: 'Délai légal de désignation ANTAI (45 jours) et chaîne de notification',
-          statement:
-            'L\'article L121-6 du Code de la route impose aux personnes morales un délai légal impératif de 45 jours pour désigner le conducteur réel auprès de l\'ANTAI sous peine d\'amende forfaitaire pour non-désignation.',
-          impact: 'medium',
-          proposedFallback:
-            'Instaurer un compte à rebours automatique dès la réception du procès-verbal avec rappels automatisés à J-30, J-15 et J-7 avant l\'expiration du délai de 45 jours.',
-          requiresHumanDecision: false,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Module Infractions' }],
-        },
-        {
-          id: 'unc-5',
-          category: 'missing_information',
-          topic: 'Numérotation continue des factures et intégrité chronologique',
-          statement:
-            'Le Code général des impôts (art. 242 nonies A) impose une numérotation des factures basée sur une séquence chronologique et continue, sans trou ni doublon.',
-          impact: 'high',
-          proposedFallback:
-            'Utiliser une séquence PostgreSQL atomique garantissant l\'attribution continue des numéros sans rupture même en cas de transactions annulées.',
-          requiresHumanDecision: false,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Facturation' }],
-        },
-        {
-          id: 'unc-6',
-          category: 'missing_information',
-          topic: 'Sécurisation des webhooks Documenso et authentification des signatures',
-          statement:
-            'Les retours de signature de contrat via les webhooks Documenso doivent être authentifiés par signature cryptographique HMAC pour éviter les usurpations de statut contractuel.',
-          impact: 'high',
-          proposedFallback:
-            'Valider systématiquement l\'en-tête de signature HMAC avec un secret partagé avant d\'acter la signature effective d\'un contrat.',
-          requiresHumanDecision: false,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Contrats & Documenso' }],
-        },
-      ]
-    : [
-        {
-          id: 'unc-1',
-          category: 'missing_information',
-          topic: 'Méthode d\'authentification et gestion de session',
-          statement:
-            'Le document ne précise pas le fournisseur d\'authentification cible (OAuth2, Passkeys ou JWT standard).',
-          impact: 'medium',
-          proposedFallback:
-            'Utiliser une authentification par session sécurisée HTTP-only avec hachage Argon2/bcrypt.',
-          requiresHumanDecision: true,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Sécurité' }],
-        },
-        {
-          id: 'unc-2',
-          category: 'hypothesis',
-          topic: 'Politique de sauvegarde et journal d\'audit',
-          statement:
-            'Absence de directives explicites sur la fréquence de sauvegarde et la rétention du journal d\'audit.',
-          impact: 'medium',
-          proposedFallback:
-            'Instaurer des sauvegardes journalières de la base PostgreSQL et un journal d\'audit immuable avec horodatage.',
-          requiresHumanDecision: false,
-          sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Architecture' }],
-        },
-      ];
+  // 7. Incertitudes : uniquement ce qui manque réellement dans le document
+  const uncertainties: ProjectProfile['uncertainties'] = [];
+  const addUncertainty = (u: Omit<ProjectProfile['uncertainties'][number], 'id' | 'sourceRefs'>) => {
+    uncertainties.push({ ...u, id: `unc-${uncertainties.length + 1}`, sourceRefs: SPEC_REF('Absent du document') });
+  };
+
+  if (!domainFound) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: "Objectif du projet",
+      statement: "Le cahier des charges ne permet pas d'identifier l'objectif du projet.",
+      impact: 'high',
+      proposedFallback: "Demander à l'utilisateur de décrire en quelques lignes l'objectif, les utilisateurs et le périmètre.",
+      requiresHumanDecision: true,
+    });
+  }
+  if (!stackFound) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: 'Pile technique non précisée',
+      statement: "Aucun langage de programmation n'est mentionné dans le cahier des charges.",
+      impact: 'high',
+      proposedFallback: "Demander à l'utilisateur le langage, le framework, la base de données et leurs versions exactes.",
+      requiresHumanDecision: true,
+    });
+  }
+  if (!rolesFound) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: "Rôles et profils d'utilisateurs",
+      statement: "Aucun rôle d'utilisateur n'est décrit dans le cahier des charges.",
+      impact: 'medium',
+      proposedFallback: "Demander la liste des rôles et leurs droits, ou confirmer qu'il n'y a qu'un seul profil.",
+      requiresHumanDecision: true,
+    });
+  }
+  if (infra.length === 0) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: 'Hébergement et déploiement',
+      statement: "Le cahier des charges ne précise ni l'hébergement ni le mode de déploiement.",
+      impact: 'medium',
+      proposedFallback: "Demander l'environnement de production visé (conteneurs, hébergeur, intégration continue).",
+      requiresHumanDecision: true,
+    });
+  }
+  if (testingTools.length === 0) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: 'Outils de test',
+      statement: "Aucun outil de test n'est mentionné dans le cahier des charges.",
+      impact: 'medium',
+      proposedFallback: "Demander l'outil de test et la commande de vérification du projet.",
+      requiresHumanDecision: true,
+    });
+  }
+  if (!/authentifi|oauth|\bjwt\b|\bsso\b|passkey|mot de passe|\bsession\b|\blogin\b|connexion/.test(textLower)) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: "Méthode d'authentification et gestion de session",
+      statement: "Le document ne précise pas le mode d'authentification (OAuth2, passkeys, JWT, session…).",
+      impact: 'medium',
+      proposedFallback: "À confirmer avec l'utilisateur ; à défaut, session sécurisée HTTP-only avec hachage Argon2 ou bcrypt.",
+      requiresHumanDecision: true,
+    });
+  }
+  if (!/sauvegarde|backup|audit|journal|traçabilité|tracabilite/.test(textLower)) {
+    addUncertainty({
+      category: 'hypothesis',
+      topic: "Politique de sauvegarde et journal d'audit",
+      statement: "Aucune directive explicite sur la fréquence de sauvegarde ni sur la rétention du journal d'audit.",
+      impact: 'medium',
+      proposedFallback: 'Sauvegardes journalières de la base de données et journal d\'audit horodaté, à valider.',
+      requiresHumanDecision: false,
+    });
+  }
+  if (!tokensFound) {
+    addUncertainty({
+      category: 'missing_information',
+      topic: 'Design system',
+      statement: ds.trim()
+        ? "Aucun token de couleur n'a pu être lu dans le design system fourni (tableau Markdown « nom | #couleur »)."
+        : 'Aucun design system fourni.',
+      impact: 'medium',
+      proposedFallback: "Fournir un DESIGN.md avec un tableau de tokens, ou confirmer qu'il n'y a pas de design system imposé.",
+      requiresHumanDecision: true,
+    });
+  }
 
   return {
     projectId: params.projectId,
     projectName: params.projectName || 'Projet Antigravity',
-    projectDescription: domain,
+    projectDescription: domainText,
     targetSurface: params.targetSurface || 'APP',
     profileVersion: 1,
 
     domainAndObjective: {
       id: 'dom-01',
-      value: domain,
-      epistemicStatus: 'explicit',
-      sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Section 1' }],
+      value: domainText,
+      epistemicStatus: domainFound ? 'explicit' : 'missing_or_contradictory',
+      sourceRefs: domainFound ? SPEC_REF('Section 1') : [],
       userEdited: false,
     },
 
@@ -397,7 +468,7 @@ export function extractHeuristicProjectProfile(params: HeuristicExtractionParams
     features,
 
     techStack: {
-      languages,
+      languages: stackFound ? languages : [TBD],
       frameworks,
       databases,
       ormAndDataLayer,
@@ -406,74 +477,13 @@ export function extractHeuristicProjectProfile(params: HeuristicExtractionParams
       infrastructureAndDeployment: infra,
       testingTools,
       complianceStandards,
-      epistemicStatus: 'explicit',
-      sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Spécifications techniques' }],
+      epistemicStatus: stackFound ? 'explicit' : 'missing_or_contradictory',
+      sourceRefs: SPEC_REF('Spécifications techniques'),
     },
 
-    architectureConstraints: [
-      {
-        id: 'arch-1',
-        value: 'Monolithe modulaire Next.js conteneurisé Docker, sans microservices superflus.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Architecture' }],
-        userEdited: false,
-      },
-      {
-        id: 'arch-2',
-        value: 'Stockage S3-compatible privé Cloudflare R2 pour les pièces justificatives et médias avec URLs pré-signées.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Stockage' }],
-        userEdited: false,
-      },
-      {
-        id: 'arch-3',
-        value: 'Horodatage et intégrité certifiée Factur-X / PDF-A3 avec conformité réforme 2026/2027.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Facturation' }],
-        userEdited: false,
-      },
-    ],
-
-    securityAndCompliance: [
-      {
-        id: 'sec-1',
-        value: 'Facturation électronique certifiée conforme Factur-X / PDF/A-3 (réforme 2026/2027) et transmission plateforme agréée.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Facturation' }],
-        userEdited: false,
-      },
-      {
-        id: 'sec-2',
-        value: 'Contrôle d\'accès RBAC strict, validation Zod et signature électronique sécurisée Documenso avec HMAC.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Sécurité' }],
-        userEdited: false,
-      },
-      {
-        id: 'sec-3',
-        value: 'Conservation 10 ans des pièces comptables et purge proportionnée RGPD des données conducteurs.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Conformité' }],
-        userEdited: false,
-      },
-    ],
-
-    qualityAndTestingStrategy: [
-      {
-        id: 'qa-1',
-        value: 'Tests unitaires automatisés des règles de calcul de facturation, prorata temporis et dépassement kilométrique.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Qualité' }],
-        userEdited: false,
-      },
-      {
-        id: 'qa-2',
-        value: 'Approche TDD (Red-Green-Refactor) avec couverture minimale de 80% sur la logique métier et financière.',
-        epistemicStatus: 'explicit',
-        sourceRefs: [{ documentId: 'spec-doc', documentName: 'Cahier des charges', location: 'Qualité' }],
-        userEdited: false,
-      },
-    ],
+    architectureConstraints,
+    securityAndCompliance,
+    qualityAndTestingStrategy,
 
     designSystem: dsProfile,
     uncertainties,
