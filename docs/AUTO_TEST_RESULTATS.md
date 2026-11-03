@@ -105,8 +105,23 @@ Consommation : environ 20 500 jetons en entrée pour une réponse d'un mot (cont
 ## Ce que cela change
 
 1. **La règle de gouvernance fonctionne** dans la surface CLI avec ce modèle (G1 et G2, 3/3).
-2. **La conclusion « les règles `model_decision` sont peu fiables » (T3) est en partie un défaut de sonde** : l'ancienne invite demandait de n'ouvrir aucun fichier, ce qui empêche de lire le corps de la règle. Hypothèse non démontrée : le scénario `C3n` (même invite que l'ancienne T3) sert à la tester. De même pour le skill (T4) : un skill se charge en lisant son `SKILL.md`. Les sondes T3 et T4 du pack ne contiennent plus cette consigne.
+2. **L'hypothèse « l'invite T3/T4 empêchait de lire le fichier » n'est pas confirmée** (voir la deuxième mesure ci-dessous) : avec l'ancienne invite (« n'ouvre aucun fichier »), `model_decision` passe 3/3 en CLI. Les échecs de T3 et de T4 lors des tours manuels restent donc inexpliqués (surface IDE, modèle, ou variabilité). Les consignes de non-lecture sont tout de même retirées des sondes T3 et T4 : elles n'ont pas d'utilité pour ce qu'on cherche à mesurer.
 3. **Les règles `glob` restent peu fiables** (1/3). Le scénario `C2b` mesure si le pointeur d'`AGENTS.md` les rattrape.
 4. **Un agent qui ne voit pas le contenu d'un fichier invente un jeton plausible** (`SKILL-OK-Z5V8TN`, `DECISION-OK-94KNWQ`) : un jeton d'un autre identifiant est un échec, jamais un succès partiel.
 5. Deux essais ont échoué sur une erreur 503 du service alors que la réponse contenait le bon jeton : ces erreurs sont désormais classées « indéterminées » et exclues des taux. Un essai (C4) a attendu 10 minutes une tâche de fond avant d'échouer.
+
+## Deuxième mesure (3 novembre 2026, même modèle `gemini-3.8-flash-medium`, effort medium, 3 répétitions)
+
+| Scénario | Résultat | Cumul avec la première mesure |
+| :--- | :--- | :--- |
+| C2 règle `glob` | 3/3 | **4/6** : variable d'un lot à l'autre |
+| C2b `glob` avec pointeur dans `AGENTS.md` | 3/3 | 3/3 : écart avec C2 trop faible pour conclure (6 et 3 essais) |
+| C3n `model_decision`, ancienne invite « n'ouvre aucun fichier » | 3/3 | `model_decision` : 9/9 avec les trois variantes |
+| C4b skill appelé par `/selftest-skill` | 3/3 | Invocation par `/nom` fiable (4 s, 20 900 jetons) ; l'invocation par un texte libre (C4) reste incertaine (1 réussite sur 3, plus un jeton inventé) |
+
+Lectures :
+- L'invocation d'un skill par `/nom` est la voie fiable ; la découverte par simple mention dans un texte ne l'est pas.
+- Les règles `glob` ne sont ni fiables ni clairement défaillantes : 4 essais sur 6. Le pointeur d'`AGENTS.md` ne se distingue pas statistiquement. Il est conservé car il ne coûte presque rien et couvre aussi le cas où une règle ne se déclenche pas.
+- C3n consomme plus de jetons de raisonnement (environ 2 300) que C3 (environ 300) : l'agent pèse la consigne contradictoire avant de répondre.
+- Limites : un seul modèle (petit), surface CLI uniquement, 3 répétitions : le banc n'a pas encore été exécuté avec Opus 5.5 (quota épuisé jusqu'au 4 novembre).
 
