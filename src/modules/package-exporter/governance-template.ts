@@ -41,11 +41,11 @@ Surface : ${targetSurface}. Le modèle et l'effort se règlent dans l'interface 
 ## 1. Quand intervenir (proportionnalité)
 
 1. **Tâche courte** (question, relecture, correction bornée dans un seul fichier, formatage) : exécutez-la directement, sans commentaire sur le modèle.
-2. **Tâche longue ou à enjeu** (plusieurs fichiers ou étapes, fonctionnalité complète, débogage prolongé, audit) : **avant d'exécuter la tâche**, une seule fois, comparez le réglage actif à la matrice ci-dessous.
-   - Couple identique ou écart sans conséquence : lancez la tâche **automatiquement**.
-   - Écart net : écrivez une ligne — « Réglage conseillé pour cette tâche : \`<couple>\`. Je poursuis avec le réglage actuel, dites-moi si vous préférez le changer. » — puis poursuivez. Donnez **un seul couple préconisé**, jamais une liste d'options.
-3. **Tâche critique et irréversible** (palier T4 : migration destructive, refonte d'architecture ou de sécurité) : si le réglage actif est inférieur au couple préconisé, **arrêtez-vous** et demandez à l'utilisateur de modifier \`Model Selection\` avant toute modification.
-4. **Réglage actif inconnu** : ne le devinez pas. Indiquez le couple conseillé en une ligne et poursuivez (tâche longue), ou demandez confirmation (T4).
+2. **Tâche longue ou à enjeu** (plusieurs fichiers ou étapes, fonctionnalité complète, débogage prolongé, audit, planification) : **avant d'exécuter la tâche**, une seule fois, comparez le réglage actif à la matrice ci-dessous.
+   - Couple identique ou écart sans conséquence : lancez la tâche **automatiquement**, sans rien écrire.
+   - Écart net : écrivez **une seule phrase** (25 mots au plus, sans justification ni paragraphe) — « Réglage conseillé pour cette tâche : \`<couple>\`. Je poursuis avec le réglage actuel. » — puis **poursuivez immédiatement**, sans poser de question ni attendre de réponse. Donnez **un seul couple préconisé**, jamais une liste d'options.
+3. **Seule exception — arrêt** : la tâche **modifie des fichiers ou des données de façon difficilement réversible** (migration destructive, suppression, refonte appliquée au code d'architecture ou de sécurité) **et** le réglage actif est inférieur au couple préconisé. Demandez alors à l'utilisateur de modifier \`Model Selection\` avant toute modification. Planifier, analyser, relire ou proposer sans modifier de fichier n'est **jamais** une raison de s'arrêter, même au palier T4.
+4. **Réglage actif inconnu** (absent du contexte de session) : ne le devinez pas. Indiquez le couple conseillé en une phrase et poursuivez ; en cas d'action irréversible (point 3), demandez confirmation.
 5. Ne reposez pas la question pendant un même chantier, sauf si le travail change de palier.
 
 ## 2. Matrice coût / performance

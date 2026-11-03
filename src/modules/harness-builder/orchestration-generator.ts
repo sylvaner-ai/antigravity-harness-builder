@@ -139,7 +139,7 @@ export function generateOrchestrationPlan(
 2. **Moindre privilège** : Chaque rôle ne dispose que des outils strictement nécessaires à sa mission (lecture seule pour la revue/sécurité, écriture pour l'implémentation).
 3. **Modèle / Niveau d'effort** :
    - Aucun sous-agent ne fige de champ \`model\` dans son frontmatter YAML.
-   - Conformément à \`.agents/rules/model-effort-governance.md\` : tâche courte = exécution directe ; tâche longue ou à enjeu = comparaison unique du réglage actif au couple conseillé, avec **un seul couple préconisé** en cas d'écart net ; tâche critique irréversible (T4) = arrêt et demande de modification de \`Model Selection\` si le réglage est insuffisant.
+   - Conformément à \`.agents/rules/model-effort-governance.md\` : tâche courte = exécution directe ; tâche longue ou à enjeu = comparaison unique du réglage actif au couple conseillé, avec **un seul couple préconisé** en une phrase en cas d'écart net, puis poursuite immédiate ; arrêt uniquement si la tâche modifie des fichiers ou des données de façon difficilement réversible et que le réglage est insuffisant (planifier ou analyser ne justifie jamais un arrêt).
    - Une délégation n'est justifiée que pour une sous-tâche indépendante, bornée et volumineuse ; les agents de revue et d'audit sont en lecture seule.
 4. **Non-régression continue** : Tout incrément de code produit par un sous-agent doit être validé par les tests avant d'être validé par l'agent parent.
 

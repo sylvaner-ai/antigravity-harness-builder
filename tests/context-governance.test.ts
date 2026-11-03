@@ -166,6 +166,13 @@ describe('Lot 3 — règle modèle/effort et commandes natives', () => {
     expect(body).toMatch(/une seule fois/);
   });
 
+  it('ne fait jamais s’arrêter l’agent pour planifier ou analyser, et limite l’avertissement à une phrase (constat T11 de l’auto-test)', () => {
+    expect(body).toMatch(/une seule phrase/);
+    expect(body).toMatch(/poursuivez immédiatement/);
+    expect(body).toMatch(/Planifier, analyser, relire ou proposer sans modifier de fichier n'est \*\*jamais\*\* une raison de s'arrêter/);
+    expect(body).toMatch(/difficilement réversible/);
+  });
+
   it('ne recommande que des commandes documentées par Antigravity (pas /compact)', () => {
     const names = NATIVE_SLASH_COMMANDS.map((c) => c.command);
     expect(names).toEqual(expect.arrayContaining(['/plan', '/goal', '/teamwork', '/boost', '/grill-me', '/learn']));

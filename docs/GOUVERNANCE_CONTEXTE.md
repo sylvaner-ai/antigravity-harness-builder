@@ -29,8 +29,8 @@ Aucun champ `model` n'est écrit dans le YAML des sous-agents : le comportement 
 
 ## Commandes slash
 
-Liste issue de la documentation officielle (https://antigravity.google/docs/slash-commands/, consultée le 3 novembre 2026) : `/plan`, `/goal`, `/teamwork`, `/boost`, `/grill-me`, `/learn`. `/compact` n'y figure pas. `/effort` et `/agents` y sont nommées sans description et ne sont pas recommandées.
+Liste issue de la documentation officielle (https://antigravity.google/docs/slash-commands/, consultée le 3 novembre 2026) : `/plan`, `/goal`, `/teamwork`, `/boost`, `/grill-me`, `/learn`. `/compact` n'y figure pas, mais elle existe dans la version testée (auto-test T8) ; son effet n'étant pas documenté, elle n'est pas recommandée. `/effort` et `/agents` y sont nommées sans description et ne sont pas recommandées.
 
 ## Workflows
 
-Selon la page officielle « workflows to skills » (https://antigravity.google/docs/migration/workflows-to-skills/), les répertoires `.agents/workflows/` ne sont plus indexés ni exécutables depuis le 19 octobre 2026. Le harnais ne génère donc que des skills (`/<nom>` les appelle). La cible `--target antigravity` d'ECC, qui convertit des commandes en workflows, ne doit pas être utilisée telle quelle.
+La page officielle « workflows to skills » (https://antigravity.google/docs/migration/workflows-to-skills/) annonce que les répertoires `.agents/workflows/` ne seront plus indexés ni exécutables à partir du 19 octobre 2026. **L'auto-test du 3 novembre 2026 (T9) montre qu'un workflow s'exécute encore dans la version testée.** Le harnais ne génère que des skills (`/<nom>` les appelle), qui fonctionnent dans les deux cas. La cible `--target antigravity` d'ECC, qui convertit des commandes en workflows, ne doit pas être utilisée telle quelle.
