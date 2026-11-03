@@ -293,9 +293,11 @@ Selon la surface Antigravity ciblée (\`${profile.targetSurface}\`) :
 - Ouvrez le projet dans Antigravity.
 - **Fonctionnement naturel** : Dialoguez simplement avec l'agent principal. Il applique automatiquement vos règles transverses et invoque de lui-même les sous-agents spécialisés (architecte, base de données, revue de code) via ses outils internes.
 - **Commandes utilisateur optionnelles (slash commands)** :
-  * \`/goal\` : Pour lancer une session au long cours en autonomie complète sans interruption.
-  * \`/teamwork\` : Pour forcer une concertation multi-agents formelle selon le protocole de \`docs/ORCHESTRATION.md\`.
-  * \`/plan\` : Pour faire décomposer et valider les étapes d'un jalon avant le codage.
+  * \`/plan\` : Pour explorer le code, poser les questions utiles et valider un plan avant le codage.
+  * \`/goal\` : Pour mener un jalon à son terme sans interruption une fois le plan validé.
+  * \`/teamwork\` : Pour un chantier de grande ampleur confié à une équipe d'agents.
+  * \`/boost\` : Pour un bogue ou un algorithme difficile.
+  * \`/learn\` : Pour transformer vos corrections de session en règles ou skills persistants.
 
 ### B. En ligne de commande (Antigravity CLI \`agy\`)
 \`\`\`bash

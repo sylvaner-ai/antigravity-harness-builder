@@ -159,6 +159,6 @@ L'agent principal doit assister l'utilisateur en lui recommandant proactivement 
 - **`/plan`** : Dès qu'une tâche complexe nécessite d'aligner l'architecture ou la décomposition multi-étapes avant d'écrire du code.
 - **`/goal`** : Dès que l'utilisateur confie un jalon complet ou un travail au long cours nécessitant de multiples étapes sans interruption.
 - **`/teamwork`** : Dès qu'une tâche nécessite de mobiliser conjointement plusieurs sous-agents (architecte + BDD + reviewer).
-- **`/compact`** : Dès que l'historique de conversation devient dense ou après la clôture d'un jalon majeur pour libérer le contexte.
 - **`/boost`** : Pour un problème algorithmique particulièrement ardu nécessitant un raisonnement multi-perspectives approfondi.
+- **`/grill-me`** : Besoin ou décision encore flou avant de commencer.
 - **`/learn`** : Lorsque l'utilisateur donne une directive réutilisable ou corrige une convention sur le projet afin de la mémoriser durablement.

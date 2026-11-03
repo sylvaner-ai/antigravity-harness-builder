@@ -61,14 +61,14 @@ export function synthesizeProjectCustomComponents(params: {
       name: "Gouvernance Centralisée du Couple Modèle / Niveau d'Effort",
       kind: 'RULE',
       description:
-        "Évaluation obligatoire avant chaque tâche du couple optimal Modèle / Niveau d'effort (exécution directe si identique au paramètre actif, demande avec un seul couple préconisé sinon).",
+        "Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques (un seul couple préconisé en cas d'écart net) ; aucune intervention sur les tâches courtes.",
       gapReason:
         "Gouvernance système automatique d'Antigravity centralisant le couple Modèle / Effort hors du frontmatter YAML des sous-agents pour un ratio coût/performance optimal.",
       content: serializeAntigravityRule(
         {
           trigger: 'always_on',
           description:
-            "Évaluation obligatoire avant chaque tâche du couple optimal Modèle / Niveau d'effort et arbitrage coût/performance.",
+            "Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques ; aucune intervention sur les tâches courtes.",
         },
         govRuleBody
       ),

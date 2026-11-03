@@ -19,6 +19,7 @@ import {
   computeSha256,
 } from '../package-exporter/exporter';
 import { renderModelEffortGovernanceRuleBody } from '../package-exporter/governance-template';
+import { enforceAlwaysOnBudget, isReviewerSlug, normalizeDelegationDescription, restrictReviewerTools } from './context-budget';
 import { resolveComponentProvenance } from '../ecc-catalog/catalog-sources';
 import {
   DeterministicPackageInput,
@@ -273,10 +274,15 @@ export class HarnessBuilderService {
       const repoUrl = prov.repositoryUrl;
       const author = prov.author;
 
+      const eccTools =
+        (rawFront.tools as unknown as AntigravitySubagentTool[]) ??
+        (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']);
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: comp.slug,
-        description: (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`,
-        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']),
+        description: normalizeDelegationDescription(
+          (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`
+        ),
+        tools: isReviewer || isReviewerSlug(comp.slug) ? restrictReviewerTools(eccTools) : eccTools,
       });
 
       const inferredPair = inferRecommendedModelEffortPair({
@@ -330,10 +336,13 @@ export class HarnessBuilderService {
 
       const split = splitMarkdownFrontmatter(custom.content);
       const rawFront = split.parsedFrontmatter ?? {};
+      const customIsReviewer = isReviewerSlug(custom.slug);
+      const customTools =
+        (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? ['view_file', 'write_to_file', 'replace_file_content'];
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: custom.slug,
-        description: (rawFront.description as string) ?? custom.description,
-        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? ['view_file', 'write_to_file', 'replace_file_content'],
+        description: normalizeDelegationDescription((rawFront.description as string) ?? custom.description),
+        tools: customIsReviewer ? restrictReviewerTools(customTools) : customTools,
       });
 
       const customPair = inferRecommendedModelEffortPair({
@@ -347,7 +356,7 @@ export class HarnessBuilderService {
         roleTitle: custom.name,
         frontmatter,
         markdownBody: split.body.trim(),
-        isIndependentReviewer: false,
+        isIndependentReviewer: customIsReviewer,
         recommendedModelTier: customPair.recommendedModelTier,
         recommendedEffort: customPair.recommendedEffort,
         qualityCostRecommendation: customPair.qualityCostRecommendation,
@@ -384,7 +393,7 @@ export class HarnessBuilderService {
         frontmatter: {
           trigger: 'always_on',
           description:
-            "Évaluation obligatoire avant chaque tâche du couple optimal Modèle / Niveau d'effort et arbitrage coût/performance.",
+            "Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques ; aucune intervention sur les tâches courtes.",
         },
         markdownBody: renderModelEffortGovernanceRuleBody({
           projectName: safeProfile.projectName,
@@ -396,6 +405,10 @@ export class HarnessBuilderService {
         originStatus: 'project_custom',
       });
     }
+
+    // Plafonnement du contexte permanent : les règles en excès passent en `model_decision`
+    const budgeted = enforceAlwaysOnBudget(selectedRules, selection.presetMode);
+    selectedRules.splice(0, selectedRules.length, ...budgeted.rules);
 
     // --- 4. RÉSUMÉ DES CANDIDATS ÉCARTÉS ---
     const discardedCandidatesSummary = selection.rejectedComponents.map((r) => ({
