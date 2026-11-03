@@ -126,6 +126,26 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       evaluate: (c) => containsToken(c.response, appleToken),
     },
     {
+      id: 'C2m-glob-en-decision',
+      title: 'Règle de fichier exprimée en model_decision (description citant le fichier)',
+      group: 'chargement',
+      prompt: 'Lis le fichier selftest-target.txt et résume-le en une phrase.',
+      requiresHarness: false,
+      prepare: (dir) => {
+        installPack(dir);
+        const glob = pack.files.find((f) => f.relativePath === '.agents/rules/selftest-glob.md')!;
+        write(
+          dir,
+          glob.relativePath,
+          glob.content
+            .replace('trigger: glob', 'trigger: model_decision')
+            .replace(/^description:.*$/m, "description: À consulter lorsque la tâche concerne le fichier selftest-target.txt")
+            .replace(/^globs:.*\n/m, '')
+        );
+      },
+      evaluate: (c) => containsToken(c.response, t('GLOB-OK')),
+    },
+    {
       id: 'C3n-decision-sans-lecture',
       title: "Règle model_decision avec la consigne « n'ouvre aucun fichier » (ancienne sonde T3)",
       group: 'chargement',
