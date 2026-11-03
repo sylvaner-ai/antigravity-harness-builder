@@ -93,4 +93,27 @@ describe('Extracteur heuristique : aucun contenu inventé', () => {
     expect(p.techStack.databases).not.toContain('MongoDB');
     expect(p.techStack.infrastructureAndDeployment).not.toContain('Cloudflare R2');
   });
+  it('détecte MyBatis et JPA lorsqu’ils sont déclarés, et rien lorsqu’ils ne le sont pas', () => {
+    const withMyBatis = extractHeuristicProjectProfile({
+      projectId: 'p',
+      projectName: 'J',
+      specText: '# Projet\n\n## Pile technique\n- Langage : Java 21\n- Données : MySQL 8, accès par MyBatis',
+    });
+    expect(withMyBatis.techStack.ormAndDataLayer).toContain('MyBatis');
+    expect(withMyBatis.techStack.ormAndDataLayer).not.toContain('JPA');
+
+    const withJpa = extractHeuristicProjectProfile({
+      projectId: 'p',
+      projectName: 'J',
+      specText: '# Projet\n\n## Pile technique\n- Langage : Java 21\n- Données : PostgreSQL avec Spring Data JPA',
+    });
+    expect(withJpa.techStack.ormAndDataLayer).toContain('JPA');
+
+    const none = extractHeuristicProjectProfile({
+      projectId: 'p',
+      projectName: 'J',
+      specText: '# Projet\n\n## Pile technique\n- Langage : Java 21\n- Données : MySQL 8',
+    });
+    expect(none.techStack.ormAndDataLayer).toEqual([]);
+  });
 });

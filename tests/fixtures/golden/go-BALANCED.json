@@ -1,0 +1,284 @@
+{
+ "total": 42,
+ "bySource": {
+  "cloudflare-security-audit": 1,
+  "curated": 3,
+  "dietrichgebert-ponytail": 4,
+  "ecc-official": 21,
+  "obra-superpowers": 13
+ },
+ "selected": [
+  {
+   "kind": "RULE",
+   "slug": "api-security-guards",
+   "slot": "rule:pack:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-code-review",
+   "slot": "rule:common:code-review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-coding-style",
+   "slot": "rule:common:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-development-workflow",
+   "slot": "rule:common:development-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-git-workflow",
+   "slot": "rule:common:git-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-security",
+   "slot": "rule:common:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-testing",
+   "slot": "rule:common:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "golang-coding-style",
+   "slot": "rule:stack:golang:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "golang-patterns",
+   "slot": "rule:stack:golang:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "golang-security",
+   "slot": "rule:stack:golang:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "golang-testing",
+   "slot": "rule:stack:golang:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "plan-first-and-anti-omissions",
+   "slot": "rule:pack:workflow",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "api-design",
+   "slot": "skill:backend:api-design",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "brainstorming",
+   "slot": "skill:workflow:design-exploration",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "database-migrations",
+   "slot": "skill:database:migrations",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "deployment-patterns",
+   "slot": "skill:ops:deployment",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "dispatching-parallel-agents",
+   "slot": "skill:workflow:parallel-agents",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "docker-patterns",
+   "slot": "skill:stack:docker:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "executing-plans",
+   "slot": "skill:workflow:plan-execution",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "finishing-a-development-branch",
+   "slot": "skill:workflow:branch-finish",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "golang-patterns",
+   "slot": "skill:stack:golang:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "golang-testing",
+   "slot": "skill:stack:golang:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail",
+   "slot": "skill:simplicity:mode",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-audit",
+   "slot": "skill:simplicity:audit",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-debt",
+   "slot": "skill:simplicity:debt",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-review",
+   "slot": "skill:simplicity:review",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "receiving-code-review",
+   "slot": "skill:workflow:review-reception",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "requesting-code-review",
+   "slot": "skill:workflow:review-request",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-audit",
+   "slot": "skill:security:audit",
+   "sourceId": "cloudflare-security-audit"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-review",
+   "slot": "skill:security:review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "subagent-driven-development",
+   "slot": "skill:workflow:subagent-development",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "systematic-debugging",
+   "slot": "skill:workflow:debugging",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "test-driven-development",
+   "slot": "skill:workflow:tdd",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-git-worktrees",
+   "slot": "skill:workflow:worktrees",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-superpowers",
+   "slot": "skill:workflow:bootstrap",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "verification-before-completion",
+   "slot": "skill:workflow:verification",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "writing-plans",
+   "slot": "skill:workflow:planning",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "architect",
+   "slot": "agent:architect",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "code-reviewer",
+   "slot": "agent:review:general",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "go-build-resolver",
+   "slot": "agent:build",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "go-reviewer",
+   "slot": "agent:review:stack",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "security-auditor",
+   "slot": "agent:security",
+   "sourceId": "curated"
+  }
+ ],
+ "custom": [
+  "model-effort-governance"
+ ]
+}

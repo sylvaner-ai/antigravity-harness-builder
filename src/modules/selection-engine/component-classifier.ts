@@ -221,7 +221,7 @@ const STACK_PREFIXES: Record<string, { anyOf: string[]; level: 2 | 3 }> = {
   angular: { anyOf: ['angular'], level: 3 }, nestjs: { anyOf: ['nestjs'], level: 3 }, django: { anyOf: ['django'], level: 3 },
   fastapi: { anyOf: ['fastapi'], level: 3 }, flask: { anyOf: ['flask'], level: 3 }, laravel: { anyOf: ['laravel'], level: 3 },
   rails: { anyOf: ['rails'], level: 3 }, springboot: { anyOf: ['springboot'], level: 3 }, quarkus: { anyOf: ['quarkus'], level: 3 },
-  jpa: { anyOf: ['jpa', 'hibernate', 'springboot'], level: 3 }, mybatis: { anyOf: ['mybatis'], level: 3 },
+  jpa: { anyOf: ['jpa', 'hibernate'], level: 3 }, mybatis: { anyOf: ['mybatis'], level: 3 },
   prisma: { anyOf: ['prisma'], level: 3 }, postgres: { anyOf: ['postgresql'], level: 3 }, mysql: { anyOf: ['mysql', 'mariadb'], level: 3 },
   redis: { anyOf: ['redis'], level: 3 }, clickhouse: { anyOf: ['clickhouse'], level: 3 }, docker: { anyOf: ['docker', 'dockercompose'], level: 3 },
   kubernetes: { anyOf: ['kubernetes'], level: 3 }, bun: { anyOf: ['bun'], level: 3 }, vite: { anyOf: ['vite'], level: 3 },
@@ -305,7 +305,8 @@ const ECC_AGENTS: Record<string, Entry> = {
   architect: { slot: 'agent:architect', tier: 'standard' },
   'code-architect': { slot: 'agent:architect', tier: 'standard' },
   planner: { slot: 'agent:planner', tier: 'extended' },
-  'database-reviewer': { slot: 'agent:database', tier: 'standard', requires: [req.db] },
+  // Agent spécialisé PostgreSQL : inutile (et trompeur) pour un projet MySQL, SQLite ou autre
+  'database-reviewer': { slot: 'agent:database', tier: 'standard', requires: [req.stack('postgresql')] },
   'e2e-runner': { slot: 'agent:e2e', tier: 'standard', requires: [req.e2e] },
   'build-error-resolver': { slot: 'agent:build', tier: 'standard', specificity: 1 },
   'tdd-guide': { slot: 'agent:tdd', tier: 'extended' },
