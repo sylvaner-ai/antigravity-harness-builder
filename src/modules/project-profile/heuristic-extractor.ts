@@ -91,6 +91,8 @@ const ORMS: Detector[] = [
   { label: 'SQLModel', pattern: /\bsqlmodel\b/ },
   { label: 'Alembic', pattern: /\balembic\b/ },
   { label: 'Hibernate', pattern: /\bhibernate\b/ },
+  { label: 'JPA', pattern: /\bjpa\b|\bspring data\b/ },
+  { label: 'MyBatis', pattern: /\bmybatis\b/ },
   { label: 'GORM', pattern: /\bgorm\b/ },
 ];
 

@@ -138,8 +138,10 @@ model: pro
       expect(split.parsedFrontmatter?.trigger).toBe('always_on');
 
       // Vérifie les exigences fonctionnelles du protocole pré-tâche :
-      // 1. Question systématique avant chaque tâche pour un ratio coût/performance optimal
-      expect(govRule!.content).toMatch(/avant d['’]exécuter chaque tâche|avant toute tâche/i);
+      // 1. Arbitrage proportionné : une seule fois, avant d'exécuter une tâche longue ou critique
+      expect(govRule!.content).toMatch(/avant d['’]exécuter la tâche/i);
+      expect(govRule!.content).toMatch(/tâche courte/i);
+      expect(govRule!.content).toMatch(/une seule fois/i);
       expect(govRule!.content).toMatch(/coût\s*\/\s*performance/i);
       // 2. Exécution automatique si le couple optimal est identique au couple paramétré
       expect(govRule!.content).toMatch(/identique|même que celui qui est paramétré/i);
@@ -242,8 +244,12 @@ model: pro
       const govFile = pkg.files.find(
         (f) => f.relativePath === '.agents/rules/model-effort-governance.md'
       );
-      expect(govFile?.content).toContain('`fast-changelog-helper`');
-      expect(govFile?.content).toContain('`Flash — Effort Low`');
+      // La règle permanente reste courte : le couple par sous-agent est publié dans docs/ORCHESTRATION.md
+      expect(govFile?.content).not.toContain('`fast-changelog-helper`');
+      expect(Buffer.byteLength(govFile!.content, 'utf8')).toBeLessThan(3_500);
+      const orch = pkg.files.find((f) => f.relativePath === 'docs/ORCHESTRATION.md');
+      expect(orch?.content).toContain('`fast-changelog-helper`');
+      expect(orch?.content).toContain('Flash — Effort Low');
     });
 
     it('embarque automatiquement la gouvernance Modèle / Effort sans jamais modifier les agents existants de l’utilisateur, dans tous les formats de déploiement (ZIP, Base64 compact, Markdown allégé, Upgrade)', async () => {

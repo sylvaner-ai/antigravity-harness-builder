@@ -1,0 +1,393 @@
+{
+ "total": 60,
+ "bySource": {
+  "cloudflare-security-audit": 1,
+  "curated": 5,
+  "dietrichgebert-ponytail": 4,
+  "ecc-official": 33,
+  "emil-kowalski-skills": 4,
+  "obra-superpowers": 13
+ },
+ "selected": [
+  {
+   "kind": "RULE",
+   "slug": "api-security-guards",
+   "slot": "rule:pack:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-code-review",
+   "slot": "rule:common:code-review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-coding-style",
+   "slot": "rule:common:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-development-workflow",
+   "slot": "rule:common:development-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-git-workflow",
+   "slot": "rule:common:git-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-security",
+   "slot": "rule:common:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-testing",
+   "slot": "rule:common:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "plan-first-and-anti-omissions",
+   "slot": "rule:pack:workflow",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "python-coding-style",
+   "slot": "rule:stack:python:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "python-patterns",
+   "slot": "rule:stack:python:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "python-security",
+   "slot": "rule:stack:python:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "python-testing",
+   "slot": "rule:stack:python:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "ui-craft-and-5-states",
+   "slot": "rule:pack:ui-craft",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-coding-style",
+   "slot": "rule:web:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-patterns",
+   "slot": "rule:web:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-security",
+   "slot": "rule:web:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-testing",
+   "slot": "rule:web:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "accessibility",
+   "slot": "skill:ui:accessibility",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "agent-security-hardening",
+   "slot": "skill:domain:agentic:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "animate",
+   "slot": "skill:ui:animation:build",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "api-design",
+   "slot": "skill:backend:api-design",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "brainstorming",
+   "slot": "skill:workflow:design-exploration",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "break-ui",
+   "slot": "skill:ui:stress-test",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "cost-aware-llm-pipeline",
+   "slot": "skill:domain:agentic:llm-cost",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "database-migrations",
+   "slot": "skill:database:migrations",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "deployment-patterns",
+   "slot": "skill:ops:deployment",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "design-system",
+   "slot": "skill:ui:design-system",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "dispatching-parallel-agents",
+   "slot": "skill:workflow:parallel-agents",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "docker-patterns",
+   "slot": "skill:stack:docker:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "emil-design-eng",
+   "slot": "skill:ui:design-engineering",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "executing-plans",
+   "slot": "skill:workflow:plan-execution",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "fastapi-patterns",
+   "slot": "skill:stack:fastapi:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "finishing-a-development-branch",
+   "slot": "skill:workflow:branch-finish",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail",
+   "slot": "skill:simplicity:mode",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-audit",
+   "slot": "skill:simplicity:audit",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-debt",
+   "slot": "skill:simplicity:debt",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-review",
+   "slot": "skill:simplicity:review",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "postgres-patterns",
+   "slot": "skill:stack:postgres:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "python-patterns",
+   "slot": "skill:stack:python:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "python-testing",
+   "slot": "skill:stack:python:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "receiving-code-review",
+   "slot": "skill:workflow:review-reception",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "requesting-code-review",
+   "slot": "skill:workflow:review-request",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "review-animations",
+   "slot": "skill:ui:animation:review",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-audit",
+   "slot": "skill:security:audit",
+   "sourceId": "cloudflare-security-audit"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-review",
+   "slot": "skill:security:review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "subagent-driven-development",
+   "slot": "skill:workflow:subagent-development",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "systematic-debugging",
+   "slot": "skill:workflow:debugging",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "test-driven-development",
+   "slot": "skill:workflow:tdd",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-git-worktrees",
+   "slot": "skill:workflow:worktrees",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-superpowers",
+   "slot": "skill:workflow:bootstrap",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "verification-before-completion",
+   "slot": "skill:workflow:verification",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "writing-plans",
+   "slot": "skill:workflow:planning",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "architect",
+   "slot": "agent:architect",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "build-error-resolver",
+   "slot": "agent:build",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "code-reviewer",
+   "slot": "agent:review:general",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "database-reviewer",
+   "slot": "agent:database",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "fastapi-reviewer",
+   "slot": "agent:review:stack",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "rag-pipeline-reviewer",
+   "slot": "agent:domain:rag",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "security-auditor",
+   "slot": "agent:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "ui-craft-reviewer",
+   "slot": "agent:review:ui",
+   "sourceId": "curated"
+  }
+ ],
+ "custom": [
+  "model-effort-governance"
+ ]
+}

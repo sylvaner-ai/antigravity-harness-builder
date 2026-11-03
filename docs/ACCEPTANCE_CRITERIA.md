@@ -43,5 +43,5 @@
 - [x] **AC-M5-02** : Script d'installation automatisé `deploy.sh` non destructif avec sauvegarde automatique sous `.agents.backup-<timestamp>/`.
 - [x] **AC-M5-03** : Guide Markdown prêt à l'emploi (`UPGRADE_PROMPT.md`) pour la mise à niveau assistée.
 - [x] **AC-M5-04** : Gouvernance centralisée Modèle / Niveau d'effort : aucun champ `model` figé dans le frontmatter YAML des sous-agents, matrice décisionnelle Coût / Performance T1 à T4 et gate pré-tâche.
-- [x] **AC-M5-05** : Consignes de recommandation proactive des commandes slash (`/goal`, `/plan`, `/teamwork`, `/compact`, `/learn`, `/boost`) intégrées dans `AGENTS.md` et `docs/ORCHESTRATION.md`.
+- [x] **AC-M5-05** : Consignes de recommandation proactive des commandes slash (`/plan`, `/goal`, `/teamwork`, `/boost`, `/grill-me`, `/learn`, issues de la documentation officielle ; `/compact` n'y figure pas) intégrées dans `AGENTS.md` et `docs/ORCHESTRATION.md`.
 - [x] **AC-M5-06** : Isolation multi-tenant et protection des routes par middleware avec validation de session cookie.

@@ -102,7 +102,7 @@ flowchart LR
     - **T4 — Architecture, Sécurité & Critique :** `Pro — Effort High`
   - Gate d'arbitrage pré-tâche incitant l'agent à proposer le bon couple Modèle / Effort avant de démarrer une tâche.
 - **Recommandation Proactive des Commandes Slash :**
-  - Consigne intégrée dans `AGENTS.md` et `docs/ORCHESTRATION.md` enjoignant l'agent à recommander proactivement les commandes slash clés à l'utilisateur (`/goal`, `/plan`, `/teamwork`, `/compact`, `/learn`, `/boost`).
+  - Consigne intégrée dans `AGENTS.md` et `docs/ORCHESTRATION.md` enjoignant l'agent à recommander proactivement les commandes slash clés à l'utilisateur (`/plan`, `/goal`, `/teamwork`, `/boost`, `/grill-me`, `/learn`).
 
 ### 4.6 Module Catalogue Multi-Sources et Administration
 - **Synchronisation GitHub réelle :** Synchronisation résiliente de la bibliothèque officielle `affaan-m/ECC` en moins de 10 secondes avec gestion de cache et fallback local.

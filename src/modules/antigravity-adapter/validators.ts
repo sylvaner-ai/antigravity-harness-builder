@@ -144,7 +144,7 @@ export function validatePackagePathSafety(relativePath: string): ValidationIssue
   const isAllowedRule = /^\.agents\/rules\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(relativePath);
   const isAllowedAgent = /^\.agents\/agents\/[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(relativePath);
   const isAllowedSkill =
-    /^\.agents\/skills\/[a-z0-9]+(?:-[a-z0-9]+)*\/(?:SKILL\.md|(?:references|resources|examples)\/[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css))$/.test(
+    /^\.agents\/skills\/[a-z0-9]+(?:-[a-z0-9]+)*\/(?:SKILL\.md|(?:(?:references|resources|examples)\/)?[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css))$/.test(
       relativePath
     );
 

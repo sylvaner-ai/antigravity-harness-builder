@@ -241,7 +241,7 @@ while IFS= read -r rel; do
 done < "$WORK/installed.txt"
 
 if [ -d ".agents/workflows" ]; then
-  echo "ℹ Le dossier déprécié .agents/workflows/ existe : il n'a pas été modifié. À migrer vers .agents/skills/ si vous le souhaitez."
+  echo "ℹ Le dossier déprécié .agents/workflows/ existe : il n'a pas été modifié. Ces workflows ne sont plus exécutables dans Antigravity depuis le 19 octobre 2026 ; la commande /migrate-workflows les convertit en skills (.agents/skills/)."
 fi
 if [ "$((n_update + n_remove + n_conflict))" -gt 0 ] && command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   if ! git check-ignore -q .agents/.harness-backup/x 2>/dev/null; then

@@ -128,6 +128,8 @@ Votre mission est de vérifier la qualité de l'expérience utilisateur et de l'
       rawContent: secRuleContent,
       adaptedContent: secRuleContent,
       parsedMeta: {
+        sourceId: 'curated',
+        sourcePriority: 100,
         family: 'security',
         tags: ['security', 'owasp', 'zero-trust', 'api', 'zod', 'validation'],
         languages: ['typescript', 'javascript'],
@@ -155,6 +157,8 @@ Votre mission est de vérifier la qualité de l'expérience utilisateur et de l'
       rawContent: uiRuleContent,
       adaptedContent: uiRuleContent,
       parsedMeta: {
+        sourceId: 'curated',
+        sourcePriority: 100,
         family: 'design-engineering',
         tags: ['design-engineering', 'ui-polish', '5-states', 'accessibility', 'craft', 'wcag'],
         languages: ['typescript', 'javascript'],
@@ -182,6 +186,8 @@ Votre mission est de vérifier la qualité de l'expérience utilisateur et de l'
       rawContent: tddRuleContent,
       adaptedContent: tddRuleContent,
       parsedMeta: {
+        sourceId: 'curated',
+        sourcePriority: 100,
         family: 'testing',
         tags: ['tdd', 'anti-omissions', 'testing', 'verification', 'workflow', 'quality'],
         languages: [],
@@ -209,6 +215,8 @@ Votre mission est de vérifier la qualité de l'expérience utilisateur et de l'
       rawContent: secAuditorContent,
       adaptedContent: secAuditorContent,
       parsedMeta: {
+        sourceId: 'curated',
+        sourcePriority: 100,
         family: 'security',
         tags: ['security', 'auditor', 'owasp', 'zero-trust'],
         languages: [],
@@ -236,6 +244,8 @@ Votre mission est de vérifier la qualité de l'expérience utilisateur et de l'
       rawContent: uiReviewerContent,
       adaptedContent: uiReviewerContent,
       parsedMeta: {
+        sourceId: 'curated',
+        sourcePriority: 100,
         family: 'design-engineering',
         tags: ['design-engineering', 'ui-polish', 'craft', 'accessibility', 'reviewer'],
         languages: [],

@@ -167,6 +167,16 @@ export interface EccComponentParsedMeta {
   resourcesList: Array<{ relativeSubPath: string; content: string; sha256: string }>;
   skippedUnsafeFiles: string[];
   adaptationNotes: string[];
+  /** Source du catalogue multi-sources (id de catalog-sources.ts, ou 'curated'). */
+  sourceId?: string;
+  /** Priorité de la source au moment de l'indexation. */
+  sourcePriority?: number;
+  /** Module ECC d'appartenance (manifests/install-modules.json), quand la source est ECC. */
+  eccModule?: string;
+  /** Nombre de références à des mécanismes propres à Claude Code, compté sur le contenu brut. */
+  claudeReferences?: number;
+  /** Avertissements de sûreté non bloquants (ex. script distant exécuté). */
+  safetyWarnings?: string[];
 }
 
 /**

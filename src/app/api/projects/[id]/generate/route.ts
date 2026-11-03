@@ -72,6 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           adaptedContent: comp.adaptedContent,
           parsedMeta: comp.parsedMeta,
           compatibilityStatus: comp.compatibilityStatus,
+          compatibilityIssues: comp.compatibilityIssues,
           searchText: comp.searchText,
         });
       }

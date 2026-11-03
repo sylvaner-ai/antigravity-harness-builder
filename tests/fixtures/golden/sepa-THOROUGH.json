@@ -1,0 +1,648 @@
+{
+ "total": 102,
+ "bySource": {
+  "cloudflare-security-audit": 1,
+  "curated": 5,
+  "dietrichgebert-ponytail": 4,
+  "ecc-official": 65,
+  "emil-kowalski-skills": 14,
+  "obra-superpowers": 13
+ },
+ "selected": [
+  {
+   "kind": "RULE",
+   "slug": "api-security-guards",
+   "slot": "rule:pack:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-code-review",
+   "slot": "rule:common:code-review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-coding-style",
+   "slot": "rule:common:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-development-workflow",
+   "slot": "rule:common:development-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-git-workflow",
+   "slot": "rule:common:git-workflow",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-patterns",
+   "slot": "rule:common:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-performance",
+   "slot": "rule:common:performance",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-security",
+   "slot": "rule:common:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "common-testing",
+   "slot": "rule:common:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "plan-first-and-anti-omissions",
+   "slot": "rule:pack:workflow",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-coding-style",
+   "slot": "rule:stack:react:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-patterns",
+   "slot": "rule:stack:react:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-security",
+   "slot": "rule:stack:react:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "react-testing",
+   "slot": "rule:stack:react:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-coding-style",
+   "slot": "rule:stack:typescript:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-patterns",
+   "slot": "rule:stack:typescript:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-security",
+   "slot": "rule:stack:typescript:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "typescript-testing",
+   "slot": "rule:stack:typescript:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "ui-craft-and-5-states",
+   "slot": "rule:pack:ui-craft",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-coding-style",
+   "slot": "rule:web:coding-style",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-design-quality",
+   "slot": "rule:web:design-quality",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-patterns",
+   "slot": "rule:web:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-performance",
+   "slot": "rule:web:performance",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-security",
+   "slot": "rule:web:security",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "RULE",
+   "slug": "web-testing",
+   "slot": "rule:web:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ai-regression-testing",
+   "slot": "skill:testing:ai-regression",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "animate",
+   "slot": "skill:ui:animation:build",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "animation-performance",
+   "slot": "skill:ui:animation:performance",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "animation-vocabulary",
+   "slot": "skill:ui:animation:vocabulary",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "api-design",
+   "slot": "skill:backend:api-design",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "apple-design",
+   "slot": "skill:ui:apple-design",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "architecture-decision-records",
+   "slot": "skill:architecture:adr",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ask-sonner",
+   "slot": "skill:stack:react:toasts",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "backend-patterns",
+   "slot": "skill:backend:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "brainstorming",
+   "slot": "skill:workflow:design-exploration",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "break-ui",
+   "slot": "skill:ui:stress-test",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "browser-qa",
+   "slot": "skill:ui:browser-qa",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "change-impact",
+   "slot": "skill:quality:change-impact",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "click-path-audit",
+   "slot": "skill:ui:click-path-audit",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "code-tour",
+   "slot": "skill:docs:code-tour",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "coding-standards",
+   "slot": "skill:quality:coding-standards",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "contract-first",
+   "slot": "skill:backend:contract-first",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "database-migrations",
+   "slot": "skill:database:migrations",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "deployment-patterns",
+   "slot": "skill:ops:deployment",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "design-system",
+   "slot": "skill:ui:design-system",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "dispatching-parallel-agents",
+   "slot": "skill:workflow:parallel-agents",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "docker-patterns",
+   "slot": "skill:stack:docker:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "emil-design-eng",
+   "slot": "skill:ui:design-engineering",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "error-handling",
+   "slot": "skill:quality:error-handling",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "executing-plans",
+   "slot": "skill:workflow:plan-execution",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "find-animation-opportunities",
+   "slot": "skill:ui:animation:opportunities",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "finishing-a-development-branch",
+   "slot": "skill:workflow:branch-finish",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "frontend-a11y",
+   "slot": "skill:ui:accessibility",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "frontend-patterns",
+   "slot": "skill:frontend:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "git-workflow",
+   "slot": "skill:workflow:git",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "hexagonal-architecture",
+   "slot": "skill:architecture:hexagonal",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "improve-animations",
+   "slot": "skill:ui:animation:audit",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "mobile-native",
+   "slot": "skill:ui:mobile-web",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "nextjs-turbopack",
+   "slot": "skill:stack:nextjs:turbopack",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "pick-ui-library",
+   "slot": "skill:ui:library-choice",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail",
+   "slot": "skill:simplicity:mode",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-audit",
+   "slot": "skill:simplicity:audit",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-debt",
+   "slot": "skill:simplicity:debt",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "ponytail-review",
+   "slot": "skill:simplicity:review",
+   "sourceId": "dietrichgebert-ponytail",
+   "methodology": "ponytail"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "postgres-patterns",
+   "slot": "skill:stack:postgres:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "prisma-patterns",
+   "slot": "skill:stack:prisma:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "production-audit",
+   "slot": "skill:ops:production-audit",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "prototype",
+   "slot": "skill:ui:prototype",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "react-patterns",
+   "slot": "skill:stack:react:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "react-performance",
+   "slot": "skill:stack:react:performance",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "react-testing",
+   "slot": "skill:stack:react:testing",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "receiving-code-review",
+   "slot": "skill:workflow:review-reception",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "remove-animations",
+   "slot": "skill:ui:animation:removal",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "requesting-code-review",
+   "slot": "skill:workflow:review-request",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "review-animations",
+   "slot": "skill:ui:animation:review",
+   "sourceId": "emil-kowalski-skills"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-audit",
+   "slot": "skill:security:audit",
+   "sourceId": "cloudflare-security-audit"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "security-review",
+   "slot": "skill:security:review",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "subagent-driven-development",
+   "slot": "skill:workflow:subagent-development",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "systematic-debugging",
+   "slot": "skill:workflow:debugging",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "test-driven-development",
+   "slot": "skill:workflow:tdd",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "typescript-patterns",
+   "slot": "skill:stack:typescript:patterns",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-git-worktrees",
+   "slot": "skill:workflow:worktrees",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "using-superpowers",
+   "slot": "skill:workflow:bootstrap",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "verification-before-completion",
+   "slot": "skill:workflow:verification",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SKILL",
+   "slug": "writing-plans",
+   "slot": "skill:workflow:planning",
+   "sourceId": "obra-superpowers",
+   "methodology": "superpowers"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "a11y-architect",
+   "slot": "agent:a11y",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "architect",
+   "slot": "agent:architect",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "code-reviewer",
+   "slot": "agent:review:general",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "code-simplifier",
+   "slot": "agent:simplifier",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "database-reviewer",
+   "slot": "agent:database",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "doc-updater",
+   "slot": "agent:docs",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "performance-optimizer",
+   "slot": "agent:performance",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "planner",
+   "slot": "agent:planner",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "pr-test-analyzer",
+   "slot": "agent:test-analysis",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "react-build-resolver",
+   "slot": "agent:build",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "react-reviewer",
+   "slot": "agent:review:stack",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "refactor-cleaner",
+   "slot": "agent:refactor",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "security-auditor",
+   "slot": "agent:security",
+   "sourceId": "curated"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "silent-failure-hunter",
+   "slot": "agent:silent-failures",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "tdd-guide",
+   "slot": "agent:tdd",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "type-design-analyzer",
+   "slot": "agent:type-design",
+   "sourceId": "ecc-official"
+  },
+  {
+   "kind": "SUBAGENT",
+   "slug": "ui-craft-reviewer",
+   "slot": "agent:review:ui",
+   "sourceId": "curated"
+  }
+ ],
+ "custom": [
+  "model-effort-governance",
+  "project-documenso-signing-guard",
+  "project-sepa-iso20022-guard",
+  "project-storage-r2-guard"
+ ]
+}

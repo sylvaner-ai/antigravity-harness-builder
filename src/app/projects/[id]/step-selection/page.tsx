@@ -46,7 +46,7 @@ const ECC_DESCRIPTIONS_FR: Record<string, string> = {
 
   // Règles projet sur-mesure & Gouvernance automatique
   'model-effort-governance':
-    "Gouvernance centralisée du couple Modèle / Niveau d'effort (always_on) : avant chaque tâche, l'agent évalue le couple optimal coût/performance (exécution automatique si identique au réglage actif, demande avec un seul couple préconisé sinon — aucun modèle figé dans le YAML des sous-agents).",
+    "Gouvernance du couple Modèle / Niveau d'effort (always_on, environ 2,5 Ko) : pour une tâche longue ou critique, l'agent compare une seule fois le réglage actif au couple conseillé et propose un seul couple en cas d'écart net ; les tâches courtes s'exécutent sans commentaire — aucun modèle figé dans le YAML des sous-agents.",
   'project-design-system-tokens': 'Application stricte des tokens visuels (palette de couleurs, typographies, règles UX) du projet.',
   'project-security-compliance-guard': 'Application impérative des règles de conformité et des contraintes de sécurité spécifiques au projet.',
 

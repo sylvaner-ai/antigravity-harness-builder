@@ -61,8 +61,16 @@ export const SelectedComponentSchema = z.object({
   acceptedRationale: z.string().min(1),
   score: ScoreBreakdownSchema,
   family: z.string().optional(),
+  /** Fonction remplie par le composant (ex. skill:workflow:tdd). */
+  slot: z.string().optional(),
+  /** Source du catalogue (catalog-sources.ts) ou 'curated'. */
+  sourceId: z.string().optional(),
+  /** Méthodologie d'appartenance, le cas échéant. */
+  methodology: z.enum(['superpowers', 'ponytail']).optional(),
   dependencies: z.array(z.string()).default([]),
   adaptedContent: z.string(),
+  /** Fichiers d'accompagnement d'un skill (références, exemples), déjà contrôlés à l'indexation. */
+  resources: z.array(z.object({ relativeSubPath: z.string(), content: z.string() })).optional(),
   recommendedModelTier: RecommendedModelTierSchema.optional(),
   recommendedEffort: ReasoningEffortTierSchema.optional(),
   userModified: z.boolean().default(false),
@@ -84,6 +92,11 @@ export const RejectedComponentSchema = z.object({
     'DEDUPLICATED_FAMILY_OVERRIDDEN',
     'SECURITY_OR_SAFETY_REJECTION',
     'USER_EXCLUDED',
+    'PLATFORM_SPECIFIC_OR_META',
+    'NOT_APPLICABLE_TO_PROJECT',
+    'NO_FUNCTIONAL_SLOT',
+    'TIER_NOT_IN_PRESET',
+    'METHODOLOGY_DISABLED',
   ]),
   rawScore: z.number().default(0),
   supersededBySlug: z.string().optional(),

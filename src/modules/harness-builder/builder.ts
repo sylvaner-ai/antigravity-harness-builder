@@ -19,6 +19,8 @@ import {
   computeSha256,
 } from '../package-exporter/exporter';
 import { renderModelEffortGovernanceRuleBody } from '../package-exporter/governance-template';
+import { enforceAlwaysOnBudget, isReviewerSlug, normalizeDelegationDescription, restrictReviewerTools } from './context-budget';
+import { resolveComponentProvenance } from '../ecc-catalog/catalog-sources';
 import {
   DeterministicPackageInput,
   InputDocumentDigest,
@@ -113,14 +115,9 @@ export class HarnessBuilderService {
         glob: (rawFront.glob as string) ?? undefined,
       });
 
-      const isEmil = comp.sourceUrl?.includes('emilkowalski');
-      const isOwasp = comp.sourceUrl?.includes('OWASP');
-      const repoUrl = isEmil
-        ? 'https://github.com/emilkowalski/skills'
-        : isOwasp
-          ? 'https://github.com/OWASP/CheatSheetSeries'
-          : 'https://github.com/affaan-m/ECC';
-      const author = isEmil ? 'Emil Kowalski' : isOwasp ? 'OWASP Foundation' : 'Affaan Mustafa';
+      const prov = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
+      const repoUrl = prov.repositoryUrl;
+      const author = prov.author;
 
       selectedRules.push({
         slug: comp.slug,
@@ -131,7 +128,7 @@ export class HarnessBuilderService {
         originStatus: 'ecc_adapted',
         eccProvenance: {
           repositoryUrl: repoUrl,
-          commitSha: eccCommitSha,
+          commitSha: prov.commitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `rules/${comp.slug}.md`,
           sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/rules/${comp.slug}.md`,
@@ -202,25 +199,26 @@ export class HarnessBuilderService {
         license: comp.license ?? 'MIT',
       });
 
+      const skillProv = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
       selectedSkills.push({
         slug: comp.slug,
         frontmatter,
         markdownBody: split.body.trim(),
-        resources: [],
+        resources: (comp.resources ?? []).filter(
+          (r) => r.content.trim().length > 0 && /^(?:(?:references|resources|examples)\/)?[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/.test(r.relativeSubPath)
+        ),
         selectionRationale: comp.acceptedRationale,
         originStatus: 'ecc_adapted',
         eccProvenance: {
-          repositoryUrl: comp.sourceUrl?.includes('emilkowalski')
-            ? 'https://github.com/emilkowalski/skills'
-            : 'https://github.com/affaan-m/ECC',
-          commitSha: eccCommitSha,
+          repositoryUrl: skillProv.repositoryUrl,
+          commitSha: skillProv.commitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `skills/${comp.slug}/SKILL.md`,
           sourceUrl:
             comp.sourceUrl ??
             `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/skills/${comp.slug}/SKILL.md`,
           license: comp.license ?? 'MIT',
-          author: comp.sourceUrl?.includes('emilkowalski') ? 'Emil Kowalski' : 'Affaan Mustafa',
+          author: skillProv.author,
           adaptationNotes: ['Adapté vers les standards de compétences Google Antigravity'],
         },
       });
@@ -272,19 +270,19 @@ export class HarnessBuilderService {
       const split = splitMarkdownFrontmatter(comp.adaptedContent);
       const rawFront = split.parsedFrontmatter ?? {};
       const isReviewer = comp.slug.includes('reviewer') || comp.slug.includes('audit');
-      const isEmil = comp.sourceUrl?.includes('emilkowalski');
-      const isOwasp = comp.sourceUrl?.includes('OWASP');
-      const repoUrl = isEmil
-        ? 'https://github.com/emilkowalski/skills'
-        : isOwasp
-          ? 'https://github.com/OWASP/CheatSheetSeries'
-          : 'https://github.com/affaan-m/ECC';
-      const author = isEmil ? 'Emil Kowalski' : isOwasp ? 'OWASP Foundation' : 'Affaan Mustafa';
+      const prov = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
+      const repoUrl = prov.repositoryUrl;
+      const author = prov.author;
 
+      const eccTools =
+        (rawFront.tools as unknown as AntigravitySubagentTool[]) ??
+        (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']);
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: comp.slug,
-        description: (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`,
-        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']),
+        description: normalizeDelegationDescription(
+          (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`
+        ),
+        tools: isReviewer || isReviewerSlug(comp.slug) ? restrictReviewerTools(eccTools) : eccTools,
       });
 
       const inferredPair = inferRecommendedModelEffortPair({
@@ -319,7 +317,7 @@ export class HarnessBuilderService {
         originStatus: 'ecc_adapted',
         eccProvenance: {
           repositoryUrl: repoUrl,
-          commitSha: eccCommitSha,
+          commitSha: prov.commitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `agents/${comp.slug}.md`,
           sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/agents/${comp.slug}.md`,
@@ -338,10 +336,13 @@ export class HarnessBuilderService {
 
       const split = splitMarkdownFrontmatter(custom.content);
       const rawFront = split.parsedFrontmatter ?? {};
+      const customIsReviewer = isReviewerSlug(custom.slug);
+      const customTools =
+        (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? ['view_file', 'write_to_file', 'replace_file_content'];
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: custom.slug,
-        description: (rawFront.description as string) ?? custom.description,
-        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? ['view_file', 'write_to_file', 'replace_file_content'],
+        description: normalizeDelegationDescription((rawFront.description as string) ?? custom.description),
+        tools: customIsReviewer ? restrictReviewerTools(customTools) : customTools,
       });
 
       const customPair = inferRecommendedModelEffortPair({
@@ -355,7 +356,7 @@ export class HarnessBuilderService {
         roleTitle: custom.name,
         frontmatter,
         markdownBody: split.body.trim(),
-        isIndependentReviewer: false,
+        isIndependentReviewer: customIsReviewer,
         recommendedModelTier: customPair.recommendedModelTier,
         recommendedEffort: customPair.recommendedEffort,
         qualityCostRecommendation: customPair.qualityCostRecommendation,
@@ -392,7 +393,7 @@ export class HarnessBuilderService {
         frontmatter: {
           trigger: 'always_on',
           description:
-            "Évaluation obligatoire avant chaque tâche du couple optimal Modèle / Niveau d'effort et arbitrage coût/performance.",
+            "Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques ; aucune intervention sur les tâches courtes.",
         },
         markdownBody: renderModelEffortGovernanceRuleBody({
           projectName: safeProfile.projectName,
@@ -404,6 +405,10 @@ export class HarnessBuilderService {
         originStatus: 'project_custom',
       });
     }
+
+    // Plafonnement du contexte permanent : les règles en excès passent en `model_decision`
+    const budgeted = enforceAlwaysOnBudget(selectedRules, selection.presetMode);
+    selectedRules.splice(0, selectedRules.length, ...budgeted.rules);
 
     // --- 4. RÉSUMÉ DES CANDIDATS ÉCARTÉS ---
     const discardedCandidatesSummary = selection.rejectedComponents.map((r) => ({
