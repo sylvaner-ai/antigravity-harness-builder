@@ -54,6 +54,7 @@ export const projects = pgTable(
     name: text('name').notNull(),
     description: text('description').notNull().default(''),
     targetSurface: text('target_surface').$type<'APP' | 'IDE' | 'CLI'>().notNull().default('IDE'),
+    mode: text('mode').$type<'NEW' | 'UPGRADE'>().notNull().default('NEW'),
     status: text('status').$type<'ACTIVE' | 'ARCHIVED'>().notNull().default('ACTIVE'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -72,7 +73,7 @@ export const sourceDocuments = pgTable(
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
     role: text('role')
-      .$type<'SPECIFICATION' | 'DESIGN_SYSTEM' | 'SUPPLEMENTARY'>()
+      .$type<'SPECIFICATION' | 'DESIGN_SYSTEM' | 'SUPPLEMENTARY' | 'AUDIT_REPORT'>()
       .notNull(),
     originalName: text('original_name').notNull(),
     safeStoragePath: text('safe_storage_path').notNull(),
@@ -158,6 +159,7 @@ export interface EccComponentParsedMeta {
   adaptedTools?: string[];
   rawModel?: string;
   adaptedModel?: 'inherit' | 'flash' | 'pro';
+  recommendedEffort?: 'low' | 'medium' | 'high';
   recommendedRuleTrigger?: 'always_on' | 'model_decision' | 'glob' | 'manual';
   recommendedRuleGlobs?: string;
   dependencies: string[];

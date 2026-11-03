@@ -10,3 +10,6 @@ coverage/
 .DS_Store
 /data/
 tmp/
+*.tsbuildinfo
+*.backup*
+.*.backup*

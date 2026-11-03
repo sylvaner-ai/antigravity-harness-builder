@@ -44,10 +44,18 @@ export const ComponentOriginStatusSchema = z.enum([
 export type ComponentOriginStatus = z.infer<typeof ComponentOriginStatusSchema>;
 
 /**
- * Tiers de modèles natifs supportés dans le YAML des sous-agents Antigravity (§6.3).
+ * Tiers de modèles natifs reconnus lors de l'analyse/traduction de sources amont (ECC).
+ * Note : Non inscrits dans le frontmatter YAML des sous-agents générés ; utilisés uniquement
+ * pour dériver la recommandation centralisée du couple modèle/effort.
  */
 export const SubagentModelTierSchema = z.enum(['inherit', 'flash', 'pro']);
 export type SubagentModelTier = z.infer<typeof SubagentModelTierSchema>;
+
+/**
+ * Paliers de modèles cibles pour la gouvernance centralisée du couple Modèle / Niveau d'effort.
+ */
+export const RecommendedModelTierSchema = z.enum(['flash', 'pro']);
+export type RecommendedModelTier = z.infer<typeof RecommendedModelTierSchema>;
 
 /**
  * Niveaux d'effort de raisonnement recommandés (§6.3).
@@ -212,7 +220,9 @@ export const AntigravitySkillFrontmatterSchema = z
 export type AntigravitySkillFrontmatter = z.infer<typeof AntigravitySkillFrontmatterSchema>;
 
 /**
- * Schéma du frontmatter YAML d'un sous-agent (.agents/agents/<name>.md)
+ * Schéma du frontmatter YAML d'un sous-agent (.agents/agents/<name>.md).
+ * Aucun champ `model` n'est autorisé dans le YAML : le couple modèle/effort est gouverné
+ * de façon centralisée par `.agents/rules/model-effort-governance.md` et `docs/ORCHESTRATION.md`.
  */
 export const AntigravitySubagentFrontmatterSchema = z
   .object({
@@ -221,7 +231,6 @@ export const AntigravitySubagentFrontmatterSchema = z
       .string()
       .min(10, "La description d'un sous-agent doit permettre au planificateur de déléguer les tâches (min 10 caractères)."),
     tools: z.array(AntigravitySubagentToolSchema).default([]),
-    model: SubagentModelTierSchema.default('inherit'),
     commandExecutionPolicy: CommandExecutionPolicySchema.optional(),
     subagent: z.boolean().optional(),
     mainAgent: z.boolean().optional(),

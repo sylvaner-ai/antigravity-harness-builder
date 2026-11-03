@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
     const syncRecord = await service.synchronizeCatalog({
       forceResync: true,
       includeEmilKowalskiSkills: body.includeEmilKowalskiSkills !== false,
+      includeSuperpowersSkills: body.includeSuperpowersSkills !== false,
+      includeCloudflareSecuritySkills: body.includeCloudflareSecuritySkills !== false,
+      includePonytailSkills: body.includePonytailSkills !== false,
+      includeCuratedExcellence: true,
     });
 
     return NextResponse.json({

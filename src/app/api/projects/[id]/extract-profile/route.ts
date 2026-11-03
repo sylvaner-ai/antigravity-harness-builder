@@ -36,8 +36,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Sélection de l'adaptateur LLM (Gemini si clé fournie, sinon extraction heuristique mock)
     const apiKey = (body.geminiApiKey as string | undefined)?.trim() || process.env.GEMINI_API_KEY;
+    const model = (body.geminiModel as string | undefined)?.trim();
     const llm: LLMGatewayPort = apiKey
-      ? new GeminiLLMAdapter(apiKey)
+      ? new GeminiLLMAdapter(apiKey, model ? { fastModel: model } : undefined)
       : new MockLLMAdapter();
 
     const profileService = new ProjectProfileService(db, llm);

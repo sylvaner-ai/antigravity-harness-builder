@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
+import StepNavigation from '@/components/StepNavigation';
 
 interface FileItem {
   relativePath: string;
@@ -29,21 +30,31 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
         const artifacts = d.artifacts || [];
         if (latestGen && latestGen.manifestData) {
           setManifest(latestGen.manifestData);
-          const manifestFiles: FileItem[] = (latestGen.manifestData.filesInventory || []).map(
+          let manifestFiles: FileItem[] = (latestGen.manifestData.filesInventory || []).map(
             (inv: any) => {
               const matched = artifacts.find((a: any) => a.relativePath === inv.relativePath);
               return {
                 relativePath: inv.relativePath,
-                sizeBytes: inv.sizeBytes,
-                sha256: inv.sha256,
+                sizeBytes: inv.sizeBytes ?? matched?.sizeBytes ?? 0,
+                sha256: inv.sha256 || inv.sha256Hash || matched?.sha256Hash || '',
                 content:
                   matched?.content ||
-                  (inv.relativePath.endsWith('manifest.json')
+                  (inv.relativePath?.endsWith('manifest.json')
                     ? JSON.stringify(latestGen.manifestData, null, 2)
                     : ''),
               };
             }
           );
+
+          if (manifestFiles.length === 0 && artifacts.length > 0) {
+            manifestFiles = artifacts.map((a: any) => ({
+              relativePath: a.relativePath,
+              sizeBytes: a.sizeBytes ?? 0,
+              sha256: a.sha256Hash || a.sha256 || '',
+              content: a.content || '',
+            }));
+          }
+
           setFiles(manifestFiles);
           setSelectedFile(
             manifestFiles.find((f) => f.relativePath === 'START_HERE.md') ||
@@ -79,30 +90,25 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* Fil d'Ariane des étapes */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4 text-xs font-semibold">
-        <span className="text-slate-400">1. Import des Documents</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">2. Profil Extrait & Épistémique</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">3. Composition du Harnais</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-indigo-600 font-bold">4. Prévisualisation & Code</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">5. Téléchargement</span>
-      </div>
+      {/* Navigation cliquable entre les étapes */}
+      <StepNavigation
+        projectId={projectId}
+        currentStep={4}
+        hasProfile={true}
+        hasGeneration={true}
+      />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Étape 4 — Prévisualisation de l&apos;Arborescence & Code</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Inspection de l&apos;arborescence native Google Antigravity ({files.length} fichiers générés).
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Étape 4 — Prévisualisation &amp; Code</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Arborescence native certifiée Google Antigravity ({files.length} fichiers).
           </p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            ✓ 100 % Conforme Antigravity
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            ✓ Conforme Antigravity
           </span>
         </div>
       </div>
@@ -152,7 +158,7 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
                       {selectedFile?.relativePath}
                     </span>
                     <span className="text-xs text-slate-400 sm:ml-3 block sm:inline">
-                      SHA-256 : {selectedFile?.sha256.slice(0, 16)}...
+                      SHA-256 : {selectedFile?.sha256 ? selectedFile.sha256.slice(0, 16) + '...' : 'Inconnu'}
                     </span>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -180,15 +186,15 @@ export default function StepPreviewPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-slate-400">
-                  Validé par le moteur déterministe Antigravity
+              <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Déterministe &amp; explicable
                 </span>
                 <Link
                   href={`/projects/${projectId}/step-export`}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-medium rounded-lg text-xs shadow-xs transition-all"
                 >
-                  Étape Suivante : Téléchargement →
+                  Déploiement (Étape 5) →
                 </Link>
               </div>
             </div>

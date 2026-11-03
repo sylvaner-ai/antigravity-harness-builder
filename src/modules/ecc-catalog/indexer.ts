@@ -88,6 +88,56 @@ function extractFirstHeadingOrSentence(markdown: string, fallback: string): stri
   return fallback;
 }
 
+const LANG_PATTERNS: ReadonlyArray<{ regex: RegExp; canonical: string }> = Object.freeze([
+  { regex: /\btypescript\b/i, canonical: 'typescript' },
+  { regex: /\bjavascript\b/i, canonical: 'javascript' },
+  { regex: /\bpython\b/i, canonical: 'python' },
+  { regex: /\bgolang\b/i, canonical: 'go' },
+  { regex: /\brust\b/i, canonical: 'rust' },
+  { regex: /\bjava\b/i, canonical: 'java' },
+  { regex: /\bkotlin\b/i, canonical: 'kotlin' },
+  { regex: /\bswift\b/i, canonical: 'swift' },
+  { regex: /\bcsharp\b/i, canonical: 'csharp' },
+  { regex: /\bphp\b/i, canonical: 'php' },
+  { regex: /\bruby\b/i, canonical: 'ruby' },
+  { regex: /\bsql\b/i, canonical: 'sql' },
+  { regex: /\bpostgres(?:ql)?\b/i, canonical: 'postgresql' },
+]);
+
+const FW_PATTERNS: ReadonlyArray<{ regex: RegExp; canonical: string }> = Object.freeze([
+  { regex: /\bnext(?:\.js|js)\b/i, canonical: 'nextjs' },
+  { regex: /\breact\b/i, canonical: 'react' },
+  { regex: /\btailwind(?:css)?\b/i, canonical: 'tailwindcss' },
+  { regex: /\bvue\b/i, canonical: 'vue' },
+  { regex: /\bnuxt\b/i, canonical: 'nuxt' },
+  { regex: /\bangular\b/i, canonical: 'angular' },
+  { regex: /\bdjango\b/i, canonical: 'django' },
+  { regex: /\bfastapi\b/i, canonical: 'fastapi' },
+  { regex: /\bspring\b/i, canonical: 'spring' },
+  { regex: /\bflutter\b/i, canonical: 'flutter' },
+  { regex: /\bplaywright\b/i, canonical: 'playwright' },
+  { regex: /\bvitest\b/i, canonical: 'vitest' },
+  { regex: /\bdocker\b/i, canonical: 'docker' },
+]);
+
+const DOMAIN_TAGS: ReadonlyArray<string> = Object.freeze([
+  'security',
+  'testing',
+  'tdd',
+  'architecture',
+  'database',
+  'api',
+  'backend',
+  'frontend',
+  'accessibility',
+  'a11y',
+  'design-system',
+  'ci-cd',
+  'devops',
+  'review',
+  'performance',
+]);
+
 function inferTagsAndStack(text: string, family?: string): {
   tags: string[];
   languages: string[];
@@ -100,72 +150,19 @@ function inferTagsAndStack(text: string, family?: string): {
 
   if (family) tags.add(family.toLowerCase());
 
-  const langKeywords: Record<string, string> = {
-    typescript: 'typescript',
-    javascript: 'javascript',
-    python: 'python',
-    golang: 'go',
-    'go ': 'go',
-    rust: 'rust',
-    java: 'java',
-    kotlin: 'kotlin',
-    swift: 'swift',
-    csharp: 'csharp',
-    php: 'php',
-    ruby: 'ruby',
-    sql: 'sql',
-    postgresql: 'postgresql',
-    postgres: 'postgresql',
-  };
-
-  const fwKeywords: Record<string, string> = {
-    'next.js': 'nextjs',
-    nextjs: 'nextjs',
-    react: 'react',
-    tailwind: 'tailwindcss',
-    vue: 'vue',
-    nuxt: 'nuxt',
-    angular: 'angular',
-    django: 'django',
-    fastapi: 'fastapi',
-    spring: 'spring',
-    flutter: 'flutter',
-    playwright: 'playwright',
-    vitest: 'vitest',
-    docker: 'docker',
-  };
-
-  const domainTags = [
-    'security',
-    'testing',
-    'tdd',
-    'architecture',
-    'database',
-    'api',
-    'backend',
-    'frontend',
-    'accessibility',
-    'a11y',
-    'design-system',
-    'ci-cd',
-    'devops',
-    'review',
-    'performance',
-  ];
-
-  for (const [kw, canonical] of Object.entries(langKeywords)) {
-    if (lower.includes(kw)) {
+  for (const { regex, canonical } of LANG_PATTERNS) {
+    if (regex.test(lower)) {
       languages.add(canonical);
       tags.add(canonical);
     }
   }
-  for (const [kw, canonical] of Object.entries(fwKeywords)) {
-    if (lower.includes(kw)) {
+  for (const { regex, canonical } of FW_PATTERNS) {
+    if (regex.test(lower)) {
       frameworks.add(canonical);
       tags.add(canonical);
     }
   }
-  for (const tag of domainTags) {
+  for (const tag of DOMAIN_TAGS) {
     if (lower.includes(tag)) {
       tags.add(tag);
     }
@@ -348,7 +345,8 @@ export function parseAndQualifyEccRepositoryEntries(
           languages: inferred.languages,
           frameworks: inferred.frameworks,
           adaptedTools: adapted.frontmatter.tools,
-          adaptedModel: adapted.frontmatter.model,
+          adaptedModel: adapted.recommendedModelTier,
+          recommendedEffort: adapted.recommendedEffort,
           dependencies: [],
           hasResources: false,
           resourcesList: [],
@@ -452,7 +450,7 @@ export function parseAndQualifyEccRepositoryEntries(
     for (const sub of subEntries) {
       const subRel = sub.relativePath.slice(prefix.length);
       if (
-        /^(?:references|resources|examples)\/[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/.test(
+        /^(?:(?:references|resources|examples)\/)?[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/i.test(
           subRel
         )
       ) {

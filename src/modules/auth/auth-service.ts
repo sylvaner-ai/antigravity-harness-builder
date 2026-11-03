@@ -161,4 +161,37 @@ export class AuthService {
       }
     }
   }
+
+  /**
+   * Génère un jeton signé temporaire pour sécuriser l'export du script deploy.sh
+   */
+  generateDeploymentToken(projectId: string, ttlHours = 48): string {
+    const expiresAt = Date.now() + ttlHours * 3600 * 1000;
+    const secret = process.env.SESSION_SECRET || 'ahb-deployment-salt-secret-key-2026';
+    const payload = `${projectId}:${expiresAt}`;
+    const hmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return `${expiresAt}.${hmac}`;
+  }
+
+  /**
+   * Vérifie la validité et la signature du jeton de déploiement en temps constant
+   */
+  verifyDeploymentToken(projectId: string, token: string): boolean {
+    if (!token || typeof token !== 'string') return false;
+    const parts = token.split('.');
+    if (parts.length !== 2) return false;
+    const expiresAtStr = parts[0];
+    const signature = parts[1];
+    if (!expiresAtStr || !signature) return false;
+    const expiresAt = Number(expiresAtStr);
+    if (!expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
+      return false; // Expiré ou invalide
+    }
+    const secret = process.env.SESSION_SECRET || 'ahb-deployment-salt-secret-key-2026';
+    const payload = `${projectId}:${expiresAt}`;
+    const expectedHmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+    if (signature.length !== expectedHmac.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expectedHmac, 'hex'));
+  }
 }

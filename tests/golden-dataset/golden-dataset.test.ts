@@ -191,7 +191,6 @@ tools:
   - view_file
   - grep_search
   - find_by_name
-model: pro
 ---
 # Architecte Logiciel Senior
 
@@ -226,7 +225,6 @@ tools:
   - view_file
   - grep_search
   - find_by_name
-model: pro
 ---
 # Auditeur de Sécurité
 
@@ -262,7 +260,6 @@ tools:
   - write_to_file
   - replace_file_content
   - run_command
-model: flash
 ---
 # Spécialiste QA
 
@@ -278,6 +275,7 @@ Exécutez la suite de tests et assurez une couverture complète des critères d 
           resourcesList: [],
           skippedUnsafeFiles: [],
           adaptationNotes: [],
+          adaptedModel: 'flash',
         },
         compatibilityStatus: 'AUTO_VALIDATED',
         searchText: 'qa testing automation vitest playwright',
@@ -354,11 +352,12 @@ description: Procédures et conventions de migrations de schéma de base de donn
     expect(report.axes.relevance.passed).toBe(true);
     expect(report.axes.consistency.passed).toBe(true);
 
-    // Vérifie la présence du plan d'orchestration multi-phases
+    // Vérifie la présence du plan d'orchestration multi-phases et de la gouvernance Modèle / Effort
     const orchDoc = pkg.files.find((f) => f.relativePath === 'docs/ORCHESTRATION.md');
     expect(orchDoc).toBeDefined();
-    expect(orchDoc!.content).toContain('Politique d\'Orchestration');
-    expect(orchDoc!.content).toContain('Séparation Modèle / Niveau d\'Effort');
+    expect(orchDoc!.content).toContain("Politique d'Orchestration");
+    expect(orchDoc!.content).toContain("Gouvernance Centralisée du Couple Modèle / Niveau d'Effort");
+    expect(orchDoc!.content).toContain('.agents/rules/model-effort-governance.md');
   });
 
   it('Cas 3 : Application avec Design System Riche — Vérifie les tokens et les règles d accessibilité', async () => {

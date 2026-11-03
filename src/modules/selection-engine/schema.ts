@@ -1,8 +1,28 @@
 import { z } from 'zod';
-import { AntigravitySurfaceSchema } from '../antigravity-adapter/schema';
+import {
+  AntigravitySurfaceSchema,
+  ReasoningEffortTierSchema,
+  RecommendedModelTierSchema,
+} from '../antigravity-adapter/schema';
 
 export const PresetModeSchema = z.enum(['MINIMAL', 'BALANCED', 'THOROUGH']);
 export type PresetMode = z.infer<typeof PresetModeSchema>;
+
+/**
+ * Packs d'Excellence activables pour garantir zéro faille, zéro défaut visuel et rigueur absolue.
+ */
+export const ExcellencePackSchema = z.enum([
+  'SECURITY_HARDENED',     // OWASP, Zero-Trust, Zod boundaries, requêtes paramétrées
+  'DESIGN_CRAFT_POLISH',   // Règle des 5 états UI, Emil Kowalski polish, tokens stricts, WCAG AA
+  'EXTREME_TDD_ANTI_BUG',  // Red-Green-Refactor, couverture >80%, checklist pré-commit
+]);
+export type ExcellencePack = z.infer<typeof ExcellencePackSchema>;
+
+export const ALL_EXCELLENCE_PACKS: ExcellencePack[] = [
+  'SECURITY_HARDENED',
+  'DESIGN_CRAFT_POLISH',
+  'EXTREME_TDD_ANTI_BUG',
+];
 
 export const ComponentOriginSchema = z.enum(['ECC_ADAPTED', 'PROJECT_CUSTOM']);
 export type ComponentOrigin = z.infer<typeof ComponentOriginSchema>;
@@ -20,6 +40,8 @@ export const ScoreBreakdownSchema = z.object({
   domainTagMatch: z.number().default(0),
   architectureSecurityMatch: z.number().default(0),
   coreBaseBonus: z.number().default(0),
+  excellenceBonus: z.number().default(0),
+  synergyBonus: z.number().default(0),
   matchingKeywords: z.array(z.string()).default([]),
 });
 export type ScoreBreakdown = z.infer<typeof ScoreBreakdownSchema>;
@@ -41,6 +63,8 @@ export const SelectedComponentSchema = z.object({
   family: z.string().optional(),
   dependencies: z.array(z.string()).default([]),
   adaptedContent: z.string(),
+  recommendedModelTier: RecommendedModelTierSchema.optional(),
+  recommendedEffort: ReasoningEffortTierSchema.optional(),
   userModified: z.boolean().default(false),
 });
 export type SelectedComponent = z.infer<typeof SelectedComponentSchema>;
@@ -85,6 +109,7 @@ export type CustomComponentSpec = z.infer<typeof CustomComponentSpecSchema>;
 export const SelectionResultSchema = z.object({
   presetMode: PresetModeSchema,
   targetSurface: AntigravitySurfaceSchema,
+  excellencePacks: z.array(ExcellencePackSchema).default(ALL_EXCELLENCE_PACKS),
   selectedComponents: z.array(SelectedComponentSchema),
   rejectedComponents: z.array(RejectedComponentSchema),
   customComponents: z.array(CustomComponentSpecSchema),

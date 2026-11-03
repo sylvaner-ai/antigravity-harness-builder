@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import StepNavigation from '@/components/StepNavigation';
 import { ProjectProfile } from '../../../../modules/project-profile/schema';
 
 export default function StepProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -10,6 +11,7 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
 
   const [profile, setProfile] = useState<ProjectProfile | null>(null);
+  const [hasGeneration, setHasGeneration] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +96,15 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
   };
 
   useEffect(() => {
+    fetch(`/api/projects/${projectId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.generations && d.generations.length > 0) {
+          setHasGeneration(true);
+        }
+      })
+      .catch(() => {});
+
     fetch(`/api/projects/${projectId}/profile`)
       .then((r) => r.json())
       .then((d) => {
@@ -133,26 +144,26 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
     switch (status) {
       case 'explicit':
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Source explicite
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Explicite
           </span>
         );
       case 'deduced':
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            Déduction ({confidence ? `Confiance: ${confidence}` : 'Moyenne'})
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            Déduit {confidence ? `(${confidence})` : ''}
           </span>
         );
       case 'hypothesis':
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-            Hypothèse provisoire
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+            Hypothèse
           </span>
         );
       case 'missing_or_contradictory':
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            Manquant / Contradiction
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+            À trancher
           </span>
         );
       default:
@@ -161,45 +172,39 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
   };
 
   if (loading) {
-    return <div className="text-center py-16 text-slate-500">Chargement du profil...</div>;
+    return <div className="text-center py-16 text-slate-400 text-sm">Chargement du profil...</div>;
   }
 
   if (error || !profile) {
     return (
       <div className="max-w-2xl mx-auto text-center py-12 bg-white rounded-xl border border-slate-200 p-8">
-        <p className="text-red-600 text-sm">{error || 'Profil manquant'}</p>
+        <p className="text-rose-600 text-sm">{error || 'Profil manquant'}</p>
         <Link
           href={`/projects/${projectId}/step-import`}
-          className="mt-4 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-800"
+          className="mt-4 inline-block text-xs font-semibold text-indigo-600 hover:text-indigo-800"
         >
-          ← Retourner à l étape d import pour relancer l analyse
+          ← Retourner à l'étape d'import
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Fil d'Ariane des étapes */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4 text-xs font-semibold">
-        <span className="text-slate-400">1. Import des Documents</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-indigo-600 font-bold">2. Profil Extrait & Épistémique</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">3. Composition du Harnais</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">4. Prévisualisation & Code</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">5. Téléchargement</span>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Navigation cliquable entre les étapes */}
+      <StepNavigation
+        projectId={projectId}
+        currentStep={2}
+        hasProfile={true}
+        hasGeneration={hasGeneration}
+      />
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
-          Étape 2 — Profil Extrait & Épistémique ({profile.projectName})
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          Étape 2 — Profil &amp; Stack Technique ({profile.projectName})
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Chaque élément a été catégorisé selon son statut épistémique (§3.3 du cahier des charges).
-          Vérifiez, modifiez ou levez les hypothèses avant la composition du harnais.
+        <p className="text-xs text-slate-500 mt-1">
+          Vérifiez la stack technique et validez les choix d'architecture avant la composition du harnais.
         </p>
       </div>
 
@@ -343,26 +348,26 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
         const pendingCount = uncertaintiesList.filter((u) => !u.isResolved).length;
 
         return (
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-base font-semibold text-slate-900">
-                  Registre des Incertitudes, Manques &amp; Contradictions
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Points d'Arbitrage &amp; Décisions
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Arbitrage humain : confirmez ou personnalisez chaque décision pour lever toute incertitude avant génération (consigné dans <code>docs/ASSUMPTIONS.md</code>).
+                  Validez les arbitrages techniques (consignés dans <code>docs/ASSUMPTIONS.md</code>).
                 </p>
               </div>
               <div>
                 <span
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                  className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
                     pendingCount === 0
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}
                 >
                   {pendingCount === 0
-                    ? '✓ 0 incertitude en suspens'
+                    ? '✓ Tous les points sont validés'
                     : `${pendingCount} arbitrage(s) requis`}
                 </span>
               </div>
@@ -371,15 +376,15 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
             {/* Bannière d'état */}
             {uncertaintiesList.length > 0 && (
               pendingCount === 0 ? (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-between">
-                  <span className="font-medium flex items-center gap-1.5">
-                    ✓ Toutes les incertitudes ({uncertaintiesList.length}/{uncertaintiesList.length}) ont été arbitrées et validées. Le harnais sera généré sans ambiguïté résiduelle.
+                <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-between">
+                  <span className="font-medium">
+                    ✓ Tous les points d'arbitrage ({uncertaintiesList.length}/{uncertaintiesList.length}) ont été validés.
                   </span>
                 </div>
               ) : (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center justify-between">
+                <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center justify-between">
                   <span>
-                    Il reste <strong>{pendingCount}</strong> point(s) en suspens. Vous pouvez valider directement le repli par défaut ou saisir une décision d&apos;architecture personnalisée.
+                    <strong>{pendingCount}</strong> décision(s) en suspens. Validez le repli ou saisissez votre choix.
                   </span>
                 </div>
               )
@@ -543,17 +548,17 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
       <div className="flex items-center justify-between pt-4 border-t border-slate-200">
         <Link
           href={`/projects/${projectId}/step-import`}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          className="text-xs font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Retour à l import
+          ← Retour à l'import
         </Link>
 
         <button
           onClick={handleConfirmProfile}
           disabled={saving}
-          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
+          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 text-white font-medium rounded-lg text-xs shadow-xs transition-all"
         >
-          {saving ? 'Enregistrement...' : 'Confirmer le Profil & Passer à la Composition →'}
+          {saving ? 'Enregistrement...' : 'Valider & Composer le Harnais →'}
         </button>
       </div>
     </div>

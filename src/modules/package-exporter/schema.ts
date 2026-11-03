@@ -8,7 +8,7 @@ import {
   ConfigurabilityStatusSchema,
   KebabSlugSchema,
   ReasoningEffortTierSchema,
-  SubagentModelTierSchema,
+  RecommendedModelTierSchema,
   ValidationIssueSchema,
   ValidationTierSchema,
 } from '../antigravity-adapter/schema';
@@ -74,11 +74,9 @@ export const SelectedSkillSpecSchema = z.object({
 export type SelectedSkillSpec = z.infer<typeof SelectedSkillSpecSchema>;
 
 /**
- * Spécification d'un sous-agent retenu pour le paquet (.agents/agents/<slug>.md)
- * incluant la séparation des 3 notions exigée par le §6.3 du CDC :
- * 1. model (tier YAML natif : inherit, flash, pro)
- * 2. recommendedEffort (low, medium, high — politique d'orchestration)
- * 3. qualityCostRecommendation (recommandation qualité/coût liée à la tâche)
+ * Spécification d'un sous-agent retenu pour le paquet (.agents/agents/<slug>.md).
+ * Le frontmatter YAML ne contient aucun champ `model` ; le couple (recommendedModelTier, recommendedEffort)
+ * est piloté de manière centralisée par `.agents/rules/model-effort-governance.md` et `docs/ORCHESTRATION.md`.
  */
 export const SelectedSubagentSpecSchema = z.object({
   slug: KebabSlugSchema,
@@ -86,6 +84,7 @@ export const SelectedSubagentSpecSchema = z.object({
   frontmatter: AntigravitySubagentFrontmatterSchema,
   markdownBody: z.string().min(1),
   isIndependentReviewer: z.boolean().default(false),
+  recommendedModelTier: RecommendedModelTierSchema.default('pro'),
   recommendedEffort: ReasoningEffortTierSchema,
   qualityCostRecommendation: z.string().min(1),
   selectionRationale: z.string().min(1),
@@ -118,6 +117,7 @@ export const DeterministicPackageInputSchema = z.object({
   eccVersionTag: z.string().min(1).default('v2.2.3'),
   inputDocuments: z.array(InputDocumentDigestSchema).min(2),
   profile: ProjectProfileSchema,
+  excellencePacks: z.array(z.string()).default([]),
   selectedRules: z.array(SelectedRuleSpecSchema).min(1),
   selectedSkills: z.array(SelectedSkillSpecSchema).min(1),
   selectedSubagents: z.array(SelectedSubagentSpecSchema).min(1),
@@ -166,7 +166,7 @@ export const HarnessManifestSchema = z.object({
       adaptationNotes: z.array(z.string()).default([]),
       modelPolicy: z
         .object({
-          subagentModelTier: SubagentModelTierSchema,
+          recommendedModelTier: RecommendedModelTierSchema,
           modelConfigurability: ConfigurabilityStatusSchema,
           recommendedEffort: ReasoningEffortTierSchema,
           effortConfigurability: ConfigurabilityStatusSchema,

@@ -10,6 +10,7 @@ import {
 } from '@/db';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { SelectionEngine, CatalogCandidateInput } from '@/modules/selection-engine';
+import { getBuiltinCuratedExcellenceComponents } from '@/modules/ecc-catalog/catalog-service';
 import { HarnessBuilderService } from '@/modules/harness-builder';
 import { LocalDiskStorage } from '@/modules/documents/storage';
 import { PresetMode } from '@/modules/selection-engine/schema';
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const presetMode: PresetMode = body.presetMode || 'BALANCED';
     const userIncludes: string[] = body.userIncludes || [];
     const userExcludes: string[] = body.userExcludes || [];
+    const excellencePacks = body.excellencePacks;
 
     // 1. Récupération du dernier profil validé
     const [latestProfileRecord] = await db
@@ -89,12 +91,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       eccSyncId = dummySync.id;
     }
 
+    // 2b. Enrichissement systématique avec les composants d'excellence pré-packagés
+    const curatedExcellence = getBuiltinCuratedExcellenceComponents();
+    for (const comp of curatedExcellence) {
+      if (!catalogCandidates.some((c) => c.slug === comp.slug)) {
+        catalogCandidates.push(comp);
+      }
+    }
+
     // 3. Exécution du moteur de sélection explicable
     const selectionEngine = new SelectionEngine();
     const selection = selectionEngine.selectComponents(profile, catalogCandidates, {
       presetMode,
       userIncludes,
       userExcludes,
+      excellencePacks,
     });
 
     // 4. Construction déterministe du harnais
@@ -102,6 +113,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const builtPackage = await harnessBuilder.buildHarness(profile, selection, {
       eccCommitSha: activeSync?.commitSha ?? '25278e7d8050e82c5f94d9305ea6a0fceec3ea42',
       eccVersionTag: activeSync?.versionTag ?? 'v2.2.3',
+      generatedAtIso: new Date().toISOString(),
     });
 
     // 5. Sauvegarde du fichier ZIP sur disque privé

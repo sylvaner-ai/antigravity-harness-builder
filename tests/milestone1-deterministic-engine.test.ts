@@ -21,6 +21,7 @@ import {
 import {
   buildDeterministicHarnessPackage,
   verifyGeneratedZipIntegrity,
+  renderDeploymentPromptMarkdown,
 } from '../src/modules/package-exporter/exporter';
 import { createSampleDeterministicInput } from './fixtures';
 
@@ -87,7 +88,9 @@ Check \${CLAUDE_PROJECT_DIR}/src and ~/.claude/rules.
       isIndependentReviewer: true,
     });
 
-    expect(adapted.frontmatter.model).toBe('pro');
+    expect('model' in adapted.frontmatter).toBe(false);
+    expect(adapted.recommendedModelTier).toBe('pro');
+    expect(adapted.content).not.toContain('model:');
     expect(adapted.frontmatter.tools).toEqual(['view_file', 'grep_search', 'run_command']);
     expect(adapted.frontmatter.tools).not.toContain('write_to_file');
     expect(adapted.frontmatter.tools).not.toContain('replace_file_content');
@@ -211,6 +214,7 @@ Instructions.
 
     const codes = issues.map((i) => i.code);
     expect(codes).toContain('SUBAGENT_FORBIDDEN_OR_UNKNOWN_TOOL');
+    expect(codes).toContain('SUBAGENT_FORBIDDEN_MODEL_IN_FRONTMATTER');
     expect(codes).toContain('SUBAGENT_SCHEMA_VIOLATION');
   });
 
@@ -220,7 +224,6 @@ Instructions.
         name: 'security-auditor',
         description: 'Auditeur sécurité qui ne devrait jamais avoir le droit de modifier le code.',
         tools: ['view_file', 'replace_file_content'],
-        model: 'pro',
       },
       '# Security Auditor'
     );
@@ -268,6 +271,7 @@ describe('Jalon 1 — Moteur déterministe d’assemblage et d’export ZIP (FR-
     expect(relPaths).toContain('docs/ASSUMPTIONS.md');
     expect(relPaths).toContain('docs/ECC_SOURCES.md');
     expect(relPaths).toContain('docs/HARNESS_MANIFEST.json');
+    expect(relPaths).toContain('.agents/rules/model-effort-governance.md');
     expect(relPaths).toContain('.agents/rules/common-coding-style.md');
     expect(relPaths).toContain('.agents/rules/typescript-strict-billing.md');
     expect(relPaths).toContain('.agents/skills/backend-patterns/SKILL.md');
@@ -281,11 +285,11 @@ describe('Jalon 1 — Moteur déterministe d’assemblage et d’export ZIP (FR-
     expect(pkg1.startHereContent).toContain('mode simulation');
     expect(pkg1.startHereContent).toContain('idempotence');
 
-    // 5. Vérification de la séparation model tier configurable vs effort seulement indicatif (§6.3 & §5.2)
+    // 5. Vérification de la politique indicative Modèle / Effort hors frontmatter YAML (§6.3 & §5.2)
     const architectManifest = pkg1.manifest.components.find((c) => c.id === 'subagent:architect');
     expect(architectManifest?.modelPolicy).toEqual({
-      subagentModelTier: 'pro',
-      modelConfigurability: 'configurable',
+      recommendedModelTier: 'pro',
+      modelConfigurability: 'seulement indicatif',
       recommendedEffort: 'high',
       effortConfigurability: 'seulement indicatif',
       qualityCostRecommendation:
@@ -330,5 +334,37 @@ describe('Jalon 1 — Moteur déterministe d’assemblage et d’export ZIP (FR-
     expect(() => buildDeterministicHarnessPackage(brokenInput)).toThrow(
       /SKILL_BROKEN_RELATIVE_LINK/
     );
+  });
+
+  it('génère un script / prompt de déploiement Markdown autonome pour Antigravity sans passer par le format ZIP', () => {
+    const input = createSampleDeterministicInput();
+    const pkg = buildDeterministicHarnessPackage(input);
+
+    expect(pkg.deploymentPromptMarkdown).toBeDefined();
+    expect(pkg.deploymentPromptMarkdown).toContain('# 🚀 Déploiement Direct du Harnais Antigravity');
+    expect(pkg.deploymentPromptMarkdown).toContain('Acme Billing Portal');
+    expect(pkg.deploymentPromptMarkdown).toContain('Directives d\'exécution pour Antigravity');
+
+    // Vérifie que chaque fichier est référencé avec son bloc de code
+    for (const f of pkg.files) {
+      expect(pkg.deploymentPromptMarkdown).toContain(`### Fichier : \`${f.relativePath}\``);
+    }
+
+    // Vérifie que la fonction directe renderDeploymentPromptMarkdown produit un résultat cohérent
+    const customPrompt = renderDeploymentPromptMarkdown({
+      projectName: 'Test App',
+      targetSurface: 'CLI',
+      files: [
+        { relativePath: '.agents/rules/test.md', content: '---\ntrigger: always_on\n---\n# Rule' },
+        { relativePath: 'docs/test.md', content: '```bash\necho "nested code block"\n```' },
+      ],
+    });
+
+    expect(customPrompt).toContain('Test App');
+    expect(customPrompt).toContain('(CLI)');
+    expect(customPrompt).toContain('### Fichier : `.agents/rules/test.md`');
+    expect(customPrompt).toContain('### Fichier : `docs/test.md`');
+    // Le bloc avec des backticks imbriqués doit être enveloppé avec au moins 4 backticks
+    expect(customPrompt).toMatch(/````markdown[\s\S]*?```bash[\s\S]*?````/);
   });
 });

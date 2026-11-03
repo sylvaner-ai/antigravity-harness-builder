@@ -1,14 +1,17 @@
 import { ProjectProfile } from '../project-profile/schema';
 import { EccComponentParsedMeta } from '../../db/schema';
 import {
+  ALL_EXCELLENCE_PACKS,
   ComponentKind,
   CustomComponentSpec,
+  ExcellencePack,
   PresetMode,
   RejectedComponent,
   ScoreBreakdown,
   SelectedComponent,
   SelectionResult,
 } from './schema';
+import { synthesizeProjectCustomComponents } from './custom-rules-synthesizer';
 
 export interface CatalogCandidateInput {
   slug: string;
@@ -29,6 +32,7 @@ export interface SelectionEngineOptions {
   userIncludes?: string[];
   userExcludes?: string[];
   customComponents?: CustomComponentSpec[];
+  excellencePacks?: ExcellencePack[];
 }
 
 const KNOWN_EXCLUSIVE_TECH = [
@@ -69,7 +73,58 @@ const KNOWN_EXCLUSIVE_TECH = [
   'fsharp',
   'pytorch',
   'gan',
+  'mybatis',
+  'mysql',
+  'mariadb',
+  'mongodb',
+  'cassandra',
+  'solana',
+  'x402',
+  'flox',
+  'mle',
 ];
+
+const CANONICAL_LANG_MAP: Record<string, string[]> = {
+  typescript: ['typescript', 'ts'],
+  javascript: ['javascript', 'js'],
+  python: ['python', 'py'],
+  java: ['java', 'jvm'],
+  csharp: ['csharp', 'c#', 'cs', 'dotnet', '.net'],
+  cpp: ['cpp', 'c++'],
+  c: ['c'],
+  rust: ['rust', 'rs'],
+  go: ['go', 'golang'],
+  ruby: ['ruby', 'rb'],
+  php: ['php'],
+  kotlin: ['kotlin', 'kt'],
+  swift: ['swift'],
+  dart: ['dart'],
+  elixir: ['elixir'],
+  sql: ['sql'],
+  html: ['html', 'css', 'html/css'],
+};
+
+export function normalizeLangToken(lang: string): string {
+  const clean = lang.toLowerCase().trim().replace(/[.\-_]/g, '');
+  for (const [canonical, aliases] of Object.entries(CANONICAL_LANG_MAP)) {
+    if (canonical === clean || aliases.includes(clean)) {
+      return canonical;
+    }
+  }
+  return clean;
+}
+
+export function matchLanguagesStrict(langA: string, langB: string): boolean {
+  const normA = normalizeLangToken(langA);
+  const normB = normalizeLangToken(langB);
+  if (normA === normB) return true;
+  // TypeScript est compatible avec JavaScript
+  if (normA === 'typescript' && normB === 'javascript') return true;
+  if (normA === 'javascript' && normB === 'typescript') return true;
+  return false;
+}
+
+const TDD_SLUG_REGEX = /(^|-)test(ing)?(-|$)/;
 
 export class SelectionEngine {
   private getSubagentRoleArchetype(slug: string): string {
@@ -95,6 +150,7 @@ export class SelectionEngine {
     options: SelectionEngineOptions = {}
   ): SelectionResult {
     const preset = options.presetMode ?? 'BALANCED';
+    const excellencePacks = options.excellencePacks ?? [...ALL_EXCELLENCE_PACKS];
     const userIncludes = new Set(options.userIncludes ?? []);
     const userExcludes = new Set(options.userExcludes ?? []);
 
@@ -161,9 +217,20 @@ export class SelectionEngine {
 
       // Compatibilité stack : si le composant exige des langages spécifiques et qu'aucun ne correspond
       const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase());
-      if (itemLangs.length > 0) {
+      const isGeneralMethodologySkill =
+        item.kind === 'SKILL' &&
+        (item.parsedMeta.family === 'quality' ||
+          item.parsedMeta.family === 'security' ||
+          item.parsedMeta.family === 'testing' ||
+          (item.parsedMeta.tags ?? []).some((t) =>
+            ['security', 'audit', 'yagni', 'anti-overengineering', 'sdlc', 'tdd', 'methodology', 'quality'].includes(
+              t.toLowerCase()
+            )
+          ));
+
+      if (itemLangs.length > 0 && !isGeneralMethodologySkill) {
         const hasMatchingLang = itemLangs.some((lang) =>
-          projectLangs.some((pLang) => pLang.includes(lang) || lang.includes(pLang))
+          projectLangs.some((pLang) => matchLanguagesStrict(lang, pLang))
         );
         if (!hasMatchingLang) {
           rejectedList.push({
@@ -178,15 +245,115 @@ export class SelectionEngine {
         }
       }
 
-      // Filtre bloquant sur technologies étrangères exclusives (ex: perl, arkts, react-native, flutter, ruby, php, etc.)
+      // Filtre bloquant d'exclusion mutuelle des bases de données
       const slugLower = item.slug.toLowerCase();
       const familyLower = (item.parsedMeta.family ?? '').toLowerCase();
+      const isPostgresProject = projectDatabases.some((d) => d.includes('postgres'));
+      const isMysqlProject = projectDatabases.some((d) => d.includes('mysql') || d.includes('mariadb'));
+
+      if (isPostgresProject && !isMysqlProject) {
+        if (slugLower.includes('mysql') || slugLower.includes('mariadb') || familyLower === 'mysql') {
+          rejectedList.push({
+            slug: item.slug,
+            name: item.name,
+            kind: item.kind,
+            rejectedRationale: `Incompatible avec la base de données du projet : composant ciblant MySQL/MariaDB alors que le projet utilise PostgreSQL.`,
+            rejectionReason: 'STACK_INCOMPATIBLE',
+            rawScore: 0,
+          });
+          continue;
+        }
+      }
+
+      // Filtres bloquants sur composants hors sujet ou inadaptés aux applications web
+      if (item.slug === 'agent-security-hardening') {
+        rejectedList.push({
+          slug: item.slug,
+          name: item.name,
+          kind: item.kind,
+          rejectedRationale: `Le composant 'agent-security-hardening' exclut formellement les applications web standards (réservé aux environnements d'agents purs).`,
+          rejectionReason: 'STACK_INCOMPATIBLE',
+          rawScore: 0,
+        });
+        continue;
+      }
+
+      if (item.slug === 'agent-payment-x402') {
+        const isCryptoProject =
+          projectDomainText.includes('x402') ||
+          projectDomainText.includes('solana') ||
+          projectDomainText.includes('crypto wallet') ||
+          projectDomainText.includes('web3');
+        if (!isCryptoProject) {
+          rejectedList.push({
+            slug: item.slug,
+            name: item.name,
+            kind: item.kind,
+            rejectedRationale: `Le composant 'agent-payment-x402' est spécifique aux micro-paiements crypto/web3 autonomes pour agents et ne convient pas aux applications web de paiement standard ou SEPA.`,
+            rejectionReason: 'STACK_INCOMPATIBLE',
+            rawScore: 0,
+          });
+          continue;
+        }
+      }
+
+      if (item.slug === 'continuous-learning-v2') {
+        rejectedList.push({
+          slug: item.slug,
+          name: item.name,
+          kind: item.kind,
+          rejectedRationale: `Le composant 'continuous-learning-v2' est une compétence méta d'apprentissage pour agents, non requise pour une application applicative de gestion.`,
+          rejectionReason: 'STACK_INCOMPATIBLE',
+          rawScore: 0,
+        });
+        continue;
+      }
+
+      if (item.slug === 'mle-workflow') {
+        const isMlProject =
+          projectDomainText.includes('machine learning') ||
+          projectDomainText.includes('mle') ||
+          projectDomainText.includes('pytorch') ||
+          projectDomainText.includes('tensorflow') ||
+          projectDomainText.includes('entraînement');
+        if (!isMlProject) {
+          rejectedList.push({
+            slug: item.slug,
+            name: item.name,
+            kind: item.kind,
+            rejectedRationale: `Le composant 'mle-workflow' est réservé aux projets de machine learning et à l'entraînement de modèles d'IA.`,
+            rejectionReason: 'STACK_INCOMPATIBLE',
+            rawScore: 0,
+          });
+          continue;
+        }
+      }
+
+      if (item.slug === 'flox-environments') {
+        const hasFlox = projectInfra.some((i) => i.includes('flox')) || projectDomainText.includes('flox');
+        if (!hasFlox) {
+          rejectedList.push({
+            slug: item.slug,
+            name: item.name,
+            kind: item.kind,
+            rejectedRationale: `Le composant 'flox-environments' requiert l'outillage Flox non présent dans l'infrastructure du projet.`,
+            rejectionReason: 'STACK_INCOMPATIBLE',
+            rawScore: 0,
+          });
+          continue;
+        }
+      }
+
+      // Filtre bloquant sur technologies étrangères exclusives (ex: perl, arkts, react-native, flutter, ruby, php, etc.)
       let foreignTechDetected: string | null = null;
 
       for (const tech of KNOWN_EXCLUSIVE_TECH) {
         const isTechInProject =
-          projectLangs.some((l) => l.includes(tech)) ||
-          projectFrameworks.some((f) => f.includes(tech));
+          projectLangs.some((l) => matchLanguagesStrict(l, tech)) ||
+          projectFrameworks.some((f) => f.toLowerCase().trim() === tech || f.toLowerCase().includes(`/${tech}/`)) ||
+          projectDatabases.some((d) => d.toLowerCase().trim() === tech) ||
+          projectInfra.some((i) => i.toLowerCase().trim() === tech) ||
+          (profile.techStack?.ormAndDataLayer ?? []).some((o) => o.toLowerCase().trim() === tech);
 
         if (!isTechInProject) {
           if (
@@ -194,7 +361,8 @@ export class SelectionEngine {
             slugLower === tech ||
             slugLower.startsWith(`${tech}-`) ||
             slugLower.endsWith(`-${tech}`) ||
-            slugLower.includes(`/${tech}/`)
+            slugLower.includes(`/${tech}/`) ||
+            slugLower.includes(`-${tech}-`)
           ) {
             foreignTechDetected = tech;
             break;
@@ -217,7 +385,7 @@ export class SelectionEngine {
       // Compatibilité frameworks : si le composant est spécifique à un framework et qu'aucun ne correspond
       const itemFrameworks = (item.parsedMeta.frameworks ?? []).map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
       const normProjectFrameworks = projectFrameworks.map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
-      if (itemFrameworks.length > 0) {
+      if (itemFrameworks.length > 0 && !isGeneralMethodologySkill) {
         const hasMatchingFramework = itemFrameworks.some((fw) =>
           normProjectFrameworks.some((pFw) => pFw.includes(fw) || fw.includes(pFw))
         );
@@ -241,7 +409,9 @@ export class SelectionEngine {
         projectLangs,
         projectFrameworks,
         projectDomainText,
-        userIncludes.has(item.slug)
+        userIncludes.has(item.slug),
+        excellencePacks,
+        profile
       );
 
       scoredCandidates.push({ item, score });
@@ -359,7 +529,26 @@ export class SelectionEngine {
         if (score.coreBaseBonus > 0) {
           rationaleParts.push(`Règle transverse fondamentale de qualité logicielle.`);
         }
+        if (score.excellenceBonus > 0) {
+          if (score.matchingKeywords.includes('pack:security-hardened')) {
+            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).`);
+          }
+          if (score.matchingKeywords.includes('pack:design-craft-polish')) {
+            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité).`);
+          }
+          if (score.matchingKeywords.includes('pack:extreme-tdd-anti-bug')) {
+            rationaleParts.push(`Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).`);
+          }
+        }
+        if (score.synergyBonus > 0) {
+          rationaleParts.push(`Synergie d'écosystème renforcée avec la stack et les outils du projet.`);
+        }
       }
+
+      const adaptedModelTier =
+        item.parsedMeta.adaptedModel === 'flash' || item.parsedMeta.adaptedModel === 'pro'
+          ? item.parsedMeta.adaptedModel
+          : undefined;
 
       selectedList.push({
         slug: item.slug,
@@ -375,6 +564,8 @@ export class SelectionEngine {
         family: item.parsedMeta.family,
         dependencies: item.parsedMeta.dependencies ?? [],
         adaptedContent: item.adaptedContent,
+        recommendedModelTier: adaptedModelTier,
+        recommendedEffort: item.parsedMeta.recommendedEffort,
         userModified: isForced,
       });
 
@@ -383,76 +574,15 @@ export class SelectionEngine {
       if (item.kind === 'SKILL') skillsCount++;
     }
 
-    // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC (Composants sur mesure §7 FR-05) ---
-    const customComponents: CustomComponentSpec[] = [...(options.customComponents ?? [])].filter(
-      (c) => !options.userExcludes?.includes(c.slug)
-    );
-
-    // 1. Règle / Compétence de Design System spécifique au projet
-    const ds = profile.designSystem;
-    const hasDesignTokens = Boolean(
-      ds &&
-      (ds.brandIdentity ||
-        Object.keys(ds.colorTokens ?? {}).length > 0 ||
-        Object.keys(ds.typography?.fontFamilies ?? {}).length > 0 ||
-        (ds.uxAndAccessibilityRules ?? []).length > 0)
-    );
-    const existingDesignRule = selectedList.find(
-      (c) => c.slug.includes('design') || c.slug.includes('tokens')
-    );
-
-    if (hasDesignTokens && !existingDesignRule && !options.userExcludes?.includes('project-design-system-tokens')) {
-      const colors = ds?.colorTokens ?? {};
-      const fontFamilies = ds?.typography?.fontFamilies ?? {};
-      const primaryColor = colors['primary'] ?? colors['brand-primary'] ?? 'Non spécifiée';
-      const secondaryColor = colors['secondary'] ?? colors['brand-secondary'] ?? 'Non spécifiée';
-      const fontSans = fontFamilies['sans'] ?? fontFamilies['body'] ?? 'Inter, system-ui, sans-serif';
-
-      customComponents.push({
-        slug: 'project-design-system-tokens',
-        name: 'Règles et Tokens du Design System Projet',
-        kind: 'RULE',
-        description: 'Directives strictes pour l application des tokens, polices et couleurs spécifiques au projet.',
-        gapReason: 'Le catalogue ECC ne fournit que des règles CSS génériques sans les tokens ni la charte graphique de ce projet.',
-        content: `---
-trigger: glob
-globs: "**/*.{tsx,jsx,css,scss,html,vue}"
-description: Respect strict des tokens et de l'identité visuelle du projet
----
-# Directives du Design System Projet
-
-- Identité : ${ds?.brandIdentity ?? profile.projectName}
-- Palette primaire : ${primaryColor}
-- Palette secondaire : ${secondaryColor}
-- Typographie Sans : ${fontSans}
-- Règles UX & Accessibilité :
-${(ds?.uxAndAccessibilityRules ?? []).map((p: string) => `  * ${p}`).join('\n') || '  * Interface claire, cohérente et accessible (WCAG 2.1 AA)'}
-`,
-      });
-    }
-
-    // 2. Règle sur mesure pour les contraintes de sécurité ou conformité spécifiques
-    const securityConstraints = profile.securityAndCompliance ?? [];
-    if (securityConstraints.length > 0) {
-      const hasSecurityRule = selectedList.find((c) => c.family === 'security' || c.slug.includes('security'));
-      if (!hasSecurityRule && !options.userExcludes?.includes('project-security-compliance-guard')) {
-        customComponents.push({
-          slug: 'project-security-compliance-guard',
-          name: 'Garde-fous de Sécurité et Conformité Projet',
-          kind: 'RULE',
-          description: 'Règles strictes appliquant les exigences de conformité et de sécurité du projet.',
-          gapReason: 'Exigences de sécurité spécifiques au domaine métier non couvertes par les règles standard ECC.',
-          content: `---
-trigger: always_on
-description: Garde-fous impératifs de sécurité et conformité du projet
----
-# Exigences de Sécurité & Conformité Métier
-
-${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.epistemicStatus}\n- Justification : ${sc.rationale ?? 'Exigence documentaire'}`).join('\n\n')}
-`,
-        });
-      }
-    }
+    // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC & GOUVERNANCE AUTOMATIQUE (§7 FR-05) ---
+    const customComponents = synthesizeProjectCustomComponents({
+      profile,
+      selectedList,
+      projectFrameworks,
+      projectDomainText,
+      initialCustomComponents: options.customComponents,
+      userExcludes: options.userExcludes,
+    });
 
     // --- VÉRIFICATION DES DÉPENDANCES ET CONFLITS ---
     const dependencyWarnings: string[] = [];
@@ -472,11 +602,16 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
       }
     }
 
-    // Estimation du budget de tokens pour les règles always_on
+    // Estimation du budget de tokens pour les règles (incluant les règles custom always_on comme model-effort-governance)
     let estimatedTokens = 0;
     for (const comp of selectedList) {
       if (comp.kind === 'RULE') {
         estimatedTokens += Math.ceil(comp.adaptedContent.length / 4);
+      }
+    }
+    for (const custom of customComponents) {
+      if (custom.kind === 'RULE' && /trigger:\s*always_on/.test(custom.content)) {
+        estimatedTokens += Math.ceil(custom.content.length / 4);
       }
     }
     const maxBudget = 20000;
@@ -485,6 +620,7 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     return {
       presetMode: preset,
       targetSurface: profile.targetSurface,
+      excellencePacks,
       selectedComponents: selectedList,
       rejectedComponents: rejectedList,
       customComponents,
@@ -504,7 +640,9 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     projectLangs: string[],
     projectFrameworks: string[],
     domainText: string,
-    isForced: boolean
+    isForced: boolean,
+    excellencePacks: ExcellencePack[] = [],
+    profile?: ProjectProfile
   ): ScoreBreakdown {
     if (isForced) {
       return {
@@ -514,6 +652,8 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
         domainTagMatch: 20,
         architectureSecurityMatch: 15,
         coreBaseBonus: 0,
+        excellenceBonus: 0,
+        synergyBonus: 0,
         matchingKeywords: ['user_forced_inclusion'],
       };
     }
@@ -523,6 +663,8 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     let domainTagMatch = 0;
     let architectureSecurityMatch = 0;
     let coreBaseBonus = 0;
+    let excellenceBonus = 0;
+    let synergyBonus = 0;
     const matchingKeywords: string[] = [];
 
     // Normalisation des langages et frameworks
@@ -533,11 +675,11 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
     const normProjectFrameworks = projectFrameworks.map((f) => f.toLowerCase().replace(/[.\-_]/g, ''));
 
     // Langages (+35 pts max)
-    const itemLangs = (item.parsedMeta.languages ?? []).map((l) => l.toLowerCase().replace(/[.\-_]/g, ''));
+    const itemLangs = item.parsedMeta.languages ?? [];
     for (const lang of itemLangs) {
-      if (normProjectLangs.some((pLang) => pLang.includes(lang) || lang.includes(pLang))) {
+      if (projectLangs.some((pLang) => matchLanguagesStrict(lang, pLang))) {
         languageMatch = Math.max(languageMatch, 35);
-        matchingKeywords.push(`lang:${lang}`);
+        matchingKeywords.push(`lang:${normalizeLangToken(lang)}`);
       }
     }
 
@@ -620,9 +762,136 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
       coreBaseBonus = 15;
     }
 
+    // --- PACKS D'EXCELLENCE : Bonus et incitations prioritaires ---
+    const itemFamily = item.parsedMeta.family?.toLowerCase() ?? '';
+    const itemSlug = item.slug.toLowerCase();
+    const itemTags = (item.parsedMeta.tags ?? []).map((t) => t.toLowerCase());
+
+    // 1. Pack Sécurité Renforcée (OWASP, Zero-Trust, Injections, Auth)
+    if (excellencePacks.includes('SECURITY_HARDENED')) {
+      const isSecurityComp =
+        itemFamily === 'security' ||
+        itemSlug.includes('security') ||
+        itemSlug.includes('audit') ||
+        itemSlug.includes('vulnerability') ||
+        itemSlug.includes('owasp') ||
+        itemSlug.includes('auth') ||
+        itemTags.includes('security') ||
+        itemTags.includes('audit') ||
+        itemTags.includes('vulnerability') ||
+        itemTags.includes('owasp') ||
+        itemTags.includes('cloudflare') ||
+        itemTags.includes('zero-trust');
+
+      if (isSecurityComp) {
+        excellenceBonus = Math.max(excellenceBonus, 45);
+        matchingKeywords.push('pack:security-hardened');
+      }
+    }
+
+    // 2. Pack Design & Craft UI/UX (5 états UI, Emil Kowalski, A11y, Design System)
+    if (excellencePacks.includes('DESIGN_CRAFT_POLISH')) {
+      const isDesignComp =
+        itemFamily === 'design-engineering' ||
+        itemSlug.includes('ui-craft') ||
+        itemSlug.includes('5-states') ||
+        itemSlug.includes('animate') ||
+        itemSlug.includes('emil') ||
+        itemTags.includes('design-engineering') ||
+        itemTags.includes('ui-polish') ||
+        itemTags.includes('5-states') ||
+        itemTags.includes('accessibility') ||
+        itemTags.includes('craft');
+
+      if (isDesignComp) {
+        excellenceBonus = Math.max(excellenceBonus, 45);
+        matchingKeywords.push('pack:design-craft-polish');
+      }
+    }
+
+    // 3. Pack Rigueur TDD & Anti-Oublis (Plan d'abord, Test-first, Vérification)
+    if (excellencePacks.includes('EXTREME_TDD_ANTI_BUG')) {
+      const isTddComp =
+        itemFamily === 'testing' ||
+        itemSlug.includes('tdd') ||
+        itemSlug.includes('anti-omissions') ||
+        TDD_SLUG_REGEX.test(itemSlug) ||
+        itemSlug.includes('superpowers') ||
+        itemSlug.includes('ponytail') ||
+        itemTags.includes('tdd') ||
+        itemTags.includes('anti-omissions') ||
+        itemTags.includes('testing') ||
+        itemTags.includes('verification') ||
+        itemTags.includes('superpowers') ||
+        itemTags.includes('sdlc') ||
+        itemTags.includes('methodology') ||
+        itemTags.includes('ponytail') ||
+        itemTags.includes('yagni') ||
+        itemTags.includes('anti-overengineering') ||
+        itemTags.includes('minimalism');
+
+      if (isTddComp) {
+        excellenceBonus = Math.max(excellenceBonus, 45);
+        matchingKeywords.push('pack:extreme-tdd-anti-bug');
+      }
+    }
+
+    // --- BUNDLE SYNERGIES : Synergies d'écosystème entre outils et composants ---
+    if (profile) {
+      // 1. Synergie Bundle Testing
+      const hasTestingDemand =
+        (profile.techStack?.testingTools ?? []).length > 0 ||
+        excellencePacks.includes('EXTREME_TDD_ANTI_BUG');
+      const isTestingComp =
+        itemFamily === 'testing' ||
+        itemSlug.includes('test') ||
+        itemSlug.includes('tdd') ||
+        itemSlug.includes('qa');
+      if (hasTestingDemand && isTestingComp) {
+        synergyBonus += 15;
+        matchingKeywords.push('bundle:testing_synergy');
+      }
+
+      // 2. Synergie Bundle Sécurité
+      const hasSecurityDemand =
+        (profile.securityAndCompliance ?? []).length > 0 ||
+        (profile.techStack?.complianceStandards ?? []).length > 0 ||
+        excellencePacks.includes('SECURITY_HARDENED');
+      const isSecurityComp =
+        itemFamily === 'security' ||
+        itemSlug.includes('security') ||
+        itemSlug.includes('audit');
+      if (hasSecurityDemand && isSecurityComp) {
+        synergyBonus += 15;
+        matchingKeywords.push('bundle:security_synergy');
+      }
+
+      // 3. Synergie Bundle UI Craft & Design System
+      const hasUiDemand =
+        normProjectFrameworks.includes('react') ||
+        normProjectFrameworks.includes('nextjs') ||
+        normProjectFrameworks.includes('vue') ||
+        Boolean(profile.designSystem?.brandIdentity);
+      const isUiComp =
+        itemFamily === 'design-engineering' ||
+        itemSlug.includes('craft') ||
+        itemSlug.includes('5-states') ||
+        itemSlug.includes('emil');
+      if (hasUiDemand && isUiComp) {
+        synergyBonus += 15;
+        matchingKeywords.push('bundle:ui_craft_synergy');
+      }
+    }
+
     const totalScore = Math.min(
       100,
-      languageMatch + frameworkMatch + domainTagMatch + architectureSecurityMatch + coreBaseBonus
+      languageMatch +
+        frameworkMatch +
+        domainTagMatch +
+        architectureSecurityMatch +
+        coreBaseBonus +
+        excellenceBonus +
+        synergyBonus
     );
 
     return {
@@ -632,6 +901,8 @@ ${securityConstraints.map((sc, i) => `## ${i + 1}. ${sc.value}\n- Source : ${sc.
       domainTagMatch,
       architectureSecurityMatch,
       coreBaseBonus,
+      excellenceBonus,
+      synergyBonus,
       matchingKeywords,
     };
   }

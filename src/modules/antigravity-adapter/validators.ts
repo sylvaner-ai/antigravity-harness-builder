@@ -435,7 +435,18 @@ export function validateSubagents(files: readonly PackageFileEntry[]): Validatio
       continue;
     }
 
-    // Vérification préalable explicite des outils et du modèle avant Zod pour fournir des codes d'erreur précis
+    // Vérification préalable explicite des outils et de l'absence de `model` dans le YAML des sous-agents
+    if ('model' in split.parsedFrontmatter) {
+      issues.push({
+        severity: 'error',
+        code: 'SUBAGENT_FORBIDDEN_MODEL_IN_FRONTMATTER',
+        message: `Le champ 'model' est interdit dans le frontmatter YAML de '${file.relativePath}'. Le choix du couple modèle/effort est centralisé dans '.agents/rules/model-effort-governance.md' et 'docs/ORCHESTRATION.md'.`,
+        filePath: file.relativePath,
+        validationKind: 'SYNTACTIC',
+        validationTier: 'AUTO_VALIDATED',
+      });
+    }
+
     const rawTools = split.parsedFrontmatter.tools;
     if (Array.isArray(rawTools)) {
       for (const tool of rawTools) {

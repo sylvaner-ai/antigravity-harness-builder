@@ -10,6 +10,8 @@ import {
   AntigravitySubagentTool,
   CLAUDE_TO_ANTIGRAVITY_MODEL_MAP,
   CLAUDE_TO_ANTIGRAVITY_TOOL_MAP,
+  ReasoningEffortTier,
+  RecommendedModelTier,
   SubagentModelTier,
 } from './schema';
 
@@ -124,6 +126,68 @@ export function translateModelToAntigravity(rawModel: string | undefined): Model
 }
 
 /**
+ * Détermine de manière déterministe le couple (Modèle, Niveau d'effort) optimal
+ * hors-YAML pour un sous-agent selon son rôle et son éventuel modèle source amont.
+ */
+export function inferRecommendedModelEffortPair(params: {
+  slug: string;
+  rawModel?: string;
+  isIndependentReviewer?: boolean;
+}): {
+  recommendedModelTier: RecommendedModelTier;
+  recommendedEffort: ReasoningEffortTier;
+  qualityCostRecommendation: string;
+} {
+  const normModel = params.rawModel?.trim().toLowerCase() ?? '';
+  const slug = params.slug.toLowerCase();
+
+  const isLightweightDocOrFormat =
+    normModel === 'haiku' ||
+    ((normModel === 'flash' || normModel === '') &&
+      /(?:^|-)(?:doc|docs|readme|codemap|format)(?:$|-)/i.test(slug)) ||
+    /(?:^|-)(?:doc-updater|codemap)(?:$|-)/i.test(slug);
+
+  if (isLightweightDocOrFormat) {
+    return {
+      recommendedModelTier: 'flash',
+      recommendedEffort: 'low',
+      qualityCostRecommendation:
+        'Couple Flash — Effort Low : latence minimale et coût très réduit pour la documentation et les mises à jour ciblées.',
+    };
+  }
+
+  if (normModel === 'flash' || /(?:^|-)(?:qa|test-runner)(?:$|-)/i.test(slug)) {
+    return {
+      recommendedModelTier: 'flash',
+      recommendedEffort: 'medium',
+      qualityCostRecommendation:
+        'Couple Flash — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.',
+    };
+  }
+
+  const isHighReasoningRole =
+    normModel === 'opus' ||
+    params.isIndependentReviewer === true ||
+    /(?:architect|security|audit|reviewer|review|performance|planner)/i.test(slug);
+
+  if (isHighReasoningRole) {
+    return {
+      recommendedModelTier: 'pro',
+      recommendedEffort: 'high',
+      qualityCostRecommendation:
+        'Couple Pro — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.',
+    };
+  }
+
+  return {
+    recommendedModelTier: 'pro',
+    recommendedEffort: 'medium',
+    qualityCostRecommendation:
+      'Couple Pro — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le refactoring sûr et la résolution d’erreurs de build.',
+  };
+}
+
+/**
  * Sépare le frontmatter YAML éventuel et le corps Markdown d'un fichier.
  */
 export function splitMarkdownFrontmatter(content: string): {
@@ -217,6 +281,125 @@ export function sanitizeClaudeSpecificReferences(markdownBody: string): {
       replacement: '.agents',
       label: '~/.claude -> .agents',
     },
+    // Modèles Claude -> Google Antigravity
+    {
+      regex: /\bHaiku\b/g,
+      replacement: 'Flash',
+      label: 'Haiku -> Flash',
+    },
+    {
+      regex: /\bSonnet\b/g,
+      replacement: 'Pro',
+      label: 'Sonnet -> Pro',
+    },
+    {
+      regex: /\bOpus\b/g,
+      replacement: 'Pro',
+      label: 'Opus -> Pro',
+    },
+    // Raccourcis et flags spécifiques Claude Code
+    {
+      regex: /Option\+T\s*\(macOS\)\s*\/\s*Alt\+T\s*\(Windows\/Linux\)/gi,
+      replacement: 'raccourci de session Antigravity',
+      label: 'Option+T -> raccourci Antigravity',
+    },
+    {
+      regex: /\/effort\b/g,
+      replacement: 'sélecteur de modèle Antigravity',
+      label: '/effort -> sélecteur de modèle',
+    },
+    {
+      regex: /CLAUDE_CODE_EFFORT_LEVEL/g,
+      replacement: 'ANTIGRAVITY_EFFORT_LEVEL',
+      label: 'CLAUDE_CODE_EFFORT_LEVEL -> ANTIGRAVITY_EFFORT_LEVEL',
+    },
+    {
+      regex: /alwaysThinkingEnabled/g,
+      replacement: 'thinkingEnabled',
+      label: 'alwaysThinkingEnabled -> thinkingEnabled',
+    },
+    {
+      regex: /Claude Code/g,
+      replacement: 'Google Antigravity',
+      label: 'Claude Code -> Google Antigravity',
+    },
+    {
+      regex: /Claude API/g,
+      replacement: 'Antigravity API',
+      label: 'Claude API -> Antigravity API',
+    },
+    {
+      regex: /\.claude\/settings\.json/g,
+      replacement: '.agents/settings.json',
+      label: '.claude/settings.json -> .agents/settings.json',
+    },
+    {
+      regex: /\bCLAUDE\.md\b/g,
+      replacement: 'AGENTS.md',
+      label: 'CLAUDE.md -> AGENTS.md',
+    },
+    {
+      regex: /\bTodoWrite\b/g,
+      replacement: 'Task tracking',
+      label: 'TodoWrite -> Task tracking',
+    },
+    // Sous-agents fantômes -> Sous-agents réels Antigravity
+    {
+      regex: /\bsecurity-reviewer\b/g,
+      replacement: 'security-auditor',
+      label: 'security-reviewer -> security-auditor',
+    },
+    {
+      regex: /\btdd-guide\b/g,
+      replacement: 'tdd-workflow',
+      label: 'tdd-guide -> tdd-workflow',
+    },
+    {
+      regex: /\btypescript-reviewer\b/g,
+      replacement: 'code-reviewer',
+      label: 'typescript-reviewer -> code-reviewer',
+    },
+    {
+      regex: /\bpython-reviewer\b/g,
+      replacement: 'code-reviewer',
+      label: 'python-reviewer -> code-reviewer',
+    },
+    {
+      regex: /\bgo-reviewer\b/g,
+      replacement: 'code-reviewer',
+      label: 'go-reviewer -> code-reviewer',
+    },
+    {
+      regex: /\brust-reviewer\b/g,
+      replacement: 'code-reviewer',
+      label: 'rust-reviewer -> code-reviewer',
+    },
+    // Liens relatifs cassés
+    {
+      regex: /\[testing\.md\]\(testing\.md\)/g,
+      replacement: '[common-testing.md](common-testing.md)',
+      label: 'testing.md -> common-testing.md',
+    },
+    {
+      regex: /\[git-workflow\.md\]\(\.\/git-workflow\.md\)/g,
+      replacement: '[common-git-workflow.md](common-git-workflow.md)',
+      label: 'git-workflow.md -> common-git-workflow.md',
+    },
+    {
+      regex: /\[development-workflow\.md\]\(\.\/development-workflow\.md\)/g,
+      replacement: '[common-development-workflow.md](common-development-workflow.md)',
+      label: 'development-workflow.md -> common-development-workflow.md',
+    },
+    {
+      regex: /\[security\.md\]\(security\.md\)/g,
+      replacement: '[common-security.md](common-security.md)',
+      label: 'security.md -> common-security.md',
+    },
+    {
+      regex: /\[agents\.md\]\(agents\.md\)/g,
+      replacement: '[AGENTS.md](../../AGENTS.md)',
+      label: 'agents.md -> AGENTS.md',
+    },
   ];
 
   for (const { regex, replacement, label } of patterns) {
@@ -300,6 +483,7 @@ export function serializeAntigravitySkill(
 
 /**
  * Sérialise de manière canonique et déterministe un sous-agent Antigravity (.agents/agents/<name>.md).
+ * Le champ `model` n'est jamais inscrit dans le frontmatter YAML (gouvernance centralisée).
  */
 export function serializeAntigravitySubagent(
   frontmatter: AntigravitySubagentFrontmatter,
@@ -315,7 +499,6 @@ export function serializeAntigravitySubagent(
     name: validated.name,
     description: validated.description,
     tools: validated.tools,
-    model: validated.model,
   };
 
   if (validated.commandExecutionPolicy) {
@@ -342,7 +525,8 @@ export function serializeAntigravitySubagent(
 
 /**
  * Adapte un fichier d'agent brut provenant d'ECC (format Claude Code)
- * vers un fichier de sous-agent Google Antigravity valide et documente toutes les adaptations.
+ * vers un fichier de sous-agent Google Antigravity valide (sans `model` dans le YAML)
+ * et retourne séparément le couple (Modèle, Effort) recommandé pour la gouvernance centralisée.
  */
 export function adaptEccAgentMarkdown(
   rawEccMarkdown: string,
@@ -351,6 +535,9 @@ export function adaptEccAgentMarkdown(
 ): {
   content: string;
   frontmatter: AntigravitySubagentFrontmatter;
+  recommendedModelTier: RecommendedModelTier;
+  recommendedEffort: ReasoningEffortTier;
+  qualityCostRecommendation: string;
   adaptationNotes: string[];
 } {
   const split = splitMarkdownFrontmatter(rawEccMarkdown);
@@ -394,12 +581,18 @@ export function adaptEccAgentMarkdown(
     }
   }
 
-  const modelResult = translateModelToAntigravity(
-    typeof fm.model === 'string' ? fm.model : undefined
-  );
-  if (modelResult.note) {
-    adaptationNotes.push(modelResult.note);
+  const rawModelString = typeof fm.model === 'string' ? fm.model : undefined;
+  if ('model' in fm) {
+    adaptationNotes.push(
+      `Suppression du champ 'model' ('${String(fm.model)}') du frontmatter YAML de l'agent : le couple modèle/effort est gouverné de manière centralisée dans '.agents/rules/model-effort-governance.md' et 'docs/ORCHESTRATION.md'.`
+    );
   }
+
+  const recommendedPair = inferRecommendedModelEffortPair({
+    slug: expectedSlug,
+    rawModel: rawModelString,
+    isIndependentReviewer: options?.isIndependentReviewer,
+  });
 
   const sanitizedBody = sanitizeClaudeSpecificReferences(split.body);
   for (const rep of sanitizedBody.replacements) {
@@ -415,7 +608,6 @@ export function adaptEccAgentMarkdown(
     name: expectedSlug,
     description,
     tools: finalTools,
-    model: modelResult.model,
     commandExecutionPolicy: 'sandbox',
   };
 
@@ -424,6 +616,9 @@ export function adaptEccAgentMarkdown(
   return {
     content,
     frontmatter: adaptedFrontmatter,
+    recommendedModelTier: recommendedPair.recommendedModelTier,
+    recommendedEffort: recommendedPair.recommendedEffort,
+    qualityCostRecommendation: recommendedPair.qualityCostRecommendation,
     adaptationNotes,
   };
 }

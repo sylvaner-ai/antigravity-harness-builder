@@ -7,13 +7,18 @@ import {
   AntigravitySkillFrontmatterSchema,
   AntigravitySubagentFrontmatter,
   AntigravitySubagentFrontmatterSchema,
+  AntigravitySubagentTool,
 } from '../antigravity-adapter/schema';
-import { splitMarkdownFrontmatter } from '../antigravity-adapter/adapter';
+import {
+  inferRecommendedModelEffortPair,
+  splitMarkdownFrontmatter,
+} from '../antigravity-adapter/adapter';
 import {
   buildDeterministicHarnessPackage,
   BuiltHarnessPackage,
   computeSha256,
 } from '../package-exporter/exporter';
+import { renderModelEffortGovernanceRuleBody } from '../package-exporter/governance-template';
 import {
   DeterministicPackageInput,
   InputDocumentDigest,
@@ -108,6 +113,15 @@ export class HarnessBuilderService {
         glob: (rawFront.glob as string) ?? undefined,
       });
 
+      const isEmil = comp.sourceUrl?.includes('emilkowalski');
+      const isOwasp = comp.sourceUrl?.includes('OWASP');
+      const repoUrl = isEmil
+        ? 'https://github.com/emilkowalski/skills'
+        : isOwasp
+          ? 'https://github.com/OWASP/CheatSheetSeries'
+          : 'https://github.com/affaan-m/ECC';
+      const author = isEmil ? 'Emil Kowalski' : isOwasp ? 'OWASP Foundation' : 'Affaan Mustafa';
+
       selectedRules.push({
         slug: comp.slug,
         title: comp.name,
@@ -116,21 +130,27 @@ export class HarnessBuilderService {
         selectionRationale: comp.acceptedRationale,
         originStatus: 'ecc_adapted',
         eccProvenance: {
-          repositoryUrl: 'https://github.com/affaan-m/ECC',
+          repositoryUrl: repoUrl,
           commitSha: eccCommitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `rules/${comp.slug}.md`,
-          sourceUrl: comp.sourceUrl ?? `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/rules/${comp.slug}.md`,
+          sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/rules/${comp.slug}.md`,
           license: comp.license ?? 'MIT',
-          author: 'Affaan Mustafa',
+          author,
           adaptationNotes: ['Adapté vers les standards Google Antigravity'],
         },
       });
     }
 
-    // Règles Custom
+    // Règles Custom (hors model-effort-governance qui est générée après finalisation de tous les sous-agents)
     for (const custom of selection.customComponents) {
-      if (custom.kind !== 'RULE' || ruleSlugsSeen.has(custom.slug)) continue;
+      if (
+        custom.kind !== 'RULE' ||
+        custom.slug === 'model-effort-governance' ||
+        ruleSlugsSeen.has(custom.slug)
+      ) {
+        continue;
+      }
       ruleSlugsSeen.add(custom.slug);
 
       const split = splitMarkdownFrontmatter(custom.content);
@@ -252,12 +272,39 @@ export class HarnessBuilderService {
       const split = splitMarkdownFrontmatter(comp.adaptedContent);
       const rawFront = split.parsedFrontmatter ?? {};
       const isReviewer = comp.slug.includes('reviewer') || comp.slug.includes('audit');
+      const isEmil = comp.sourceUrl?.includes('emilkowalski');
+      const isOwasp = comp.sourceUrl?.includes('OWASP');
+      const repoUrl = isEmil
+        ? 'https://github.com/emilkowalski/skills'
+        : isOwasp
+          ? 'https://github.com/OWASP/CheatSheetSeries'
+          : 'https://github.com/affaan-m/ECC';
+      const author = isEmil ? 'Emil Kowalski' : isOwasp ? 'OWASP Foundation' : 'Affaan Mustafa';
+
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: comp.slug,
         description: (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`,
-        tools: (rawFront.tools as any) ?? (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']),
-        model: (rawFront.model as any) ?? (isReviewer ? 'pro' : 'inherit'),
+        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']),
       });
+
+      const inferredPair = inferRecommendedModelEffortPair({
+        slug: comp.slug,
+        rawModel: typeof rawFront.model === 'string' ? rawFront.model : undefined,
+        isIndependentReviewer: isReviewer,
+      });
+      const recommendedModelTier =
+        comp.recommendedModelTier ?? inferredPair.recommendedModelTier;
+      const recommendedEffort = comp.recommendedEffort ?? inferredPair.recommendedEffort;
+      const qualityCostRecommendation =
+        comp.recommendedModelTier || comp.recommendedEffort
+          ? recommendedModelTier === 'flash' && recommendedEffort === 'low'
+            ? 'Couple Flash — Effort Low : latence minimale et coût très réduit pour les tâches légères et documentaires.'
+            : recommendedModelTier === 'flash'
+              ? 'Couple Flash — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.'
+              : recommendedEffort === 'high'
+                ? 'Couple Pro — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.'
+                : 'Couple Pro — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le TDD et la résolution chirurgicale d’erreurs.'
+          : inferredPair.qualityCostRecommendation;
 
       selectedSubagents.push({
         slug: comp.slug,
@@ -265,19 +312,22 @@ export class HarnessBuilderService {
         frontmatter,
         markdownBody: split.body.trim(),
         isIndependentReviewer: isReviewer,
-        recommendedEffort: isReviewer ? 'high' : 'medium',
-        qualityCostRecommendation: isReviewer ? 'Raisonnement approfondi requis pour l audit critique.' : 'Compromis équilibré entre vitesse et rigueur.',
+        recommendedModelTier,
+        recommendedEffort,
+        qualityCostRecommendation,
         selectionRationale: comp.acceptedRationale,
         originStatus: 'ecc_adapted',
         eccProvenance: {
-          repositoryUrl: 'https://github.com/affaan-m/ECC',
+          repositoryUrl: repoUrl,
           commitSha: eccCommitSha,
           versionTag: eccVersionTag,
           sourceRelativePath: comp.sourceRelativePath ?? `agents/${comp.slug}.md`,
-          sourceUrl: comp.sourceUrl ?? `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/agents/${comp.slug}.md`,
+          sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/agents/${comp.slug}.md`,
           license: comp.license ?? 'MIT',
-          author: 'Affaan Mustafa',
-          adaptationNotes: ['Adapté vers la spécification officielle des sous-agents Antigravity'],
+          author,
+          adaptationNotes: [
+            'Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML)',
+          ],
         },
       });
     }
@@ -291,8 +341,13 @@ export class HarnessBuilderService {
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
         name: custom.slug,
         description: (rawFront.description as string) ?? custom.description,
-        tools: (rawFront.tools as any) ?? ['view_file', 'write_to_file', 'replace_file_content'],
-        model: (rawFront.model as any) ?? 'inherit',
+        tools: (rawFront.tools as unknown as AntigravitySubagentTool[]) ?? ['view_file', 'write_to_file', 'replace_file_content'],
+      });
+
+      const customPair = inferRecommendedModelEffortPair({
+        slug: custom.slug,
+        rawModel: typeof rawFront.model === 'string' ? rawFront.model : undefined,
+        isIndependentReviewer: false,
       });
 
       selectedSubagents.push({
@@ -301,8 +356,9 @@ export class HarnessBuilderService {
         frontmatter,
         markdownBody: split.body.trim(),
         isIndependentReviewer: false,
-        recommendedEffort: 'medium',
-        qualityCostRecommendation: 'Sous-agent sur mesure spécialisé pour le projet.',
+        recommendedModelTier: customPair.recommendedModelTier,
+        recommendedEffort: customPair.recommendedEffort,
+        qualityCostRecommendation: customPair.qualityCostRecommendation,
         selectionRationale: custom.gapReason,
         originStatus: 'project_custom',
       });
@@ -316,13 +372,35 @@ export class HarnessBuilderService {
           name: 'project-architect',
           description: "Sous-agent responsable du cadrage technique, de l'architecture logicielle et du schéma DB.",
           tools: ['view_file', 'grep_search', 'find_by_name'],
-          model: 'pro',
         },
         markdownBody: `# Mission de l'Architecte\n\nConcevoir l'architecture et vérifier la conformité aux contraintes.`,
         isIndependentReviewer: true,
+        recommendedModelTier: 'pro',
         recommendedEffort: 'high',
         qualityCostRecommendation: 'Effort élevé requis pour les décisions architecturales fondatrices.',
         selectionRationale: 'Rôle d architecture fondamental par défaut.',
+        originStatus: 'project_custom',
+      });
+    }
+
+    // Injection systématique de la règle active de gouvernance du couple Modèle / Niveau d'Effort
+    if (!ruleSlugsSeen.has('model-effort-governance')) {
+      ruleSlugsSeen.add('model-effort-governance');
+      selectedRules.unshift({
+        slug: 'model-effort-governance',
+        title: "Gouvernance Centralisée du Couple Modèle / Niveau d'Effort (Coût / Performance)",
+        frontmatter: {
+          trigger: 'always_on',
+          description:
+            "Évaluation obligatoire avant chaque tâche du couple optimal Modèle / Niveau d'effort et arbitrage coût/performance.",
+        },
+        markdownBody: renderModelEffortGovernanceRuleBody({
+          projectName: safeProfile.projectName,
+          targetSurface: safeProfile.targetSurface,
+          subagents: selectedSubagents,
+        }),
+        selectionRationale:
+          "Gouvernance centralisée du couple Modèle / Niveau d'effort (remplace toute référence au modèle dans le frontmatter YAML des agents).",
         originStatus: 'project_custom',
       });
     }
@@ -340,6 +418,7 @@ export class HarnessBuilderService {
       packageRootName,
       eccCommitSha,
       eccVersionTag,
+      excellencePacks: selection.excellencePacks ?? [],
       inputDocuments,
       profile: safeProfile,
       selectedRules,

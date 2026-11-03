@@ -41,6 +41,7 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
     packageRootName: 'acme-billing-harness',
     eccCommitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
     eccVersionTag: 'v2.2.3',
+    excellencePacks: [],
     inputDocuments: [
       {
         documentId: 'doc-spec-01',
@@ -315,6 +316,7 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
         frontmatter: adaptedArchitect.frontmatter,
         markdownBody: adaptedArchitect.content.replace(/^---[\s\S]*?---\n\n/, ''),
         isIndependentReviewer: false,
+        recommendedModelTier: adaptedArchitect.recommendedModelTier,
         recommendedEffort: 'high',
         qualityCostRecommendation:
           'Modèle Pro avec effort élevé recommandé pour la conception des transactions de facturation.',
@@ -338,6 +340,7 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
         frontmatter: adaptedReviewer.frontmatter,
         markdownBody: adaptedReviewer.content.replace(/^---[\s\S]*?---\n\n/, ''),
         isIndependentReviewer: true,
+        recommendedModelTier: adaptedReviewer.recommendedModelTier,
         recommendedEffort: 'medium',
         qualityCostRecommendation:
           'Modèle Pro en lecture seule pour auditer les calculs de TVA et l’isolation tenant avant validation.',

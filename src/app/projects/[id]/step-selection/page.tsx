@@ -3,7 +3,9 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PresetMode, SelectionResult } from '../../../../modules/selection-engine/schema';
+import StepNavigation from '@/components/StepNavigation';
+import { ExcellencePack, PresetMode, SelectionResult } from '../../../../modules/selection-engine/schema';
+import { Search, X, HelpCircle, Shield, Palette, Beaker, Sparkles, Check } from 'lucide-react';
 
 // Descriptions claires et détaillées de ce que fait chaque composant
 const ECC_DESCRIPTIONS_FR: Record<string, string> = {
@@ -42,9 +44,18 @@ const ECC_DESCRIPTIONS_FR: Record<string, string> = {
   'pick-ui-library': 'Guide de sélection rigoureux de bibliothèques d’interface et de composants headless adaptés.',
   'prototype': 'Génération rapide de variantes interactives de design pour comparaison visuelle en direct.',
 
-  // Règles projet sur-mesure
+  // Règles projet sur-mesure & Gouvernance automatique
+  'model-effort-governance':
+    "Gouvernance centralisée du couple Modèle / Niveau d'effort (always_on) : avant chaque tâche, l'agent évalue le couple optimal coût/performance (exécution automatique si identique au réglage actif, demande avec un seul couple préconisé sinon — aucun modèle figé dans le YAML des sous-agents).",
   'project-design-system-tokens': 'Application stricte des tokens visuels (palette de couleurs, typographies, règles UX) du projet.',
   'project-security-compliance-guard': 'Application impérative des règles de conformité et des contraintes de sécurité spécifiques au projet.',
+
+  // Composants d'Excellence & Garde-fous
+  'api-security-guards': 'Garde-fous de sécurité API & OWASP : validation stricte Zod, requêtes SQL/ORM préparées, zéro fuite de secrets et en-têtes sécurisés.',
+  'ui-craft-and-5-states': 'Excellence Craft UI & Design : règle obligatoire des 5 états UI (normal, loading skeleton, empty, error, toast), tokens Tailwind et WCAG AA.',
+  'plan-first-and-anti-omissions': 'Rigueur d ingénierie logicielle : plan d implémentation préalable obligatoire, cycle TDD (couverture >80%) et checklist pré-commit.',
+  'security-auditor': 'Auditeur de sécurité senior : inspection du code en lecture seule pour détecter les injections, failles OWASP et secrets exposés (couple cible gouverné dans model-effort-governance).',
+  'ui-craft-reviewer': 'Revue d ergonomie & accessibilité : vérification des finitions visuelles, contrastes WCAG et fluidité des micro-interactions.',
 };
 
 function getComponentDescription(comp: { slug: string; kind: string; description?: string }): string {
@@ -69,13 +80,25 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
   const router = useRouter();
 
   const [preset, setPreset] = useState<PresetMode>('BALANCED');
+  const [excellencePacks, setExcellencePacks] = useState<ExcellencePack[]>([
+    'SECURITY_HARDENED',
+    'DESIGN_CRAFT_POLISH',
+    'EXTREME_TDD_ANTI_BUG',
+  ]);
   const [selection, setSelection] = useState<SelectionResult | null>(null);
+  const [hasGeneration, setHasGeneration] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [userIncludes, setUserIncludes] = useState<string[]>([]);
   const [userExcludes, setUserExcludes] = useState<string[]>([]);
+
+  const togglePack = (pack: ExcellencePack) => {
+    setExcellencePacks((prev) =>
+      prev.includes(pack) ? prev.filter((p) => p !== pack) : [...prev, pack]
+    );
+  };
 
   // Filtres et exploration des composants retenus
   const [selectedKindFilter, setSelectedKindFilter] = useState<'ALL' | 'RULE' | 'SUBAGENT' | 'SKILL' | 'COMMAND_CONVERTED'>('ALL');
@@ -87,14 +110,22 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
   const [rejectedDisplayLimit, setRejectedDisplayLimit] = useState(25);
 
   // Simulation / Pré-calcul de la sélection
-  const calculateSelection = async () => {
+  const calculateSelection = async (
+    overrideIncludes = userIncludes,
+    overrideExcludes = userExcludes
+  ) => {
     try {
       setLoading(true);
       // On lance la génération pour récupérer l'état de sélection
       const res = await fetch(`/api/projects/${projectId}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presetMode: preset, userIncludes, userExcludes }),
+        body: JSON.stringify({
+          presetMode: preset,
+          userIncludes: overrideIncludes,
+          userExcludes: overrideExcludes,
+          excellencePacks,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la sélection');
@@ -108,8 +139,17 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
   };
 
   useEffect(() => {
+    fetch(`/api/projects/${projectId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.generations && d.generations.length > 0) {
+          setHasGeneration(true);
+        }
+      })
+      .catch(() => {});
+
     calculateSelection();
-  }, [projectId, preset]);
+  }, [projectId, preset, excellencePacks]);
 
   const handleGenerateAndProceed = async () => {
     setGenerating(true);
@@ -119,7 +159,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
       const res = await fetch(`/api/projects/${projectId}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ presetMode: preset, userIncludes, userExcludes }),
+        body: JSON.stringify({ presetMode: preset, userIncludes, userExcludes, excellencePacks }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l assemblage du harnais');
@@ -140,36 +180,31 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      {/* Fil d'Ariane des étapes */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4 text-xs font-semibold">
-        <span className="text-slate-400">1. Import des Documents</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">2. Profil Extrait & Épistémique</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-indigo-600 font-bold">3. Composition du Harnais</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">4. Prévisualisation & Code</span>
-        <span className="text-slate-300">→</span>
-        <span className="text-slate-400">5. Téléchargement</span>
-      </div>
+      {/* Navigation cliquable entre les étapes */}
+      <StepNavigation
+        projectId={projectId}
+        currentStep={3}
+        hasProfile={true}
+        hasGeneration={hasGeneration}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Étape 3 — Composition du Harnais Antigravity</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Sélection multicritère explicable, gestion des quotas de règles et rôles multi-agents.
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Étape 3 — Composition du Harnais</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Sélection des compétences, règles de qualité et sous-agents adaptés à votre stack.
           </p>
         </div>
 
         {/* Sélecteur de preset */}
-        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+        <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 self-start sm:self-auto">
           {(['MINIMAL', 'BALANCED', 'THOROUGH'] as PresetMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setPreset(mode)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                 preset === mode
-                  ? 'bg-white text-indigo-600 shadow-sm'
+                  ? 'bg-white text-indigo-600 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -180,22 +215,130 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
           {error}
         </div>
       )}
 
-      {/* Jauge de Budget Tokens Always_on */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
+      {/* Packs d'Excellence & Garde-fous */}
+      <div className="bg-gradient-to-br from-indigo-50/40 via-white to-slate-50 p-5 rounded-2xl border border-indigo-100 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <span className="text-sm font-semibold text-slate-900">Budget Quota Règles Always-On</span>
-            <span className="text-xs text-slate-500 ml-2">
-              (Limite officielle Antigravity : 20 000 tokens)
-            </span>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <h2 className="text-sm font-bold text-slate-900">Packs d'Excellence & Garde-fous de Production</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-100 text-indigo-800">
+                Activés par défaut
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Garde-fous impératifs injectés dans le harnais pour garantir zéro faille OWASP, zéro bug visuel et un cycle TDD sans oubli.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+          {/* 1. Pack Sécurité Renforcée */}
+          <div
+            onClick={() => togglePack('SECURITY_HARDENED')}
+            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+              excellencePacks.includes('SECURITY_HARDENED')
+                ? 'bg-white border-indigo-300 shadow-xs ring-1 ring-indigo-200'
+                : 'bg-slate-50/80 border-slate-200 text-slate-400 opacity-60 hover:opacity-90'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${excellencePacks.includes('SECURITY_HARDENED') ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-500'}`}>
+                  <Shield className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-900">Sécurité Renforcée</h3>
+              </div>
+              <div className={`w-4 h-4 rounded-md flex items-center justify-center border ${excellencePacks.includes('SECURITY_HARDENED') ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                {excellencePacks.includes('SECURITY_HARDENED') && <Check className="w-3 h-3 stroke-[3]" />}
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              Validation stricte Zod des entrées d'API, requêtes SQL paramétrées sans concaténation, zéro fuite de secret et audit OWASP.
+            </p>
+            <div className="flex flex-wrap gap-1 mt-2.5">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">Zero-Trust</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">OWASP</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">Zod</span>
+            </div>
+          </div>
+
+          {/* 2. Pack Design System & 5 États UI */}
+          <div
+            onClick={() => togglePack('DESIGN_CRAFT_POLISH')}
+            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+              excellencePacks.includes('DESIGN_CRAFT_POLISH')
+                ? 'bg-white border-indigo-300 shadow-xs ring-1 ring-indigo-200'
+                : 'bg-slate-50/80 border-slate-200 text-slate-400 opacity-60 hover:opacity-90'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${excellencePacks.includes('DESIGN_CRAFT_POLISH') ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-500'}`}>
+                  <Palette className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-900">Design & Craft UI</h3>
+              </div>
+              <div className={`w-4 h-4 rounded-md flex items-center justify-center border ${excellencePacks.includes('DESIGN_CRAFT_POLISH') ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                {excellencePacks.includes('DESIGN_CRAFT_POLISH') && <Check className="w-3 h-3 stroke-[3]" />}
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              Règle des 5 états UI (normal, skeleton, vide, erreur, toast), tokens Tailwind stricts, accessibilité WCAG AA et zéro placeholder.
+            </p>
+            <div className="flex flex-wrap gap-1 mt-2.5">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">5 États UI</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">WCAG AA</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">Craft Polish</span>
+            </div>
+          </div>
+
+          {/* 3. Pack Rigueur TDD & Anti-Oublis */}
+          <div
+            onClick={() => togglePack('EXTREME_TDD_ANTI_BUG')}
+            className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+              excellencePacks.includes('EXTREME_TDD_ANTI_BUG')
+                ? 'bg-white border-indigo-300 shadow-xs ring-1 ring-indigo-200'
+                : 'bg-slate-50/80 border-slate-200 text-slate-400 opacity-60 hover:opacity-90'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${excellencePacks.includes('EXTREME_TDD_ANTI_BUG') ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-500'}`}>
+                  <Beaker className="w-4 h-4" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-900">Rigueur TDD</h3>
+              </div>
+              <div className={`w-4 h-4 rounded-md flex items-center justify-center border ${excellencePacks.includes('EXTREME_TDD_ANTI_BUG') ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                {excellencePacks.includes('EXTREME_TDD_ANTI_BUG') && <Check className="w-3 h-3 stroke-[3]" />}
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
+              Planification obligatoire avant action, cycle Test-Driven Development (Red-Green-Refactor, &gt;80% coverage) et checklist pré-commit.
+            </p>
+            <div className="flex flex-wrap gap-1 mt-2.5">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">Plan First</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">TDD &gt;80%</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium text-slate-600">Pré-commit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Jauge de Budget Tokens Always_on */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <div>
+            <span className="font-semibold text-slate-900">Budget Règles Always-On</span>
+            <span className="text-slate-400 ml-2">(Quota Antigravity : 20 000 tokens)</span>
           </div>
           <span
-            className={`text-xs font-bold px-2 py-0.5 rounded ${
+            className={`font-bold px-2 py-0.5 rounded ${
               isBudgetWarning ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'
             }`}
           >
@@ -203,9 +346,9 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
           </span>
         </div>
 
-        <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
           <div
-            className={`h-2.5 rounded-full transition-all ${
+            className={`h-2 rounded-full transition-all ${
               isBudgetWarning ? 'bg-amber-500' : 'bg-emerald-500'
             }`}
             style={{ width: `${Math.min(100, budgetPercent)}%` }}
@@ -276,20 +419,23 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
 
               {/* Recherche rapide */}
               <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2.5 top-2 text-slate-400 w-3.5 h-3.5" />
                 <input
                   type="text"
+                  aria-label="Filtrer les composants"
                   placeholder="Filtrer par nom, description, slug..."
                   value={selectedSearch}
                   onChange={(e) => setSelectedSearch(e.target.value)}
                   className="w-full px-3 py-1.5 pl-8 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
-                <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
                 {selectedSearch && (
                   <button
+                    type="button"
+                    aria-label="Effacer le filtre"
                     onClick={() => setSelectedSearch('')}
-                    className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600"
                   >
-                    ✕
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
@@ -348,10 +494,16 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                           {comp.kind}
                         </span>
 
-                        {comp.isCustom && (
-                          <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
-                            SUR-MESURE PROJET
+                        {comp.slug === 'model-effort-governance' ? (
+                          <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            GOUVERNANCE AUTO
                           </span>
+                        ) : (
+                          comp.isCustom && (
+                            <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                              SUR-MESURE PROJET
+                            </span>
+                          )
                         )}
 
                         <span className="font-semibold text-slate-900 text-sm">{comp.name}</span>
@@ -365,8 +517,9 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
 
                       {/* Détails rétractables pour la justification de sélection */}
                       <details className="text-[11px] pt-0.5">
-                        <summary className="text-slate-400 hover:text-indigo-600 cursor-pointer select-none transition-colors">
-                          🔍 Pourquoi ce composant a-t-il été retenu ?
+                        <summary className="text-slate-400 hover:text-indigo-600 cursor-pointer select-none transition-colors flex items-center gap-1">
+                          <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pourquoi ce composant a-t-il été retenu ?</span>
                         </summary>
                         <div className="mt-1 pl-2.5 border-l-2 border-indigo-200 text-slate-500 text-[11px] italic">
                           {comp.rationale}
@@ -375,19 +528,30 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                     </div>
 
                     <div className="flex items-center space-x-3 shrink-0 self-start sm:self-auto">
-                      <span className="font-semibold px-2 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs">
+                      <span className="font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs">
                         Score : {comp.score}/100
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUserExcludes([...userExcludes, comp.slug]);
-                          calculateSelection();
-                        }}
-                        className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors"
-                      >
-                        Exclure ✕
-                      </button>
+                      {comp.slug === 'model-effort-governance' ? (
+                        <span
+                          className="font-medium text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          title="Règle système incluse automatiquement dans 100 % des harnais générés"
+                        >
+                          Actif par défaut
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextExcludes = [...userExcludes, comp.slug];
+                            setUserExcludes(nextExcludes);
+                            calculateSelection(userIncludes, nextExcludes);
+                          }}
+                          className="text-rose-500 hover:text-rose-700 font-medium text-xs px-2 py-1 rounded hover:bg-rose-50 transition-colors flex items-center gap-1"
+                        >
+                          <span>Exclure</span>
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -446,10 +610,11 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                   {rejectedSearch && (
                     <button
                       type="button"
+                      aria-label="Effacer la recherche des candidats écartés"
                       onClick={() => setRejectedSearch('')}
-                      className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-600"
+                      className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -518,8 +683,9 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
                     <button
                       type="button"
                       onClick={() => {
-                        setUserIncludes([...userIncludes, rej.slug]);
-                        calculateSelection();
+                        const nextIncludes = [...userIncludes, rej.slug];
+                        setUserIncludes(nextIncludes);
+                        calculateSelection(nextIncludes, userExcludes);
                       }}
                       className="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700 border border-indigo-200 rounded font-medium text-xs shrink-0 self-start sm:self-auto shadow-sm transition-colors"
                     >
@@ -550,7 +716,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
       <div className="flex items-center justify-between pt-4 border-t border-slate-200">
         <Link
           href={`/projects/${projectId}/step-profile`}
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          className="text-xs font-medium text-slate-600 hover:text-slate-900"
         >
           ← Retour au profil
         </Link>
@@ -558,9 +724,9 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
         <button
           onClick={handleGenerateAndProceed}
           disabled={generating}
-          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm shadow-sm transition-colors"
+          className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 text-white font-medium rounded-lg text-xs shadow-xs transition-all"
         >
-          {generating ? 'Assemblage du harnais...' : 'Prévisualiser l Arborescence & les Fichiers →'}
+          {generating ? 'Assemblage...' : 'Prévisualiser l\'Arborescence →'}
         </button>
       </div>
     </div>

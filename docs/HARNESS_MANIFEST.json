@@ -1,0 +1,889 @@
+{
+  "manifestSchemaVersion": "1.0.0",
+  "generationId": "canonical-generation-01",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "packageRootName": "antigravity-harness-builder",
+  "targetSurface": "IDE",
+  "eccReference": {
+    "repositoryUrl": "https://github.com/affaan-m/ECC",
+    "commitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+    "versionTag": "v2.2.3",
+    "license": "MIT"
+  },
+  "inputDocuments": [
+    {
+      "documentId": "doc-spec-01",
+      "role": "SPECIFICATION",
+      "fileName": "cahier_des_charges.md",
+      "mimeType": "text/markdown",
+      "sizeBytes": 15420,
+      "sha256": "0f8c920e4c7e7069b5e470ecec37cb977fe4ced07be96a92addc35d02ef2a470"
+    },
+    {
+      "documentId": "doc-ds-01",
+      "role": "DESIGN_SYSTEM",
+      "fileName": "design_system.md",
+      "mimeType": "text/markdown",
+      "sizeBytes": 8320,
+      "sha256": "000ca4b52e30704ef02000ca3697d4ceb7bc90c0feca8ca120cfedf7f1974479"
+    }
+  ],
+  "profileDigest": {
+    "projectId": "f6c9c7ac-8788-4e59-924c-3c4e831844f4",
+    "projectName": "antigravity-harness-builder",
+    "profileVersion": 1,
+    "profileSha256": "619869f0bf4a386728bb805ced460bf9fa0e5633f2f8051bb95077b691368bc7"
+  },
+  "components": [
+    {
+      "id": "rule:model-effort-governance",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/model-effort-governance.md",
+      "originStatus": "project_custom",
+      "selectionRationale": "Règle système obligatoire centralisant l'évaluation pré-tâche du couple Modèle / Niveau d'effort optimal (ratio coût/performance) hors des frontmatters YAML des sous-agents.",
+      "adaptationNotes": [],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-code-review",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-code-review.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, sql, api. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/code-review.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-testing",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-testing.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, api, testing_focus, pack:extreme-tdd-anti-bug. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/testing.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:react-patterns",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/react-patterns.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/patterns.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:typescript-security",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/typescript-security.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/security.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:api-security-guards",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/api-security-guards.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, validation. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/OWASP/CheatSheetSeries",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:ui-craft-and-5-states",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/ui-craft-and-5-states.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, design_engineering_excellence, pack:design-craft-polish. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/emilkowalski/skills",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:plan-first-and-anti-omissions",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/plan-first-and-anti-omissions.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : testing_focus, pack:extreme-tdd-anti-bug, bundle:testing_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-development-workflow",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-development-workflow.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : api, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/development-workflow.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-patterns",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-patterns.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : api, pack:security-hardened, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/patterns.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-git-workflow",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-git-workflow.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/git-workflow.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-coding-style",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-coding-style.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : api. Règle transverse fondamentale de qualité logicielle.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/coding-style.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-hooks",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-hooks.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Règle transverse fondamentale de qualité logicielle.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/hooks.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:common-performance",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/common-performance.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Règle transverse fondamentale de qualité logicielle.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/performance.md",
+      "adaptationNotes": [
+        "Adapté vers les standards Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:project-design-system-tokens",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/project-design-system-tokens.md",
+      "originStatus": "project_custom",
+      "selectionRationale": "Le catalogue ECC ne fournit que des règles CSS génériques sans les tokens ni la charte graphique de ce projet.",
+      "adaptationNotes": [],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "rule:project-drizzle-orm-guidelines",
+      "kind": "RULE",
+      "destinationPath": ".agents/rules/project-drizzle-orm-guidelines.md",
+      "originStatus": "project_custom",
+      "selectionRationale": "Le catalogue standard ne fournit pas de règle dédiée aux conventions de schéma et migrations Drizzle ORM.",
+      "adaptationNotes": [],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:react-test",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/react-test/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:react, vitest, api, testing_focus. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/commands/react-test.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:agent-payment-x402",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/agent-payment-x402/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:java, framework:nextjs, skill. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/agent-payment-x402/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:ai-regression-testing",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/ai-regression-testing/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, skill, vitest. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/ai-regression-testing/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:backend-patterns",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/backend-patterns/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, skill, sql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/backend-patterns/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:bun-runtime",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/bun-runtime/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, skill, sql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/bun-runtime/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:click-path-audit",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/click-path-audit/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:react, skill, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/click-path-audit/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:codebase-onboarding",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/codebase-onboarding/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/codebase-onboarding/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:coding-standards",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/coding-standards/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/coding-standards/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:deployment-patterns",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/deployment-patterns/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, skill, postgresql, docker. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/deployment-patterns/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:frontend-patterns",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/frontend-patterns/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/frontend-patterns/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:gateguard",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/gateguard/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:java, skill, sql, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/gateguard/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:healthcare-phi-compliance",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/healthcare-phi-compliance/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, skill, sql, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/healthcare-phi-compliance/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:mysql-patterns",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/mysql-patterns/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:javascript, skill, sql, postgresql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/mysql-patterns/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:mybatis-patterns",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/mybatis-patterns/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:java, skill, sql, postgresql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/mybatis-patterns/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:prompt-optimizer",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/prompt-optimizer/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:java, framework:nextjs, framework:react. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/prompt-optimizer/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:react-testing",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/react-testing/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:nextjs, framework:react, skill, vitest. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/react-testing/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "skill:security-review",
+      "kind": "SKILL",
+      "destinationPath": ".agents/skills/security-review/SKILL.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/security-review/SKILL.md",
+      "adaptationNotes": [
+        "Adapté vers les standards de compétences Google Antigravity"
+      ],
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:build-error-resolver",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/build-error-resolver.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, agent. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/build-error-resolver.md",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "pro",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "medium",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Compromis équilibré entre vitesse et rigueur."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:code-reviewer",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/code-reviewer.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/code-reviewer.md",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "pro",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "high",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Raisonnement approfondi requis pour l audit critique."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:performance-optimizer",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/performance-optimizer.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, agent. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli).",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/performance-optimizer.md",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "pro",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "medium",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Compromis équilibré entre vitesse et rigueur."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:security-auditor",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/security-auditor.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Mots-clés pertinents détectés : role:security_auditor, pack:security-hardened, bundle:security_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/OWASP/CheatSheetSeries",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "pro",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "high",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Raisonnement approfondi requis pour l audit critique."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:react-build-resolver",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/react-build-resolver.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/react-build-resolver.md",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "pro",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "medium",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Compromis équilibré entre vitesse et rigueur."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "id": "subagent:doc-updater",
+      "kind": "SUBAGENT",
+      "destinationPath": ".agents/agents/doc-updater.md",
+      "originStatus": "ecc_adapted",
+      "selectionRationale": "Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, agent, api.",
+      "sourceCommitSha": "b38be6a7f6350964d59328b52f0624e1d1d552d1",
+      "sourceUrl": "https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/doc-updater.md",
+      "adaptationNotes": [
+        "Adapté vers la spécification officielle des sous-agents Antigravity"
+      ],
+      "modelPolicy": {
+        "recommendedModelTier": "flash",
+        "modelConfigurability": "seulement indicatif",
+        "recommendedEffort": "medium",
+        "effortConfigurability": "seulement indicatif",
+        "qualityCostRecommendation": "Compromis équilibré entre vitesse et rigueur."
+      },
+      "validationTier": "AUTO_VALIDATED"
+    }
+  ],
+  "assumptionsAndWarnings": {
+    "uncertaintiesCount": 0,
+    "uncertainties": [],
+    "compatibilityWarnings": []
+  },
+  "filesInventory": [
+    {
+      "relativePath": ".agents/agents/build-error-resolver.md",
+      "sizeBytes": 4805,
+      "sha256": "279f1a1ef4a3b950a1bb3d4814944571df5e18fbfef1f02982bb763a2b019f73",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/agents/code-reviewer.md",
+      "sizeBytes": 13903,
+      "sha256": "5e334e14acdfce6290df52c831164aa17fe20eea245d0392753615c9cef23d89",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/agents/doc-updater.md",
+      "sizeBytes": 4433,
+      "sha256": "bfb03fd968a0d8f5c7f93e60be4439b1b06695e754c2e0957f11072a7d7da292",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/agents/performance-optimizer.md",
+      "sizeBytes": 13510,
+      "sha256": "0e58b48b98aa0a8028f90ee435775f92a71395941c040eeaffdb53beed2a3de5",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/agents/react-build-resolver.md",
+      "sizeBytes": 11243,
+      "sha256": "b31723a81d5ac65e0a89f9926774d070ff85ee5bd62383bba14372a9cda2179f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/agents/security-auditor.md",
+      "sizeBytes": 779,
+      "sha256": "9d83dd26fbb5745f52ce7d393e88be0a2054f29957a5cc0830fa466c7eaa5515",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/api-security-guards.md",
+      "sizeBytes": 1272,
+      "sha256": "a3a8c57038d3e6f9bddb9d1e051f7ee581430490beab17889dec134a206d88e7",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-code-review.md",
+      "sizeBytes": 3762,
+      "sha256": "b597a2a71910cfd004de27e6ba8f9315fdbd60cc81a15ca85582d71232956d71",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-coding-style.md",
+      "sizeBytes": 3117,
+      "sha256": "64ed71d301eb863fd16f0a1cc9d7d118f3c570f0f70cdde078d4b3bc5029ea87",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-development-workflow.md",
+      "sizeBytes": 2359,
+      "sha256": "044f7334014b7e2d6e4b74833b76dc2443bcbea591a26cf61437ba6d5012b68f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-git-workflow.md",
+      "sizeBytes": 926,
+      "sha256": "abc11a68d3ff5e8c5f163739f15202ac2fb6c6582fc031d2cb5ad98daa5b5d8f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-hooks.md",
+      "sizeBytes": 911,
+      "sha256": "b74d38b15f95626a1cf75542fc94d4ea8f167877cca17a22915580b43d0daad1",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-patterns.md",
+      "sizeBytes": 1112,
+      "sha256": "dfd1511b89fb9e284f3ddb8e6fdfc54e14df9118f7999a4e5ed8f3561220947a",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-performance.md",
+      "sizeBytes": 2527,
+      "sha256": "174ad2da00c67665ba93f8930e69db740accd370513aa10dd32d35e3c9b93c8e",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/common-testing.md",
+      "sizeBytes": 1494,
+      "sha256": "08d9ea3d0d3575fe4a63691f9fd9dfa751f5f6f6f4ec2cd1f60db03a090fa94d",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/model-effort-governance.md",
+      "sizeBytes": 5647,
+      "sha256": "ae7f370c6f696c2e57f3d8f5c1dd6627353909b9b6a770f24b996c6d090a86d9",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/plan-first-and-anti-omissions.md",
+      "sizeBytes": 1270,
+      "sha256": "828de469cb5a143a8c7497fead484361d809243b46a944500459eff4b17ad39e",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/project-design-system-tokens.md",
+      "sizeBytes": 460,
+      "sha256": "6deb74f73d68aba1eae2232bb7e277bbdbe3800fab4879f6d41152e7dcd35367",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/project-drizzle-orm-guidelines.md",
+      "sizeBytes": 1224,
+      "sha256": "457d7f0dc5d9a4362ab7f90d5b60ccce2e7dddccb114cb1ada031b804c0eb061",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/react-patterns.md",
+      "sizeBytes": 7216,
+      "sha256": "2e11f1a1355fbc7fbbfe8885eb59898a36dc03a223b9445e95872de9ab3e86c9",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/typescript-security.md",
+      "sizeBytes": 592,
+      "sha256": "488117834f868e7a4ff2152590f551fecc62907d0ca5f2a43d82eddb314b7ae4",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/rules/ui-craft-and-5-states.md",
+      "sizeBytes": 1420,
+      "sha256": "277007a6e53a0b392d811d88b1e880a39310c9ed80d095cbb300baffd428f674",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/agent-payment-x402/SKILL.md",
+      "sizeBytes": 35831,
+      "sha256": "a722b4ab709961256fcdb46c1a47310df4723038ffe1fa2789edb13d0a7b699d",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/ai-regression-testing/SKILL.md",
+      "sizeBytes": 11648,
+      "sha256": "eba56727b94a966327c4cfd81a6feac780569cd6b97f4d8ef7825f615ddca3d4",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/backend-patterns/SKILL.md",
+      "sizeBytes": 13338,
+      "sha256": "e79e358bb69c9af0a0250a5af3a116f057a506d04fff248ae43c4d45c12c0528",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/bun-runtime/SKILL.md",
+      "sizeBytes": 5744,
+      "sha256": "27c101ca25477e7e70442a465d803395910c7264e321157b0ad30bb40e2d319e",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/click-path-audit/SKILL.md",
+      "sizeBytes": 7958,
+      "sha256": "24a42b0982c77fb09c08105b8c06d5999f63a52a590a3b4af1f3e9353e599cf5",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/codebase-onboarding/SKILL.md",
+      "sizeBytes": 8224,
+      "sha256": "49f743b4b08e17aac22c1bbf9e9ef456c2aa56757d3dd242a9df8a2332949b2f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/coding-standards/SKILL.md",
+      "sizeBytes": 12855,
+      "sha256": "f57a59fba3a98e1819dbe076d6437ebcfee24481e104583c9eae25493fb56c7e",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/deployment-patterns/SKILL.md",
+      "sizeBytes": 11102,
+      "sha256": "7e72f3a7f4b317dddbb90fbaf551198fe32de9817fdc252f4ab23e92905877aa",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/frontend-patterns/SKILL.md",
+      "sizeBytes": 15421,
+      "sha256": "fb77627c6bf246c59deb4c6c7ebf1c25b2ce288834d0221cf4ab96577dd2968c",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/gateguard/SKILL.md",
+      "sizeBytes": 42331,
+      "sha256": "54de2d1769e398a4ffbeebe2fd977cdc9e6a485d2c62b34c029a1aafa0f8e41f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/healthcare-phi-compliance/SKILL.md",
+      "sizeBytes": 5657,
+      "sha256": "b7b05c0ca508402ab7683aade30dea94a90fc3f61785c95c65476cb562ea8f10",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/mybatis-patterns/SKILL.md",
+      "sizeBytes": 18095,
+      "sha256": "ee4f602deb3ac80e135cb8f6213d34053234f5b35fbfb296e1d4ae2cd55c2198",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/mysql-patterns/SKILL.md",
+      "sizeBytes": 12158,
+      "sha256": "133ce14ffd87a399a3aa33f36df3ab154325e2feacff92ef0fbe273054cd7cbe",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/prompt-optimizer/SKILL.md",
+      "sizeBytes": 16022,
+      "sha256": "7d43d2f6d9748c3f105c0b98c585081d73ffb567d681410937cb11cf75770146",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/react-test/SKILL.md",
+      "sizeBytes": 7365,
+      "sha256": "b2975893424c70a08862fc612557ff8d73baca1264710c819dd7792e5eb0264f",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/react-testing/SKILL.md",
+      "sizeBytes": 13157,
+      "sha256": "986931d633a3b035b55aede239e0f2caeca8757a99d2eea2f47e686f6ed7736b",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": ".agents/skills/security-review/SKILL.md",
+      "sizeBytes": 12944,
+      "sha256": "d5570a34dae6895d0114bb690762ac4ad7aabc552dff6be85fc41e344e5a66f2",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "AGENTS.md",
+      "sizeBytes": 16507,
+      "sha256": "13db889d69abacbd8203689b673b7fe21a8cbc2ea3b2cd0d70695fe7bc81e39a",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/ACCEPTANCE_CRITERIA.md",
+      "sizeBytes": 594,
+      "sha256": "8250f06af073037902b382d3335a545a02daca615f3e861635d4922cf151f1d1",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/ARCHITECTURE.md",
+      "sizeBytes": 2544,
+      "sha256": "a9272802427e4cfbc0275dc98831f8bd3647b454b037d39feaaac772d293cef4",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/ASSUMPTIONS.md",
+      "sizeBytes": 636,
+      "sha256": "1feaaed3dfaf65a247b419ade86f93547939b3a85c4c5c7374889d8c3df36d01",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/DESIGN_SYSTEM.md",
+      "sizeBytes": 894,
+      "sha256": "e29d4017607a06e9e1b083e421dca08042f50a7a9d0de66f6757bbfa5697801b",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/ECC_SOURCES.md",
+      "sizeBytes": 94306,
+      "sha256": "fc2065f0034baf3f04564982afb9441064e5ce78d03ff49e5264db3e7d03192b",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/ORCHESTRATION.md",
+      "sizeBytes": 22048,
+      "sha256": "438bc4387afed1da1526cc348a983f2352a33a186e09569e727da57dbb54339c",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "docs/PROJECT_SPEC.md",
+      "sizeBytes": 2240,
+      "sha256": "9a2d8849ad52675df857db8a141c747d0847f6fc255c6927b9d39472ca46b36b",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "README.md",
+      "sizeBytes": 1979,
+      "sha256": "d8b3c04b0e13c04ebfdb03dec9e740e25c5dbbf7c6dcd32948f06b300cb68072",
+      "validationTier": "AUTO_VALIDATED"
+    },
+    {
+      "relativePath": "START_HERE.md",
+      "sizeBytes": 7893,
+      "sha256": "1d3d2e80bba1a4c1c7e4e54822550d5c3d83a339916d239a2e0f1efe01cc5469",
+      "validationTier": "AUTO_VALIDATED"
+    }
+  ],
+  "validationSummary": {
+    "valid": true,
+    "totalFilesCount": 49,
+    "estimatedAlwaysOnRulesTokens": 11324,
+    "alwaysOnRulesTokenLimit": 18000,
+    "syntacticChecksPassed": true,
+    "documentaryChecksCount": 0,
+    "unverifiedChecksCount": 0,
+    "errorsCount": 0,
+    "warningsCount": 0,
+    "issues": []
+  }
+}

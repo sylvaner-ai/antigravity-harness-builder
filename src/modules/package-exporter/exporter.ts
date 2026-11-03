@@ -34,7 +34,23 @@ import {
   renderProjectSpecMarkdown,
   renderReadmeMarkdown,
   renderStartHereMarkdown,
+  isEssentialHarnessFile,
+  renderDeploymentPromptMarkdown,
+  renderUpgradePromptMarkdown,
+  renderBase64OneLinerPrompt,
+  renderLightweightUpgradePromptMarkdown,
 } from './templates';
+import { buildTarGzBase64 } from './tar-builder';
+import { renderModelEffortGovernanceRuleBody } from './governance-template';
+
+export {
+  isEssentialHarnessFile,
+  renderDeploymentPromptMarkdown,
+  renderUpgradePromptMarkdown,
+  renderBase64OneLinerPrompt,
+  renderLightweightUpgradePromptMarkdown,
+  buildTarGzBase64,
+};
 
 /**
  * Calcule l'empreinte SHA-256 hexadécimale d'une chaîne ou d'un buffer.
@@ -49,6 +65,11 @@ export function computeSha256(data: string | Uint8Array): string {
 export interface BuiltHarnessPackage {
   packageRootName: string;
   startHereContent: string;
+  deploymentPromptMarkdown: string;
+  upgradePromptMarkdown: string;
+  compactOneLinerPrompt: string;
+  lightweightUpgradePromptMarkdown: string;
+  base64TarGz: string;
   manifest: HarnessManifest;
   files: Array<{
     relativePath: string;
@@ -77,16 +98,48 @@ const DETERMINISTIC_ZIP_MTIME = new Date('2026-01-01T00:00:00.000Z');
 export function buildDeterministicHarnessPackage(
   rawInput: DeterministicPackageInput
 ): BuiltHarnessPackage {
-  const input = DeterministicPackageInputSchema.parse(rawInput);
+  const parsedInput = DeterministicPackageInputSchema.parse(rawInput);
 
   // 1. Vérification d'absence de doublons dans les slugs sélectionnés
   const ruleSlugs = new Set<string>();
-  for (const r of input.selectedRules) {
+  for (const r of parsedInput.selectedRules) {
     if (ruleSlugs.has(r.slug)) {
       throw new Error(`Doublon de règle détecté : '${r.slug}'.`);
     }
     ruleSlugs.add(r.slug);
   }
+
+  // Garantie d'auto-cohérence : injecte la règle centralisée de gouvernance Modèle / Effort
+  // si l'appelant direct ne l'a pas déjà incluse dans selectedRules (ex: appel bas niveau hors HarnessBuilderService).
+  const input: DeterministicPackageInput = ruleSlugs.has('model-effort-governance')
+    ? parsedInput
+    : {
+        ...parsedInput,
+        selectedRules: [
+          ...parsedInput.selectedRules,
+          {
+            slug: 'model-effort-governance',
+            title: "Gouvernance Centralisée du Couple Modèle / Niveau d'Effort",
+            frontmatter: {
+              trigger: 'always_on',
+            },
+            markdownBody: renderModelEffortGovernanceRuleBody({
+              projectName: parsedInput.profile.projectName,
+              targetSurface: parsedInput.profile.targetSurface,
+              subagents: parsedInput.selectedSubagents.map((sub) => ({
+                slug: sub.slug,
+                roleTitle: sub.roleTitle,
+                recommendedModelTier: sub.recommendedModelTier,
+                recommendedEffort: sub.recommendedEffort,
+                qualityCostRecommendation: sub.qualityCostRecommendation,
+              })),
+            }),
+            selectionRationale:
+              "Règle système obligatoire centralisant l'évaluation pré-tâche du couple Modèle / Niveau d'effort optimal (ratio coût/performance) hors des frontmatters YAML des sous-agents.",
+            originStatus: 'project_custom',
+          },
+        ],
+      };
 
   const skillSlugs = new Set<string>();
   for (const s of input.selectedSkills) {
@@ -268,8 +321,8 @@ export function buildDeterministicHarnessPackage(
         sourceUrl: a.eccProvenance?.sourceUrl,
         adaptationNotes: a.eccProvenance?.adaptationNotes ?? [],
         modelPolicy: {
-          subagentModelTier: a.frontmatter.model,
-          modelConfigurability: 'configurable' as const,
+          recommendedModelTier: a.recommendedModelTier,
+          modelConfigurability: 'seulement indicatif' as const,
           recommendedEffort: a.recommendedEffort,
           effortConfigurability: 'seulement indicatif' as const,
           qualityCostRecommendation: a.qualityCostRecommendation,
@@ -361,9 +414,50 @@ export function buildDeterministicHarnessPackage(
   const zipBuffer = zipSync(zipEntries);
   const zipSha256 = computeSha256(zipBuffer);
 
+  const deploymentPromptMarkdown = renderDeploymentPromptMarkdown({
+    projectName: input.profile.projectName,
+    targetSurface: input.profile.targetSurface,
+    files: builtFiles,
+  });
+
+  const testCmdItem = input.profile.qualityAndTestingStrategy?.find((q) => q.id === 'quality-commands')?.value;
+  const matchCmd = testCmdItem ? testCmdItem.match(/`([^`]+)`/) : null;
+  const operationalTestCommand = matchCmd ? matchCmd[1] : undefined;
+
+  const upgradePromptMarkdown = renderUpgradePromptMarkdown({
+    projectName: input.profile.projectName,
+    targetSurface: input.profile.targetSurface,
+    files: builtFiles,
+    operationalTestCommand,
+  });
+
+  const essentialFiles = builtFiles.filter((f) => isEssentialHarnessFile(f.relativePath));
+
+  const base64TarGz = buildTarGzBase64(essentialFiles.length > 0 ? essentialFiles : builtFiles);
+
+  const compactOneLinerPrompt = renderBase64OneLinerPrompt({
+    projectName: input.profile.projectName,
+    targetSurface: input.profile.targetSurface,
+    base64Payload: base64TarGz,
+    filesCount: builtFiles.length,
+    operationalTestCommand,
+  });
+
+  const lightweightUpgradePromptMarkdown = renderLightweightUpgradePromptMarkdown({
+    projectName: input.profile.projectName,
+    targetSurface: input.profile.targetSurface,
+    files: builtFiles,
+    operationalTestCommand,
+  });
+
   return {
     packageRootName: input.packageRootName,
     startHereContent,
+    deploymentPromptMarkdown,
+    upgradePromptMarkdown,
+    compactOneLinerPrompt,
+    lightweightUpgradePromptMarkdown,
+    base64TarGz,
     manifest: manifestObject,
     files: builtFiles,
     zipBuffer,

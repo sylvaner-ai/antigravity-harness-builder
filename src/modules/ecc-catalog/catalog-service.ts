@@ -7,10 +7,87 @@ import {
 } from '../../db';
 import { sanitizeErrorMessage } from '../jobs-observability/job-queue';
 import { extractTarGzTextFilesInMemory } from './tar-extractor';
-import { parseAndQualifyEccRepositoryEntries } from './indexer';
+import { parseAndQualifyEccRepositoryEntries, IndexedEccComponentCandidate } from './indexer';
 
 export type EccSyncRecord = typeof eccSyncs.$inferSelect;
 export type EccComponentRecord = typeof eccComponents.$inferSelect;
+
+/**
+ * Configuration d'un dépôt de référence GitHub pour le catalogue multi-sources.
+ */
+export interface CatalogSourceConfig {
+  id: string;
+  name: string;
+  owner: string;
+  repo: string;
+  ref: string;
+  category: 'CORE' | 'DESIGN' | 'SECURITY' | 'QUALITY';
+  tags: string[];
+  frameworks?: string[];
+  languages?: string[];
+  enabled: boolean;
+}
+
+/**
+ * Sources de référence officielles et complémentaires par défaut.
+ */
+export const DEFAULT_CATALOG_SOURCES: CatalogSourceConfig[] = [
+  {
+    id: 'ecc-official',
+    name: 'Everything Claude Code (ECC Core)',
+    owner: 'affaan-m',
+    repo: 'ECC',
+    ref: 'main',
+    category: 'CORE',
+    tags: ['core', 'rules', 'skills', 'agents'],
+    enabled: true,
+  },
+  {
+    id: 'emil-kowalski-skills',
+    name: 'Emil Kowalski Design Engineering & Micro-Interactions',
+    owner: 'emilkowalski',
+    repo: 'skills',
+    ref: 'main',
+    category: 'DESIGN',
+    tags: ['design-engineering', 'ui-polish', 'animation', 'emil-kowalski'],
+    frameworks: ['react', 'nextjs'],
+    languages: ['typescript', 'javascript'],
+    enabled: true,
+  },
+  {
+    id: 'obra-superpowers',
+    name: 'Superpowers Agentic SDLC & Methodology (obra)',
+    owner: 'obra',
+    repo: 'superpowers',
+    ref: 'main',
+    category: 'QUALITY',
+    tags: ['sdlc', 'tdd', 'planning', 'brainstorming', 'code-review', 'subagents', 'discipline', 'quality'],
+    enabled: true,
+  },
+  {
+    id: 'cloudflare-security-audit',
+    name: 'Cloudflare Security Code Audit & Vulnerability Hunting',
+    owner: 'cloudflare',
+    repo: 'security-audit-skill',
+    ref: 'main',
+    category: 'SECURITY',
+    tags: ['security', 'audit', 'vulnerability', 'hunting', 'owasp', 'cloudflare', 'verification'],
+    enabled: true,
+  },
+  {
+    id: 'dietrichgebert-ponytail',
+    name: 'Ponytail Pragmatic YAGNI & Anti-Overengineering (Dietrich Gebert)',
+    owner: 'dietrichgebert',
+    repo: 'ponytail',
+    ref: 'main',
+    category: 'QUALITY',
+    tags: ['yagni', 'anti-overengineering', 'minimalism', 'pragmatism', 'quality', 'audit'],
+    enabled: true,
+  },
+];
+
+import { getBuiltinCuratedExcellenceComponents } from './curated-excellence';
+export { getBuiltinCuratedExcellenceComponents };
 
 /**
  * Interface de transport permettant d'injecter un client GitHub réel ou un mock déterministe en test (FR-04).
@@ -129,6 +206,39 @@ export class EccCatalogService {
   }
 
   /**
+   * Helper privé pour télécharger, parser et qualifier les composants d'un dépôt complémentaire.
+   */
+  private async syncAuxiliaryRepo(
+    owner: string,
+    repo: string,
+    ref: string,
+    modifier?: (comp: IndexedEccComponentCandidate) => void
+  ): Promise<{ components: IndexedEccComponentCandidate[]; tagSuffix: string } | null> {
+    try {
+      const sha = await this.fetcher.resolveRefCommitSha(owner, repo, ref);
+      const bytes = await this.fetcher.downloadRepositoryTarball(owner, repo, sha);
+      const entries = extractTarGzTextFilesInMemory(bytes);
+      const parsed = parseAndQualifyEccRepositoryEntries(
+        entries,
+        sha,
+        `https://github.com/${owner}/${repo}`
+      );
+      if (modifier) {
+        for (const comp of parsed.components) {
+          modifier(comp);
+        }
+      }
+      return {
+        components: parsed.components,
+        tagSuffix: ` + ${owner}/${repo}@${sha.slice(0, 7)}`,
+      };
+    } catch (err) {
+      console.warn(`Note : synchronisation complémentaire de ${owner}/${repo} ignorée :`, err);
+      return null;
+    }
+  }
+
+  /**
    * Synchronise le catalogue ECC depuis la source officielle (ou une référence/commit donné).
    *
    * Garanties de résilience (FR-04 & §11.2) :
@@ -144,6 +254,10 @@ export class EccCatalogService {
     ref?: string;
     forceResync?: boolean;
     includeEmilKowalskiSkills?: boolean;
+    includeSuperpowersSkills?: boolean;
+    includeCloudflareSecuritySkills?: boolean;
+    includePonytailSkills?: boolean;
+    includeCuratedExcellence?: boolean;
   }): Promise<EccSyncRecord> {
     const owner = options?.owner ?? process.env.ECC_REPO_OWNER ?? 'affaan-m';
     const repo = options?.repo ?? process.env.ECC_REPO_NAME ?? 'ECC';
@@ -182,35 +296,82 @@ export class EccCatalogService {
         );
       }
 
-      // Téléchargement et qualification complémentaire des skills de Design Engineering (emilkowalski/skills)
+      // Téléchargement et qualification des sources complémentaires
       const allComponents = [...parsedCatalog.components];
       let versionTag = parsedCatalog.versionTag;
 
-      if (options?.includeEmilKowalskiSkills) {
-        try {
-          const emilSha = await this.fetcher.resolveRefCommitSha('emilkowalski', 'skills', 'main');
-          const emilBytes = await this.fetcher.downloadRepositoryTarball('emilkowalski', 'skills', emilSha);
-          const emilEntries = extractTarGzTextFilesInMemory(emilBytes);
-          const emilParsed = parseAndQualifyEccRepositoryEntries(
-            emilEntries,
-            emilSha,
-            'https://github.com/emilkowalski/skills'
-          );
-
-          for (const comp of emilParsed.components) {
-            comp.parsedMeta.tags.push('design-engineering', 'ui-polish', 'animation', 'emil-kowalski');
-            if (!comp.parsedMeta.frameworks.includes('react')) comp.parsedMeta.frameworks.push('react');
-            if (!comp.parsedMeta.frameworks.includes('nextjs')) comp.parsedMeta.frameworks.push('nextjs');
-            if (!comp.parsedMeta.languages.includes('typescript')) comp.parsedMeta.languages.push('typescript');
-            if (!comp.parsedMeta.languages.includes('javascript')) comp.parsedMeta.languages.push('javascript');
-
-            if (!allComponents.some((c) => c.slug === comp.slug)) {
-              allComponents.push(comp);
-            }
+      const appendAuxiliary = (
+        res: { components: IndexedEccComponentCandidate[]; tagSuffix: string } | null
+      ) => {
+        if (!res) return;
+        for (const comp of res.components) {
+          if (!allComponents.some((c) => c.slug === comp.slug)) {
+            allComponents.push(comp);
           }
-          versionTag = `${parsedCatalog.versionTag} + emilkowalski/skills@${emilSha.slice(0, 7)}`;
-        } catch (emilErr) {
-          console.warn('Note : synchronisation complémentaire de emilkowalski/skills ignorée :', emilErr);
+        }
+        versionTag += res.tagSuffix;
+      };
+
+      if (options?.includeEmilKowalskiSkills) {
+        appendAuxiliary(
+          await this.syncAuxiliaryRepo('emilkowalski', 'skills', 'main', (comp) => {
+            const addedTags = ['design-engineering', 'ui-polish', 'animation', 'emil-kowalski'];
+            comp.parsedMeta.tags = Array.from(new Set([...comp.parsedMeta.tags, ...addedTags]));
+            comp.parsedMeta.frameworks = Array.from(
+              new Set([...comp.parsedMeta.frameworks, 'react', 'nextjs'])
+            );
+            comp.parsedMeta.languages = Array.from(
+              new Set([...comp.parsedMeta.languages, 'typescript', 'javascript'])
+            );
+            comp.searchText = `${comp.searchText} ${addedTags.join(' ')}`;
+          })
+        );
+      }
+
+      if (options?.includeSuperpowersSkills) {
+        appendAuxiliary(
+          await this.syncAuxiliaryRepo('obra', 'superpowers', 'main', (comp) => {
+            const addedTags = ['sdlc', 'methodology', 'quality', 'superpowers'];
+            if (
+              comp.slug === 'test-driven-development' ||
+              comp.slug === 'verification-before-completion'
+            ) {
+              addedTags.push('tdd', 'anti-omissions');
+            }
+            comp.parsedMeta.tags = Array.from(new Set([...comp.parsedMeta.tags, ...addedTags]));
+            comp.searchText = `${comp.searchText} ${addedTags.join(' ')}`;
+          })
+        );
+      }
+
+      if (options?.includeCloudflareSecuritySkills) {
+        appendAuxiliary(
+          await this.syncAuxiliaryRepo('cloudflare', 'security-audit-skill', 'main', (comp) => {
+            const addedTags = ['security', 'audit', 'vulnerability', 'owasp', 'cloudflare', 'zero-trust'];
+            comp.parsedMeta.tags = Array.from(new Set([...comp.parsedMeta.tags, ...addedTags]));
+            comp.parsedMeta.family = 'security';
+            comp.searchText = `${comp.searchText} ${addedTags.join(' ')}`;
+          })
+        );
+      }
+
+      if (options?.includePonytailSkills) {
+        appendAuxiliary(
+          await this.syncAuxiliaryRepo('dietrichgebert', 'ponytail', 'main', (comp) => {
+            const addedTags = ['yagni', 'anti-overengineering', 'minimalism', 'pragmatism', 'ponytail', 'quality'];
+            comp.parsedMeta.tags = Array.from(new Set([...comp.parsedMeta.tags, ...addedTags]));
+            comp.searchText = `${comp.searchText} ${addedTags.join(' ')}`;
+          })
+        );
+      }
+
+      // Ajout des composants d'excellence pré-packagés si demandé
+      if (options?.includeCuratedExcellence) {
+        const curatedExcellence = getBuiltinCuratedExcellenceComponents();
+        for (const comp of curatedExcellence) {
+          if (!allComponents.some((c) => c.slug === comp.slug)) {
+            allComponents.push(comp);
+          }
         }
       }
 
