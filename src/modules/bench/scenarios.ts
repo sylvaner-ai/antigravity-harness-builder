@@ -24,6 +24,8 @@ export interface BenchRunContext {
 export interface Verdict {
   pass: boolean;
   detail: string;
+  /** Erreur du service (indisponibilité, quota) : l'essai ne dit rien du harnais et n'entre pas dans les taux. */
+  inconclusive?: boolean;
 }
 
 export interface BenchScenario {
@@ -55,17 +57,23 @@ function containsToken(response: string, token: string): Verdict {
   return { pass, detail: pass ? `jeton ${token} présent` : `jeton ${token} absent` };
 }
 
-/** Section d'AGENTS.md produite par le générateur pour une règle `model_decision` (option C). */
-function onDemandSection(): string {
+/** Section d'AGENTS.md produite par le générateur pour une règle chargée à la demande (option C). */
+function onDemandSection(slug: string, trigger: 'model_decision' | 'glob', description: string, globs?: string): string {
   const rule = {
-    slug: 'selftest-decision',
-    title: 'selftest-decision',
-    frontmatter: { trigger: 'model_decision', description: "À consulter lorsque l'utilisateur parle de la « pomme-bleue »" },
+    slug,
+    title: slug,
+    frontmatter: { trigger, description, ...(globs ? { globs } : {}) },
     markdownBody: '',
     selectionRationale: 'bench',
     originStatus: 'project_custom',
   } as unknown as SelectedRuleSpec;
   return `\n\n## Règles du harnais (banc d'essai)\n\n${renderRuleIndex([rule])}\n`;
+}
+
+function appendToAgents(dir: string, section: string): void {
+  const agentsPath = join(dir, 'AGENTS.md');
+  const current = existsSync(agentsPath) ? readFileSync(agentsPath, 'utf8') : '# Instructions\n';
+  writeFileSync(agentsPath, current + section, 'utf8');
 }
 
 export function buildBenchScenarios(nonce: string): BenchScenario[] {
@@ -97,10 +105,31 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       evaluate: (c) => containsToken(c.response, t('GLOB-OK')),
     },
     {
+      id: 'C2b-glob-pointeur',
+      title: 'Règle glob appliquée (avec pointeur dans AGENTS.md, option C)',
+      group: 'chargement',
+      prompt: 'Lis le fichier selftest-target.txt et résume-le en une phrase.',
+      requiresHarness: false,
+      prepare: (dir) => {
+        installPack(dir);
+        appendToAgents(dir, onDemandSection('selftest-glob', 'glob', "Sonde d'auto-test, règle liée à un fichier", '**/selftest-target.txt'));
+      },
+      evaluate: (c) => containsToken(c.response, t('GLOB-OK')),
+    },
+    {
       id: 'C3-decision',
       title: 'Règle model_decision appliquée (sans pointeur dans AGENTS.md)',
       group: 'chargement',
       prompt: 'Parle-moi en une phrase de la pomme-bleue.',
+      requiresHarness: false,
+      prepare: installPack,
+      evaluate: (c) => containsToken(c.response, appleToken),
+    },
+    {
+      id: 'C3n-decision-sans-lecture',
+      title: "Règle model_decision avec la consigne « n'ouvre aucun fichier » (ancienne sonde T3)",
+      group: 'chargement',
+      prompt: `Parle-moi en une phrase de la pomme-bleue ${noRead}.`,
       requiresHarness: false,
       prepare: installPack,
       evaluate: (c) => containsToken(c.response, appleToken),
@@ -113,9 +142,7 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       requiresHarness: false,
       prepare: (dir) => {
         installPack(dir);
-        const agentsPath = join(dir, 'AGENTS.md');
-        const current = existsSync(agentsPath) ? readFileSync(agentsPath, 'utf8') : '# Instructions\n';
-        writeFileSync(agentsPath, current + onDemandSection(), 'utf8');
+        appendToAgents(dir, onDemandSection('selftest-decision', 'model_decision', "À consulter lorsque l'utilisateur parle de la « pomme-bleue »"));
       },
       evaluate: (c) => containsToken(c.response, appleToken),
     },
@@ -123,7 +150,16 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       id: 'C4-skill',
       title: 'Skill découvert automatiquement',
       group: 'chargement',
-      prompt: `SELFTEST-SKILL ${noRead}`,
+      prompt: 'SELFTEST-SKILL',
+      requiresHarness: false,
+      prepare: installPack,
+      evaluate: (c) => containsToken(c.response, t('SKILL-OK')),
+    },
+    {
+      id: 'C4b-skill-slash',
+      title: 'Skill appelé par /nom (invocation documentée)',
+      group: 'chargement',
+      prompt: '/selftest-skill',
       requiresHarness: false,
       prepare: installPack,
       evaluate: (c) => containsToken(c.response, t('SKILL-OK')),

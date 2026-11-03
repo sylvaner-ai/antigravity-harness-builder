@@ -40,6 +40,9 @@ export interface RunRecord {
   filesChanged: string[];
 }
 
+/** Erreurs du service (et non du harnais) : indisponibilité, quota, délai dépassé. */
+const SERVICE_ERROR = /UNAVAILABLE|RESOURCE_EXHAUSTED|code 429|code 503|DEADLINE_EXCEEDED|interrompu par le banc/i;
+
 const IGNORED_TOP_DIRS = new Set(['.git', '.gemini', 'node_modules', '.next']);
 
 /** Copie le projet sans dépendances ni historique, pour que `agy` ne touche jamais l'original. */
@@ -184,7 +187,11 @@ export async function executeBench(options: BenchOptions): Promise<RunRecord[]> 
       const filesChanged = changedFiles(before, snapshotFiles(dir));
       const verdict: Verdict = result.ok
         ? step.scenario.evaluate({ dir, response: result.response, status: result.status, filesChanged })
-        : { pass: false, detail: `exécution en échec (${result.status}${result.error ? `: ${result.error}` : ''})` };
+        : {
+            pass: false,
+            inconclusive: SERVICE_ERROR.test(`${result.error ?? ''} ${result.status}`),
+            detail: `${SERVICE_ERROR.test(`${result.error ?? ''} ${result.status}`) ? 'indéterminé, erreur du service' : 'exécution en échec'} (${result.status}${result.error ? `: ${result.error}` : ''})`,
+          };
       const record: RunRecord = { scenarioId: step.scenario.id, group: step.scenario.group, config: step.config.label, rep: step.rep, verdict, result, filesChanged };
       records.push(record);
       onRecord?.(record, i + 1, plan.length);
@@ -221,18 +228,26 @@ export function renderSummary(records: readonly RunRecord[], meta: { agyVersion?
     for (const id of scenarioIds) {
       const rs = records.filter((r) => r.scenarioId === id && r.config === config);
       if (rs.length === 0) continue;
-      const passes = rs.filter((r) => r.verdict.pass).length;
+      const conclusive = rs.filter((r) => !r.verdict.inconclusive);
+      const passes = conclusive.filter((r) => r.verdict.pass).length;
+      const undetermined = rs.length - conclusive.length;
       const usageSums = new Map<string, number[]>();
       for (const r of rs) for (const [k, v] of Object.entries(flattenNumbers(r.result.usage))) usageSums.set(k, [...(usageSums.get(k) ?? []), v]);
       const usage = [...usageSums.entries()].map(([k, v]) => `${k}=${fmt(mean(v), 0)}`).join(', ') || '—';
-      lines.push(`| ${id} | ${passes}/${rs.length} | ${fmt(mean(rs.map((r) => r.result.durationSeconds ?? r.result.wallSeconds)))} | ${fmt(mean(rs.flatMap((r) => (r.result.numTurns === undefined ? [] : [r.result.numTurns]))))} | ${usage} |`);
+      lines.push(`| ${id} | ${passes}/${conclusive.length}${undetermined > 0 ? ` (+${undetermined} indéterminé)` : ''} | ${fmt(mean(rs.map((r) => r.result.durationSeconds ?? r.result.wallSeconds)))} | ${fmt(mean(rs.flatMap((r) => (r.result.numTurns === undefined ? [] : [r.result.numTurns]))))} | ${usage} |`);
     }
     lines.push('');
   }
-  const failed = records.filter((r) => !r.verdict.pass);
+  const failed = records.filter((r) => !r.verdict.pass && !r.verdict.inconclusive);
   if (failed.length > 0) {
     lines.push('## Détail des échecs', '');
     for (const r of failed) lines.push(`- ${r.scenarioId} (${r.config}, essai ${r.rep}) : ${r.verdict.detail}`);
+    lines.push('');
+  }
+  const undeterminedRuns = records.filter((r) => r.verdict.inconclusive);
+  if (undeterminedRuns.length > 0) {
+    lines.push('## Essais indéterminés (erreur du service, exclus des taux)', '');
+    for (const r of undeterminedRuns) lines.push(`- ${r.scenarioId} (${r.config}, essai ${r.rep}) : ${r.verdict.detail}`);
     lines.push('');
   }
   return lines.join('\n');

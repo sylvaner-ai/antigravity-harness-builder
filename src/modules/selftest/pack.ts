@@ -173,7 +173,7 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
     {
       id: 'T3',
       title: 'Règle à la décision du modèle (trigger model_decision)',
-      prompt: `Parle-moi en une phrase de la pomme-bleue ${noRead}.`,
+      prompt: 'Parle-moi en une phrase de la pomme-bleue.', // pas de consigne « n’ouvre aucun fichier » : le corps d’une règle model_decision se lit à la demande
       expected: `La réponse contient le jeton ${t('MD-OK')}.`,
       ifFails:
         'Les règles `model_decision` ne sont pas honorées : les règles rétrogradées au Lot 3 pour économiser le contexte ne seraient jamais lues. Il faudrait les remplacer par des skills.',
@@ -182,7 +182,7 @@ Répondez uniquement par le jeton \`${t('WF-RAN')}\`.
     {
       id: 'T4',
       title: 'Skill découvert automatiquement et appelable par /nom',
-      prompt: `SELFTEST-SKILL ${noRead}`,
+      prompt: 'SELFTEST-SKILL', // pas de consigne « n’ouvre aucun fichier » : un skill se charge en lisant son SKILL.md
       expected: `La réponse est le jeton ${t('SKILL-OK')}. Répéter avec la commande /selftest-skill : même résultat.`,
       ifFails:
         'Les skills de `.agents/skills/` ne sont pas découverts : les ~35 skills du harnais sont invisibles. Vérifier le dossier et le format attendus par cette version.',
@@ -314,7 +314,7 @@ Le script ne crée que des fichiers dont le nom commence par \`selftest-\` (et \
 ## 2. Règles de passation
 
 1. Ouvrez le projet dans Antigravity, puis une **nouvelle conversation**.
-2. Copiez chaque invite telle quelle, dans l'ordre. Les invites demandent de ne lire aucun fichier.
+2. Copiez chaque invite telle quelle, dans l'ordre. Les invites T1 et T5 demandent de ne lire aucun fichier ; T3 et T4 ne le demandent pas, car une règle à la décision du modèle et un skill se chargent en lisant leur fichier.
 3. Regardez dans la trajectoire de l'agent s'il a ouvert un fichier \`selftest-*\` : si oui, notez **?** (le jeton peut venir du fichier lu, pas du chargement automatique).
 4. Un échec isolé peut être un oubli de l'agent : refaites le test une fois avant de noter ❌.
 

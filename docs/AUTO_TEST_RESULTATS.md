@@ -81,3 +81,32 @@ Les résultats T10 et T11 du tour 1 venaient de l'ancienne règle `model-effort-
 2. Les règles `glob` et `model_decision` étant peu fiables, option C retenue : `AGENTS.md` annonce chaque règle chargée à la demande (chemin, sujet, consigne de lecture avant la tâche). Voir `docs/GOUVERNANCE_CONTEXTE.md`.
 3. À mesurer ensuite : une tâche qui relève d'une règle rétrogradée, dans un projet généré par cette version, pour vérifier que l'agent ouvre le fichier annoncé.
 
+---
+
+# Première mesure avec le banc d'essai (3 novembre 2026)
+
+`agy` 1.4.12 en mode non interactif, modèle `gemini-3.8-flash-medium`, effort medium, 3 répétitions par scénario, projet : le dépôt de l'application avec son harnais à jour.
+
+| Scénario | Résultat | Lecture |
+| :--- | :--- | :--- |
+| C1 règle `always_on` | 3/3 | Fiable |
+| C2 règle `glob` | 1/3 | **Non fiable** : l'agent lit le fichier et le résume sans appliquer la règle |
+| C3 règle `model_decision` | 3/3 | Fiable avec une invite qui n'interdit pas d'ouvrir des fichiers |
+| C3b idem avec pointeur dans `AGENTS.md` | 3/3 | Aucun gain mesurable : plafond atteint dès C3 |
+| C4 skill (texte `SELFTEST-SKILL`) | 1 réussite, 1 jeton inventé (`SKILL-OK-Z5V8TN`), 1 erreur 503 | Non concluant ; l'invite interdisait d'ouvrir des fichiers |
+| C5 sous-agent | 3/3 | Fiable |
+| C6 sous-agent `model: flash` | 2/2 conclusifs, 1 erreur 503 | Sous-agent appelé ; le sous-agent répond « modèle inconnu » : l'effet du champ n'est pas prouvé |
+| W1 workflow hérité | 3/3 | Toujours exécuté sur 1.4.12 |
+| G1 tâche courte | 3/3 | Faute corrigée, aucun commentaire sur le modèle |
+| G2 tâche longue | 3/3 | Une phrase « Réglage conseillé… Je poursuis avec le réglage actuel. », puis plan complet (7 000 à 9 000 caractères), sans arrêt ni modification de fichier |
+
+Consommation : environ 20 500 jetons en entrée pour une réponse d'un mot (contexte de base : consignes de la plateforme et harnais) ; une tâche de plan (G2) consomme 47 000 à 70 000 jetons au total, en 65 à 135 secondes.
+
+## Ce que cela change
+
+1. **La règle de gouvernance fonctionne** dans la surface CLI avec ce modèle (G1 et G2, 3/3).
+2. **La conclusion « les règles `model_decision` sont peu fiables » (T3) est en partie un défaut de sonde** : l'ancienne invite demandait de n'ouvrir aucun fichier, ce qui empêche de lire le corps de la règle. Hypothèse non démontrée : le scénario `C3n` (même invite que l'ancienne T3) sert à la tester. De même pour le skill (T4) : un skill se charge en lisant son `SKILL.md`. Les sondes T3 et T4 du pack ne contiennent plus cette consigne.
+3. **Les règles `glob` restent peu fiables** (1/3). Le scénario `C2b` mesure si le pointeur d'`AGENTS.md` les rattrape.
+4. **Un agent qui ne voit pas le contenu d'un fichier invente un jeton plausible** (`SKILL-OK-Z5V8TN`, `DECISION-OK-94KNWQ`) : un jeton d'un autre identifiant est un échec, jamais un succès partiel.
+5. Deux essais ont échoué sur une erreur 503 du service alors que la réponse contenait le bon jeton : ces erreurs sont désormais classées « indéterminées » et exclues des taux. Un essai (C4) a attendu 10 minutes une tâche de fond avant d'échouer.
+
