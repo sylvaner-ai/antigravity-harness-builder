@@ -64,9 +64,10 @@ flowchart TD
 
 Aucun sous-agent (`.agents/agents/<name>.md`) n'embarque de propriété `model` dans son frontmatter YAML. Le choix du couple **Modèle / Niveau d'effort** est intégralement piloté par la règle permanente `.agents/rules/model-effort-governance.md` (`trigger: always_on`) :
 
-1. **Questionnement systématique avant chaque tâche :** Avant d'exécuter chaque tâche, l'agent principal évalue le couple `(Modèle / Niveau d'effort)` offrant le meilleur résultat avec un **ratio coût / performance optimal**.
-2. **Exécution automatique si conforme :** Si le couple optimal est identique à celui actuellement paramétré dans `Model Selection` (visible via `<USER_SETTINGS_CHANGE>`), l'agent lance la tâche automatiquement.
-3. **Arbitrage explicite en cas d'écart :** Sinon, l'agent s'arrête avant de lancer la tâche et demande à l'utilisateur de modifier ses paramètres avec **un seul couple préconisé** (sauf dérogation explicite de l'utilisateur).
+1. **Tâche courte** (question, relecture, correction bornée dans un seul fichier) : exécution directe, sans commentaire sur le modèle.
+2. **Tâche longue ou à enjeu :** avant de commencer, une seule fois, l'agent principal compare le réglage actif (`Model Selection`, visible via `<USER_SETTINGS_CHANGE>`) au couple conseillé ; si l'écart est net, il formule **un seul couple préconisé** en une phrase et poursuit immédiatement.
+3. **Action difficilement réversible (migration destructive, suppression, refonte appliquée au code) :** si le réglage actif est inférieur au couple préconisé, l'agent s'arrête et demande à l'utilisateur de modifier `Model Selection`. Planifier ou analyser n'est jamais une raison de s'arrêter.
+4. **Délégation proportionnée :** un sous-agent n'est sollicité que pour une sous-tâche indépendante, bornée et volumineuse ; les revues et audits sont en lecture seule.
 
 ### Matrice des Sous-Agents Retenus
 

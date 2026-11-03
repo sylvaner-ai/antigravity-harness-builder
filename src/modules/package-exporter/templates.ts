@@ -105,7 +105,7 @@ ${agentsList}
 Après mise en place des fichiers, vérifiez que :
 1. Chaque skill possède bien son fichier \`.agents/skills/<name>/SKILL.md\` avec frontmatter YAML valide (\`name\` et \`description\`).
 2. Chaque sous-agent dans \`.agents/agents/<name>.md\` utilise exclusivement des outils natifs Antigravity et **ne comporte aucun champ \`model\`** dans son frontmatter YAML (la gouvernance du couple Modèle / Effort étant centralisée dans \`.agents/rules/model-effort-governance.md\` et \`docs/ORCHESTRATION.md\`).
-3. Aucun dossier \`.agents/workflows/\` n'est utilisé : ces workflows ne sont plus indexés ni exécutables dans Antigravity depuis le 19 octobre 2026. Une procédure réutilisable est un skill (\`.agents/skills/<nom>/SKILL.md\`), appelable par \`/<nom>\`.
+3. Aucun dossier \`.agents/workflows/\` n'est utilisé : la documentation officielle annonce l'arrêt des workflows au 19 octobre 2026 (certaines versions les exécutent encore). Une procédure réutilisable est un skill (\`.agents/skills/<nom>/SKILL.md\`), appelable par \`/<nom>\`, qui fonctionne dans les deux cas.
 4. Les liens relatifs entre \`AGENTS.md\`, \`docs/ORCHESTRATION.md\`, les skills et les sous-agents sont résolus et sans doublons.
 
 ### Étape 7 — Relecture critique des règles et des hypothèses (\`docs/ASSUMPTIONS.md\`)
@@ -243,7 +243,7 @@ ${SLASH_COMMAND_SUGGESTION_POLICY}
 
 ${renderSlashCommandBullets()}
 
-Les procédures réutilisables sont des skills (\`.agents/skills/\`), pas des workflows.`;
+Les procédures réutilisables sont des skills (\`.agents/skills/\`), pas des workflows (arrêt annoncé).`;
 }
 
 /**
@@ -566,8 +566,8 @@ flowchart TD
 Aucun sous-agent (\`.agents/agents/<name>.md\`) n'embarque de propriété \`model\` dans son frontmatter YAML. Le choix du couple **Modèle / Niveau d'effort** est intégralement piloté par la règle permanente \`.agents/rules/model-effort-governance.md\` (\`trigger: always_on\`) :
 
 1. **Tâche courte** (question, relecture, correction bornée dans un seul fichier) : exécution directe, sans commentaire sur le modèle.
-2. **Tâche longue ou à enjeu :** avant de commencer, une seule fois, l'agent principal compare le réglage actif au couple conseillé ; si l'écart est net, il formule **un seul couple préconisé** en une ligne et poursuit.
-3. **Tâche critique et irréversible (T4) :** si le réglage actif est inférieur au couple préconisé (\`Pro — Effort High\`), l'agent s'arrête et demande à l'utilisateur de modifier \`Model Selection\` avant d'engager des changements irréversibles.
+2. **Tâche longue ou à enjeu :** avant de commencer, une seule fois, l'agent principal compare le réglage actif au couple conseillé ; si l'écart est net, il formule **un seul couple préconisé** en une phrase et poursuit immédiatement.
+3. **Action difficilement réversible (migration destructive, suppression, refonte appliquée au code) :** si le réglage actif est inférieur au couple préconisé (\`Pro — Effort High\`), l'agent s'arrête et demande à l'utilisateur de modifier \`Model Selection\`. Planifier ou analyser n'est jamais une raison de s'arrêter.
 4. **Délégation proportionnée :** un sous-agent n'est sollicité que pour une sous-tâche indépendante, bornée et volumineuse ; les revues et audits sont en lecture seule.
 
 ### Matrice des Sous-Agents Retenus
@@ -617,7 +617,7 @@ ${SLASH_COMMAND_SUGGESTION_POLICY}
 
 ${renderSlashCommandBullets()}
 
-Les procédures réutilisables sont des skills (\`.agents/skills/\`) ; les workflows (\`.agents/workflows/\`) ne sont plus exécutables depuis le 19 octobre 2026.`;
+Les procédures réutilisables sont des skills (\`.agents/skills/\`) ; les workflows (\`.agents/workflows/\`) sont voués à disparaître (arrêt annoncé au 19 octobre 2026, encore exécutés par certaines versions).`;
 }
 
 /**

@@ -557,7 +557,7 @@ export function parseAndQualifyEccRepositoryEntries(
     const split = splitMarkdownFrontmatter(entry.content);
     const sanitized = sanitizeClaudeSpecificReferences(split.body);
     const adaptationNotes: string[] = [
-      "Conversion d'une commande slash ECC ('commands/') en Skill natif Antigravity ('.agents/skills/<name>/SKILL.md') suite à la dépréciation des workflows le 19 octobre 2026 (§4.4 CDC).",
+      "Conversion d'une commande slash ECC ('commands/') en Skill natif Antigravity ('.agents/skills/<name>/SKILL.md') suite à l'arrêt annoncé des workflows le 19 octobre 2026 (§4.4 CDC).",
     ];
 
     for (const rep of sanitized.replacements) {

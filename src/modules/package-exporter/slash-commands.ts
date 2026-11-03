@@ -2,10 +2,12 @@
  * Commandes slash natives d'Antigravity que le harnais recommande à l'utilisateur.
  *
  * Source : documentation officielle https://antigravity.google/docs/slash-commands/ (consultée le 3 novembre 2026).
- * Seules les commandes dont l'usage est décrit par la documentation sont listées. `/compact` n'y figure pas ;
- * `/effort` et `/agents` y sont nommées sans description : elles ne sont donc pas recommandées.
- * Les anciens workflows (`.agents/workflows/`) ne sont plus exécutables depuis le 19 octobre 2026 : une
- * procédure réutilisable est un skill (`.agents/skills/<nom>/SKILL.md`), appelable par `/<nom>`.
+ * Seules les commandes dont l'usage est décrit par la documentation sont recommandées. `/compact` n'y figure pas,
+ * mais l'auto-test du 3 novembre 2026 (T8) montre qu'elle existe dans la version testée : son effet n'étant pas
+ * documenté, elle n'est pas recommandée. `/effort` et `/agents` sont nommées sans description : même traitement.
+ * Workflows (`.agents/workflows/`) : arrêt annoncé au 19 octobre 2026 par la documentation, mais l'auto-test (T9) montre
+ * qu'ils s'exécutent encore dans la version testée. Le harnais ne produit que des skills (`.agents/skills/<nom>/SKILL.md`,
+ * appelables par `/<nom>`), qui fonctionnent dans les deux cas.
  */
 export interface SlashCommandGuide {
   command: string;

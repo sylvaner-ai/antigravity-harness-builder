@@ -43,6 +43,7 @@ Conformément aux consignes de la Mission 0 (§6 et §7), aucune réponse n'a é
   2. Privilégier systématiquement les composants du dossier `skills/` d'ECC (qui couvrent déjà 90 % des besoins).
   3. Lorsqu'une commande du dossier `commands/` d'ECC apporte une valeur unique non couverte par un skill existant, la convertir automatiquement en un **Skill natif valide** (`.agents/skills/<command-name>/SKILL.md` avec frontmatter conforme) et la marquer comme `ecc_adapted` dans le manifeste.
 - **Question :** Confirmez-vous cet arbitrage (zéro fichier `.agents/workflows/` généré, conversion éventuelle en `.agents/skills/<name>/SKILL.md`) ?
+- **Erratum du 3 novembre 2026 :** l'auto-test (T9) montre qu'un workflow s'exécute encore dans la version d'Antigravity de l'utilisateur, malgré l'échéance annoncée. L'arbitrage « skills uniquement » reste valable (les skills fonctionnent dans les deux cas), mais l'arrêt des workflows n'est pas constaté.
 
 ### Q4. Validation des choix technologiques différés au Jalon 0 (ADR-02 à ADR-07)
 - **Contexte (§8.0 & §13 du CDC) :** Le cahier des charges demandait d'évaluer et de proposer au Jalon 0 un choix unique pour chaque responsabilité différée.
