@@ -22,6 +22,14 @@ La règle fait environ 2,5 Ko. Elle ne demande rien pour une tâche courte, comp
 
 Aucun champ `model` n'est écrit dans le YAML des sous-agents : le comportement de ce champ dans l'IDE n'est pas vérifié.
 
+## Règles chargées à la demande (option C)
+
+Les règles `model_decision` et `glob` se sont déclenchées de façon peu fiable lors de l'auto-test (T3 : un essai exact sur trois ; T2 : un essai exact sur trois). Le plafond du contexte permanent rétrograde des règles en `model_decision`, ce qui pouvait les rendre inopérantes. `AGENTS.md`, lui, est toujours lu : il contient désormais la section « Règles à lire avant certaines tâches », qui liste chaque règle non `always_on` avec son chemin, son sujet (et ses motifs de fichiers pour une règle `glob`) et demande à l'agent d'ouvrir le fichier avant la tâche concernée.
+
+- Les règles ne sont pas recopiées dans `AGENTS.md` : cela recréerait le volume de contexte permanent que le plafond évite. Seul un pointeur est ajouté (environ 150 octets par règle).
+- Au-delà de 3 500 octets de pointeurs, la liste devient compacte (noms de fichiers seulement) ; `AGENTS.md` reste sous 24 000 octets (tests unitaires et tests sur catalogue réel).
+- Ce mécanisme repose sur l'obéissance de l'agent à `AGENTS.md`. Il n'a pas encore été mesuré dans Antigravity : voir `docs/AUTO_TEST_RESULTATS.md`.
+
 ## Sous-agents
 
 - Les injonctions amont « MUST BE USED » et « PROACTIVELY » sont retirées des descriptions (`normalizeDelegationDescription`) ; la délégation est réservée aux sous-tâches indépendantes, bornées et volumineuses.

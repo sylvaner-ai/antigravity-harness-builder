@@ -135,20 +135,36 @@ function truncateOneLine(text: string, max: number): string {
   return one.length > max ? `${one.slice(0, max - 1).trimEnd()}…` : one;
 }
 
-/** Index compact des règles : les règles `always_on` sont nommées, les autres regroupées par déclencheur. */
+/** Taille maximale (octets) du bloc listant les règles à lire avant certaines tâches ; au-delà, liste compacte. */
+const ON_DEMAND_RULES_DETAILED_MAX_BYTES = 3_500;
+
+/** Sujet lisible d'une règle chargée à la demande (description générée, ou à défaut le nom de la règle). */
+function onDemandTopic(rule: DeterministicPackageInput['selectedRules'][number]): string {
+  const description = (rule.frontmatter.description ?? '').trim();
+  const topic = description.replace(/^À consulter lorsque la tâche concerne\s*:\s*/i, '').replace(/\.$/, '');
+  const globs = (rule.frontmatter as { globs?: string }).globs;
+  const base = topic.length > 0 ? topic : rule.slug.replace(/-/g, ' ');
+  return rule.frontmatter.trigger === 'glob' && globs ? `${truncateOneLine(base, 90)} (fichiers : \`${truncateOneLine(globs, 70)}\`)` : truncateOneLine(base, 120);
+}
+
+/**
+ * Index des règles. `AGENTS.md` est toujours lu : les règles `always_on` y sont nommées, et chaque règle
+ * chargée à la demande (`glob`, `model_decision`, `manual`) y est annoncée avec son chemin et la consigne de
+ * l'ouvrir avant la tâche concernée, car son chargement automatique n'est pas garanti (auto-test T2 et T3).
+ */
 function renderRuleIndex(rules: DeterministicPackageInput['selectedRules']): string {
-  const groups = new Map<string, string[]>();
-  for (const r of rules) {
-    const key = r.frontmatter.trigger;
-    groups.set(key, [...(groups.get(key) ?? []), `\`${r.slug}\``]);
-  }
-  const label: Record<string, string> = {
-    always_on: 'Toujours actives',
-    glob: 'Activées selon les fichiers modifiés',
-    model_decision: 'Activées selon la tâche',
-    manual: 'Sur demande',
-  };
-  return [...groups.entries()].map(([k, v]) => `- **${label[k] ?? k}** : ${v.join(', ')}`).join('\n');
+  const always = rules.filter((r) => r.frontmatter.trigger === 'always_on');
+  const onDemand = rules.filter((r) => r.frontmatter.trigger !== 'always_on');
+  const lines = [`- **Toujours actives** : ${always.length > 0 ? always.map((r) => `\`${r.slug}\``).join(', ') : '*(aucune)*'}`];
+  if (onDemand.length === 0) return lines.join('\n');
+
+  const detailed = onDemand.map((r) => `- \`.agents/rules/${r.slug}.md\` : ${onDemandTopic(r)}`).join('\n');
+  const compact = `Fichiers : ${onDemand.map((r) => `\`${r.slug}\``).join(', ')} (dossier \`.agents/rules/\`).`;
+  const list = Buffer.byteLength(detailed, 'utf8') <= ON_DEMAND_RULES_DETAILED_MAX_BYTES ? detailed : compact;
+  lines.push(
+    `\n### Règles à lire avant certaines tâches\nCes règles ne sont pas relues à chaque requête et leur chargement automatique n'est pas garanti. **Avant de commencer une tâche qui correspond à l'une d'elles, ouvrez le fichier indiqué (\`view_file\`) et appliquez-le.**\n${list}`
+  );
+  return lines.join('\n');
 }
 
 /**
