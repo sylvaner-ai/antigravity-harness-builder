@@ -185,7 +185,7 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     c2m.prepare(dir);
     const rule = readFileSync(join(dir, '.agents/rules/selftest-glob.md'), 'utf8');
     expect(rule).toMatch(/^trigger: model_decision$/m);
-    expect(rule).toMatch(/^description: À consulter lorsque la tâche concerne le fichier selftest-target\.txt$/m);
+    expect(rule).toMatch(/^description: "À consulter lorsque la tâche concerne des fichiers \*\*\/selftest-target\.txt — Règle de sonde liée à un fichier"$/m);
     expect(rule).not.toMatch(/globs:/);
     expect(rule).toContain(`GLOB-OK-${NONCE}`);
   });

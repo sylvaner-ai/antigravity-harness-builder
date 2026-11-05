@@ -19,7 +19,7 @@ import {
   computeSha256,
 } from '../package-exporter/exporter';
 import { renderModelEffortGovernanceRuleBody } from '../package-exporter/governance-template';
-import { enforceAlwaysOnBudget, isReviewerSlug, normalizeDelegationDescription, restrictReviewerTools } from './context-budget';
+import { convertGlobRulesToModelDecision, enforceAlwaysOnBudget, isReviewerSlug, normalizeDelegationDescription, restrictReviewerTools } from './context-budget';
 import { resolveComponentProvenance } from '../ecc-catalog/catalog-sources';
 import {
   DeterministicPackageInput,
@@ -406,7 +406,8 @@ export class HarnessBuilderService {
       });
     }
 
-    // Plafonnement du contexte permanent : les règles en excès passent en `model_decision`
+    // Règles de fichiers : `glob` non fiable à l'auto-test, converties en `model_decision` ; puis plafonnement du contexte permanent
+    selectedRules.splice(0, selectedRules.length, ...convertGlobRulesToModelDecision(selectedRules));
     const budgeted = enforceAlwaysOnBudget(selectedRules, selection.presetMode);
     selectedRules.splice(0, selectedRules.length, ...budgeted.rules);
 

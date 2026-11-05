@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  convertGlobRulesToModelDecision,
+  modelDecisionDescriptionForGlob,
   ALWAYS_ON_BUDGET_BYTES,
   enforceAlwaysOnBudget,
   isReviewerSlug,
@@ -247,3 +249,66 @@ describe('Option C — AGENTS.md annonce les règles chargées à la demande', (
     expect(renderAgentsMarkdown(input)).toBe(renderAgentsMarkdown(input));
   });
 });
+
+describe('Règles de fichiers : glob converti en model_decision', () => {
+  const globRule = (slug: string, globs: string, description: string, originStatus: 'ecc_adapted' | 'project_custom' = 'ecc_adapted'): SelectedRuleSpec =>
+    ({
+      slug,
+      title: slug,
+      frontmatter: { trigger: 'glob', globs, description },
+      markdownBody: 'corps',
+      selectionRationale: 'test',
+      originStatus,
+    }) as SelectedRuleSpec;
+
+  it('remplace le déclencheur par model_decision, met les motifs en tête de la description et retire le champ globs', () => {
+    const [out] = convertGlobRulesToModelDecision([globRule('react-patterns', '**/*.tsx, **/*.jsx', 'Bonnes pratiques React.')]);
+    expect(out!.frontmatter.trigger).toBe('model_decision');
+    expect(out!.frontmatter).not.toHaveProperty('globs');
+    expect(out!.frontmatter.description).toBe('À consulter lorsque la tâche concerne des fichiers **/*.tsx, **/*.jsx — Bonnes pratiques React');
+    expect(out!.selectionRationale).toMatch(/Convertie de « glob » en « model_decision »/);
+    expect(out!.markdownBody).toBe('corps');
+  });
+
+  it('laisse intactes les règles toujours actives, à la décision et manuelles, et convertit aussi les règles du projet', () => {
+    const others = [rule('common-security', 500), onDecision(), { ...onDecision(), slug: 'm', frontmatter: { trigger: 'manual' } } as SelectedRuleSpec];
+    expect(convertGlobRulesToModelDecision(others)).toEqual(others);
+    const [custom] = convertGlobRulesToModelDecision([globRule('project-api', 'src/api/**', 'Contrats API', 'project_custom')]);
+    expect(custom!.frontmatter.trigger).toBe('model_decision');
+    expect(custom!.originStatus).toBe('project_custom');
+  });
+
+  it('borne la longueur de la description et reste idempotent', () => {
+    const long = globRule('x', Array.from({ length: 40 }, (_, i) => `src/dossier-${i}/**/*.ts`).join(', '), 'Sujet '.repeat(80));
+    const once = convertGlobRulesToModelDecision([long]);
+    expect(once[0]!.frontmatter.description!.length).toBeLessThanOrEqual(320);
+    expect(convertGlobRulesToModelDecision(once)).toEqual(once);
+    expect(modelDecisionDescriptionForGlob('', '**/*.ts')).toBe('À consulter lorsque la tâche concerne des fichiers **/*.ts');
+  });
+
+  it('un harnais généré ne contient plus aucune règle glob, et les règles converties sont annoncées dans AGENTS.md', async () => {
+    const sample = createSampleDeterministicInput();
+    const selection = new SelectionEngine().selectComponents(sample.profile, getBuiltinCuratedExcellenceComponents(), { presetMode: 'THOROUGH' });
+    const pkg = await new HarnessBuilderService().buildHarness(sample.profile, selection);
+    const ruleFiles = pkg.files.filter((f) => f.relativePath.startsWith('.agents/rules/'));
+    expect(ruleFiles.length).toBeGreaterThan(0);
+    for (const f of ruleFiles) expect(f.content.slice(0, 400), f.relativePath).not.toMatch(/^trigger:\s*glob/m);
+    const converted = ruleFiles.filter((f) => /^description:.*concerne des fichiers/m.test(f.content.slice(0, 600)));
+    expect(converted.length).toBeGreaterThan(0);
+    const agents = pkg.files.find((f) => f.relativePath === 'AGENTS.md')!.content;
+    for (const f of converted) expect(agents).toContain(f.relativePath);
+    expect(pkg.manifest.validationSummary.valid).toBe(true);
+  });
+});
+
+function onDecision(): SelectedRuleSpec {
+  return {
+    slug: 'd',
+    title: 'd',
+    frontmatter: { trigger: 'model_decision', description: 'Sujet' },
+    markdownBody: 'x',
+    selectionRationale: 'test',
+    originStatus: 'ecc_adapted',
+  } as SelectedRuleSpec;
+}
+

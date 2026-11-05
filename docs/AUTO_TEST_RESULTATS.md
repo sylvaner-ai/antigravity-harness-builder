@@ -139,3 +139,16 @@ Consommation moyenne : G1 environ 18 800 jetons, G2 environ 45 650, sans jetons 
 
 Conclusion provisoire : la gouvernance se comporte comme attendu avec Opus low sur les essais conclusifs, mais l'échantillon (2 essais) est petit. Les règles `glob` sont peu fiables avec deux modèles différents ; le scénario `C2m` mesure l'alternative `model_decision` (9 essais sur 9 réussis avec Flash pour cette famille de règles).
 
+## Quatrième mesure : `glob` contre `model_decision` (5 novembre 2026)
+
+`gemini-3.8-flash-medium`, effort medium, 6 répétitions chacune, même lot, même fichier cible.
+
+| Scénario | Résultat |
+| :--- | :--- |
+| C2 règle `glob` | **0/6** |
+| C2m même règle en `model_decision` (description citant le fichier) | **6/6** |
+
+Cumul des règles `glob` : 4 essais réussis sur 14 (Flash 4/12, Opus low 0/2). Cumul de la famille `model_decision` avec Flash : 15 sur 15.
+
+Décision : le générateur convertit les règles `glob` en `model_decision` (voir `docs/GOUVERNANCE_CONTEXTE.md`). À mesurer ensuite : C2m avec la description produite par le générateur (motifs en tête), puis une règle de langage réelle.
+
