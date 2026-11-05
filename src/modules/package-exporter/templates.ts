@@ -799,16 +799,19 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
 
   const tableRows = allComponents
     .map((c) => {
-      const sourceLink = c.prov
-        ? `[${c.prov.sourceRelativePath}](${c.prov.sourceUrl}) (\`${c.prov.commitSha.slice(0, 8)}\`)`
-        : 'Généré sur mesure pour le projet';
+      const curated = c.prov?.repositoryUrl === GENERATOR_REPOSITORY_URL;
+      const sourceLink = curated
+        ? `Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [${c.prov!.sourceUrl}](${c.prov!.sourceUrl}))`
+        : c.prov
+          ? `[${c.prov.sourceRelativePath}](${c.prov.sourceUrl}) (\`${c.prov.commitSha.slice(0, 8)}\`)`
+          : 'Généré sur mesure pour le projet';
       const notes =
         c.prov && c.prov.adaptationNotes.length > 0
           ? c.prov.adaptationNotes.join(' ; ')
           : c.origin === 'ecc_verbatim'
             ? 'Utilisé tel quel'
             : 'Créé spécifiquement pour le projet cible';
-      return `| ${c.type} | \`${c.dest}\` | \`${c.origin}\` | ${sourceLink} | ${c.rationale} | ${notes} |`;
+      return `| ${c.type} | \`${c.dest}\` | \`${curated ? 'project_custom' : c.origin}\` | ${sourceLink} | ${c.rationale} | ${notes} |`;
     })
     .join('\n');
 
