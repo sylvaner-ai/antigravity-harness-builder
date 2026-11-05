@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import ToastNotification from '@/components/ui/ToastNotification';
 import { RefreshCw, CheckCircle2 } from 'lucide-react';
