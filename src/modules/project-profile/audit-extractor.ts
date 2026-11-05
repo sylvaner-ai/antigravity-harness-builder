@@ -21,7 +21,7 @@ export const AntigravityAuditReportSchema = z.object({
       packageManager: z.string().optional(),
       infrastructureAndDeployment: z.array(z.string()).optional().default([]),
     })
-    .default({ languages: [], frameworks: [], databases: [], testingTools: [] }),
+    .default({ languages: [], frameworks: [], databases: [], testingTools: [], infrastructureAndDeployment: [] }),
   operationalCommands: z
     .object({
       build: z.string().optional(),
