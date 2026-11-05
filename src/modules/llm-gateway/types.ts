@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 export interface StructuredLLMRequest<T> {
   systemPrompt: string;
   userPrompt: string;
-  schema: z.ZodType<T, any, any>;
+  schema: z.ZodType<T, any>;
   modelTier?: 'fast' | 'pro';
   temperature?: number;
   maxTokens?: number;
