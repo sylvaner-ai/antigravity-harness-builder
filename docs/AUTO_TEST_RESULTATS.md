@@ -125,3 +125,17 @@ Lectures :
 - C3n consomme plus de jetons de raisonnement (environ 2 300) que C3 (environ 300) : l'agent pèse la consigne contradictoire avant de répondre.
 - Limites : un seul modèle (petit), surface CLI uniquement, 3 répétitions : le banc n'a pas encore été exécuté avec Opus 5.5 (quota épuisé jusqu'au 4 novembre).
 
+## Troisième mesure : Opus 5.5, effort low (3 novembre 2026)
+
+Trois essais prévus par scénario ; le quota s'est épuisé au troisième tour de chaque scénario (réinitialisation annoncée dans 71 h 48). Ces trois essais ont d'abord été comptés comme des échecs par erreur : le message « Individual quota reached » ne contenait aucun des mots recherchés. Le banc le classe désormais « indéterminé ». Résultats conclusifs :
+
+| Scénario | Résultat | Remarque |
+| :--- | :--- | :--- |
+| C2 règle `glob` | 0/2 | Jeton absent. Cumul toutes mesures : 4/8 |
+| G1 tâche courte | 2/2 | Faute corrigée, aucun commentaire sur le modèle |
+| G2 tâche longue | 2/2 selon les critères automatiques | Plans de 1 668 et 2 215 caractères (contre 7 000 à 9 000 avec Flash) : réponses à relire avant de conclure sur la conformité de la phrase d'introduction |
+
+Consommation moyenne : G1 environ 18 800 jetons, G2 environ 45 650, sans jetons de raisonnement comptés (`thinking_tokens=0`).
+
+Conclusion provisoire : la gouvernance se comporte comme attendu avec Opus low sur les essais conclusifs, mais l'échantillon (2 essais) est petit. Les règles `glob` sont peu fiables avec deux modèles différents ; le scénario `C2m` mesure l'alternative `model_decision` (9 essais sur 9 réussis avec Flash pour cette famille de règles).
+

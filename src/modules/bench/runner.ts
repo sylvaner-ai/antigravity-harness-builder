@@ -41,7 +41,7 @@ export interface RunRecord {
 }
 
 /** Erreurs du service (et non du harnais) : indisponibilité, quota, délai dépassé. */
-const SERVICE_ERROR = /UNAVAILABLE|RESOURCE_EXHAUSTED|code 429|code 503|DEADLINE_EXCEEDED|interrompu par le banc/i;
+const SERVICE_ERROR = /UNAVAILABLE|RESOURCE_EXHAUSTED|quota|code 429|code 503|DEADLINE_EXCEEDED|interrompu par le banc/i;
 
 const IGNORED_TOP_DIRS = new Set(['.git', '.gemini', 'node_modules', '.next']);
 

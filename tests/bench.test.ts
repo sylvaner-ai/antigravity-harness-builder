@@ -27,7 +27,7 @@ const prompt = args[args.indexOf('-p') + 1];
 const tokenIn = (file, prefix) => { try { return (fs.readFileSync(file, 'utf8').match(new RegExp(prefix + '-[A-Z0-9]{6}')) || [''])[0]; } catch { return ''; } };
 const out = (response, status = 'SUCCESS', error) => { console.log(JSON.stringify({ conversation_id: 'c1', status, response, ...(error ? { error } : {}), duration_seconds: 1.5, num_turns: 2, usage: { input_tokens: 100, output_tokens: 20 } })); process.exit(status === 'SUCCESS' ? 0 : 1); };
 if (process.env.FAKE_AGY_FAIL) out('', 'ERROR');
-if (process.env.FAKE_AGY_503) out('', 'ERROR', 'API error: UNAVAILABLE (code 503): The service is currently unavailable.');
+if (process.env.FAKE_AGY_503) out('', 'ERROR', process.env.FAKE_AGY_503 === '1' ? 'API error: UNAVAILABLE (code 503): The service is currently unavailable.' : process.env.FAKE_AGY_503);
 if (process.env.FAKE_AGY_SLEEP) setTimeout(() => out('trop tard'), 60000);
 else if (prompt.includes('SELFTEST-A')) out(tokenIn('.agents/rules/selftest-always.md', 'ALWAYS-OK'));
 else if (prompt.includes('selftest-target.txt')) out('Résumé. ' + tokenIn('.agents/rules/selftest-glob.md', 'GLOB-OK'));
@@ -94,7 +94,7 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     const records = await bench(null);
     delete process.env.FAKE_AGY_FOLLOW_POINTER;
 
-    expect(records).toHaveLength(13);
+    expect(records).toHaveLength(14);
     // C3 (sans pointeur) échoue : l’agent simulé n’ouvre la règle que si AGENTS.md la lui annonce (mesure de l’option C)
     const withoutPointer = ['C3-decision', 'C3n-decision-sans-lecture'];
     for (const r of records.filter((x) => !withoutPointer.includes(x.scenarioId))) expect(r.verdict.pass, `${r.scenarioId} : ${r.verdict.detail}`).toBe(true);
@@ -172,6 +172,24 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     expect(hard!.verdict.inconclusive).toBeFalsy();
   });
 
+  it('un quota épuisé (message sans code HTTP) est lui aussi indéterminé', async () => {
+    process.env.FAKE_AGY_503 = 'Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 71h48m49s.';
+    const [r] = await bench(['C1-always-on']);
+    delete process.env.FAKE_AGY_503;
+    expect(r!.verdict.inconclusive).toBe(true);
+  });
+
+  it('la règle de fichier exprimée en model_decision ne garde ni globs ni trigger glob', async () => {
+    const c2m = buildBenchScenarios(NONCE).find((s) => s.id === 'C2m-glob-en-decision')!;
+    const dir = mkdtempSync(join(work, 'c2m-'));
+    c2m.prepare(dir);
+    const rule = readFileSync(join(dir, '.agents/rules/selftest-glob.md'), 'utf8');
+    expect(rule).toMatch(/^trigger: model_decision$/m);
+    expect(rule).toMatch(/^description: À consulter lorsque la tâche concerne le fichier selftest-target\.txt$/m);
+    expect(rule).not.toMatch(/globs:/);
+    expect(rule).toContain(`GLOB-OK-${NONCE}`);
+  });
+
   it('les sondes de skill et de règle à la décision ne demandent pas de ne lire aucun fichier', () => {
     const byId = new Map(buildBenchScenarios(NONCE).map((s) => [s.id, s]));
     expect(byId.get('C4-skill')!.prompt).not.toMatch(/aucun fichier/);
@@ -237,7 +255,7 @@ describe('Lot 5 — ligne de commande', () => {
     expect(cli(['--project', project, '--scenarios', 'ZZ']).stderr).toMatch(/inconnu\(s\) : ZZ/);
     const dry = cli(['--project', project, '--runs', '2', '--config', 'a:low', '--config', 'b:high', '--dry-run']);
     expect(dry.status).toBe(0);
-    expect(dry.stdout).toMatch(/Exécutions prévues : 52 appels/);
+    expect(dry.stdout).toMatch(/Exécutions prévues : 56 appels/);
   });
 
   it('s’arrête avec un message clair si agy n’est pas utilisable (contrôle préalable)', () => {
