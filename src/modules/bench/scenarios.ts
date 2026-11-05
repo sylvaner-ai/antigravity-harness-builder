@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { buildSelfTestPack } from '../selftest/pack';
+import { modelDecisionDescriptionForGlob } from '../harness-builder/context-budget';
 import { renderRuleIndex } from '../package-exporter/templates';
 import type { SelectedRuleSpec } from '../package-exporter/schema';
 
@@ -127,7 +128,7 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
     },
     {
       id: 'C2m-glob-en-decision',
-      title: 'Règle de fichier exprimée en model_decision (description citant le fichier)',
+      title: 'Règle de fichiers convertie en model_decision (description produite par le générateur)',
       group: 'chargement',
       prompt: 'Lis le fichier selftest-target.txt et résume-le en une phrase.',
       requiresHarness: false,
@@ -139,7 +140,7 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
           glob.relativePath,
           glob.content
             .replace('trigger: glob', 'trigger: model_decision')
-            .replace(/^description:.*$/m, "description: À consulter lorsque la tâche concerne le fichier selftest-target.txt")
+            .replace(/^description:.*$/m, `description: ${JSON.stringify(modelDecisionDescriptionForGlob('Règle de sonde liée à un fichier', '**/selftest-target.txt'))}`)
             .replace(/^globs:.*\n/m, '')
         );
       },

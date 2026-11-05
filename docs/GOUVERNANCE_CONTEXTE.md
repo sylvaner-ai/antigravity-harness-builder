@@ -24,11 +24,19 @@ Aucun champ `model` n'est écrit dans le YAML des sous-agents : le comportement 
 
 ## Règles chargées à la demande (option C)
 
-Les règles `model_decision` et `glob` se sont déclenchées de façon peu fiable lors de l'auto-test (T3 : un essai exact sur trois ; T2 : un essai exact sur trois). Le plafond du contexte permanent rétrograde des règles en `model_decision`, ce qui pouvait les rendre inopérantes. `AGENTS.md`, lui, est toujours lu : il contient désormais la section « Règles à lire avant certaines tâches », qui liste chaque règle non `always_on` avec son chemin, son sujet (et ses motifs de fichiers pour une règle `glob`) et demande à l'agent d'ouvrir le fichier avant la tâche concernée.
+`AGENTS.md`, toujours lu, contient la section « Règles à lire avant certaines tâches », qui liste chaque règle non `always_on` avec son chemin, son sujet et la consigne de l'ouvrir avant la tâche concernée.
 
 - Les règles ne sont pas recopiées dans `AGENTS.md` : cela recréerait le volume de contexte permanent que le plafond évite. Seul un pointeur est ajouté (environ 150 octets par règle).
 - Au-delà de 3 500 octets de pointeurs, la liste devient compacte (noms de fichiers seulement) ; `AGENTS.md` reste sous 24 000 octets (tests unitaires et tests sur catalogue réel).
-- Ce mécanisme repose sur l'obéissance de l'agent à `AGENTS.md`. Il n'a pas encore été mesuré dans Antigravity : voir `docs/AUTO_TEST_RESULTATS.md`.
+- Mesure (banc d'essai, `gemini-3.8-flash-medium`) : les règles `model_decision` se déclenchent sans le pointeur (15 essais sur 15). Le pointeur est donc une garantie à faible coût, dont le gain n'est pas démontré.
+
+## Règles liées à des fichiers : `glob` converti en `model_decision`
+
+Le déclenchement `glob` n'est pas fiable : 4 essais sur 14 réussis (Flash et Opus), dont 0 sur 6 dans la dernière mesure, alors que la même règle exprimée en `model_decision` réussit 6 essais sur 6 dans le même lot (voir `docs/AUTO_TEST_RESULTATS.md`).
+
+Le générateur convertit donc toute règle `glob` (catalogue ou règle du projet) en `model_decision` : le champ `globs` est retiré et la description devient « À consulter lorsque la tâche concerne des fichiers `<motifs>` — `<sujet d'origine>` » (motifs limités à 100 caractères, sujet à 140). La règle est annoncée dans `AGENTS.md` comme les autres règles à la demande, et ne compte pas dans le plafond du contexte permanent.
+
+Limites de la mesure : un seul modèle pour la comparaison (Flash), une règle de sonde dont les motifs désignent un fichier unique, et non des motifs de langage comme `**/*.tsx`. La conversion de règles réelles reste à mesurer.
 
 ## Sous-agents
 

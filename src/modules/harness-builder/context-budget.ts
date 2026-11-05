@@ -126,3 +126,41 @@ export function isReviewerSlug(slug: string): boolean {
 export function restrictReviewerTools(tools: readonly AntigravitySubagentTool[]): AntigravitySubagentTool[] {
   return tools.filter((t) => !MUTATION_TOOLS.has(t));
 }
+
+/** Longueurs maximales (caractères) des éléments de la description d'une règle de fichiers convertie. */
+const GLOB_DESCRIPTION_MAX = { globs: 100, original: 140 } as const;
+
+const clip = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
+
+/**
+ * Description `model_decision` d'une règle initialement liée à des fichiers : les motifs en tête, puis le sujet
+ * d'origine. Les motifs ne sont plus un déclencheur automatique, ils servent à l'agent pour décider s'il doit lire la règle.
+ */
+export function modelDecisionDescriptionForGlob(originalDescription: string, globs: string): string {
+  const subject = originalDescription.trim().replace(/\.$/, '');
+  const patterns = clip(globs.trim().replace(/\s+/g, ' '), GLOB_DESCRIPTION_MAX.globs);
+  return `À consulter lorsque la tâche concerne des fichiers ${patterns}${subject ? ` — ${clip(subject, GLOB_DESCRIPTION_MAX.original)}` : ''}`;
+}
+
+/**
+ * Convertit les règles `glob` en `model_decision`. Le déclenchement par fichier s'est révélé peu fiable à l'auto-test
+ * (0 essai réussi sur 6 pour une règle `glob`, 6 sur 6 pour la même règle en `model_decision`, même modèle et même
+ * lot : docs/AUTO_TEST_RESULTATS.md). La conversion s'applique aussi aux règles écrites pour le projet.
+ */
+export function convertGlobRulesToModelDecision(rules: readonly SelectedRuleSpec[]): SelectedRuleSpec[] {
+  return rules.map((rule) => {
+    if (rule.frontmatter.trigger !== 'glob') return rule;
+    const globs = (rule.frontmatter.globs ?? rule.frontmatter.glob ?? '').trim();
+    const { globs: _globs, glob: _glob, ...rest } = rule.frontmatter;
+    return {
+      ...rule,
+      frontmatter: {
+        ...rest,
+        trigger: 'model_decision' as const,
+        description: modelDecisionDescriptionForGlob(rule.frontmatter.description ?? '', globs),
+      },
+      selectionRationale: `${rule.selectionRationale} Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md).`,
+    };
+  });
+}
+

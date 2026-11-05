@@ -186,6 +186,11 @@ describe('Harnais complet généré depuis le catalogue réel', () => {
         expect(Buffer.byteLength(agentsMd.content, 'utf8')).toBeLessThan(24_000);
         expect(agentsMd.content).not.toMatch(/\/compact|PROACTIVELY|MUST BE USED/);
 
+        // Les règles liées à des fichiers (glob) sont converties en model_decision (déclenchement par fichier non fiable)
+        for (const f of pkg.files.filter((x) => x.relativePath.startsWith('.agents/rules/'))) {
+          expect(f.content.slice(0, 400), f.relativePath).not.toMatch(/^trigger:\s*glob/m);
+        }
+
         // Option C : AGENTS.md (toujours lu) annonce chaque règle chargée à la demande, avec son chemin
         const onDemandRules = pkg.files.filter(
           (f) => f.relativePath.startsWith('.agents/rules/') && !/^trigger:\s*always_on/m.test(f.content.slice(0, 300))
