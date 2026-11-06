@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
 import { getDb, sourceDocuments } from '@/db';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { LocalDiskStorage } from '@/modules/documents/storage';
+import { checkUploadLimits } from '@/modules/documents/upload-limits';
 import {
   extractDocumentText,
   sanitizeTextForPromptSafety,
@@ -21,6 +23,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!file) {
       return NextResponse.json({ error: 'Fichier manquant.' }, { status: 400 });
+    }
+
+    const existingDocs = await getDb()
+      .select({ id: sourceDocuments.id })
+      .from(sourceDocuments)
+      .where(eq(sourceDocuments.projectId, projectId));
+    const limitError = checkUploadLimits(file.size, existingDocs.length);
+    if (limitError) {
+      return NextResponse.json({ error: limitError.error }, { status: limitError.status });
     }
 
     const arrayBuffer = await file.arrayBuffer();

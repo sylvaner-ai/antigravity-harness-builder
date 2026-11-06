@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { estimateTokens, LlmLimits, readLlmLimits } from './limits';
 import { LLMGatewayPort, LLMResponse, StructuredLLMRequest, computeLLMCacheKey } from './types';
 
 export class GeminiLLMAdapter implements LLMGatewayPort {
@@ -7,6 +8,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
   private readonly defaultProModel: string;
   private readonly fallbackModels: string[];
   private readonly requestTimeoutMs: number;
+  private readonly limits: LlmLimits;
   private readonly inMemoryCache = new Map<string, LLMResponse<any>>();
 
   constructor(apiKey = process.env.GEMINI_API_KEY, options?: { fastModel?: string; proModel?: string }) {
@@ -16,6 +18,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
     this.client = new GoogleGenAI({ apiKey });
     this.defaultFastModel = options?.fastModel ?? process.env.GEMINI_MODEL_FAST ?? 'gemini-3.8-flash';
     this.defaultProModel = options?.proModel ?? process.env.GEMINI_MODEL_PRO ?? 'gemini-3.8-pro';
+    this.limits = readLlmLimits();
     const configuredTimeout = Number(process.env.GEMINI_TIMEOUT_MS);
     this.requestTimeoutMs = Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 60_000;
     this.fallbackModels = (process.env.GEMINI_FALLBACK_MODELS ?? 'gemini-3.5-flash,gemini-3.5-flash-lite')
@@ -31,6 +34,14 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
     const cached = this.inMemoryCache.get(cacheKey);
     if (cached) {
       return { ...cached, cached: true };
+    }
+
+    const estimatedInputTokens = estimateTokens(req.systemPrompt) + estimateTokens(req.userPrompt);
+    if (estimatedInputTokens > this.limits.maxInputTokens) {
+      throw new Error(
+        `Le texte à analyser est trop volumineux (environ ${estimatedInputTokens} jetons estimés ; plafond ${this.limits.maxInputTokens}). ` +
+          'Réduisez le document ou augmentez MAX_LLM_TOKENS_PER_GENERATION.'
+      );
     }
 
     const contents: any[] = [];
@@ -57,12 +68,22 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
     let response: any;
     let lastError: any;
     let successfulModel = model;
+    let callsMade = 0;
+    let callLimitReached = false;
 
     for (const targetModel of modelsToTry) {
       let attempt = 0;
       const maxRetries = targetModel === model ? 2 : 1;
 
       while (attempt <= maxRetries) {
+        if (callsMade >= this.limits.maxCalls) {
+          callLimitReached = true;
+          lastError = new Error(
+            `Plafond de ${this.limits.maxCalls} appels Gemini atteint pour cette génération (MAX_LLM_CALLS_PER_GENERATION).`
+          );
+          break;
+        }
+        callsMade++;
         try {
           response = await this.client.models.generateContent({
             model: targetModel,
@@ -106,7 +127,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
         }
       }
 
-      if (response) break;
+      if (response || callLimitReached) break;
     }
 
     if (!response) {

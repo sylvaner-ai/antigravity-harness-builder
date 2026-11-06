@@ -151,3 +151,8 @@ docker exec -it <conteneur-application> node dist/create-user.cjs prenom@exemple
 En développement : `npm run admin:user -- prenom@exemple.fr [--role ADMIN] [--reset]`.
 
 Les connexions sont limitées : 5 échecs consécutifs bloquent une adresse e-mail et 20 échecs une adresse IP pendant 15 minutes (mémoire de l'instance, remise à zéro au redémarrage).
+
+## Plafonds de consommation
+
+- **Gemini** : `MAX_LLM_CALLS_PER_GENERATION` (défaut 12 appels, essais et replis compris) et `MAX_LLM_TOKENS_PER_GENERATION` (défaut 250 000 jetons estimés pour le texte envoyé). Au dépassement, l'extraction s'arrête avec un message explicite avant tout appel (taille) ou à l'appel concerné (nombre).
+- **Envoi de documents** : `MAX_FILE_SIZE_MB` (défaut 20 Mo par fichier, réponse 413) et `MAX_PROJECT_FILES` (défaut 15 documents par projet).
