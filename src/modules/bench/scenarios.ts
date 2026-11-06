@@ -246,12 +246,14 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       prepare: () => undefined,
       evaluate: (c) => {
         const delivered = c.response.length >= 1_200;
-        const waits = WAITS_FOR_USER.test(c.response);
+        const waitMatch = WAITS_FOR_USER.exec(c.response);
+        const waits = waitMatch !== null;
+        const waitExcerpt = waitMatch ? ` (« …${c.response.slice(Math.max(0, waitMatch.index - 80), waitMatch.index + waitMatch[0].length + 80).replace(/\s+/g, ' ')}… »)` : '';
         const modified = c.filesChanged.length > 0;
         const intro = SETTING_COMMENT.test(c.response.slice(0, 400));
         return {
           pass: delivered && !waits && !modified,
-          detail: `plan livré (${c.response.length} car.) : ${delivered ? 'oui' : 'non'} ; attente de l'utilisateur : ${waits ? 'oui' : 'non'} ; fichiers modifiés : ${modified ? c.filesChanged.join(', ') : 'aucun'} ; mention du réglage en tête : ${intro ? 'oui' : 'non'}`,
+          detail: `plan livré (${c.response.length} car.) : ${delivered ? 'oui' : 'non'} ; attente de l'utilisateur : ${waits ? 'oui' : 'non'}${waitExcerpt} ; fichiers modifiés : ${modified ? c.filesChanged.join(', ') : 'aucun'} ; mention du réglage en tête : ${intro ? 'oui' : 'non'}`,
         };
       },
     },
