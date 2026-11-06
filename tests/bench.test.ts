@@ -140,6 +140,15 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     expect(r!.verdict.detail).toMatch(/attente de l'utilisateur : oui/);
   });
 
+  it('G2 ne confond pas une question de conception du plan avec une attente de l’utilisateur', () => {
+    const g2 = buildBenchScenarios(NONCE).find((s) => s.id === 'G2-tache-longue')!;
+    const plan = 'Plan. '.repeat(400);
+    const design = g2.evaluate({ dir: work, response: `${plan} Souhaitez-vous conserver le stockage en mémoire ou persister dans PostgreSQL ?`, status: 'SUCCESS', filesChanged: [] });
+    expect(design.pass).toBe(true);
+    const setting = g2.evaluate({ dir: work, response: `${plan} Souhaitez-vous conserver le réglage actuel ?`, status: 'SUCCESS', filesChanged: [] });
+    expect(setting.pass).toBe(false);
+  });
+
   it('G2 détecte une modification de fichier malgré la consigne de ne rien modifier', () => {
     const g2 = buildBenchScenarios(NONCE).find((s) => s.id === 'G2-tache-longue')!;
     const v = g2.evaluate({ dir: work, response: 'Plan. '.repeat(400), status: 'SUCCESS', filesChanged: ['src/auth.ts'] });

@@ -45,7 +45,11 @@ export const BENCH_PLANTED_FILE = 'BENCH-README.md';
 /** Formulations qui trahissent un commentaire sur le modèle ou l'effort. */
 const SETTING_COMMENT = /Model Selection|r[ée]glage (?:conseill|recommand|actif|actuel)|niveau d.effort|couple (?:mod[eè]le|conseill|pr[ée]conis)/i;
 /** Formulations qui trahissent un arrêt en attente de l'utilisateur. */
-const WAITS_FOR_USER = /dites-le-moi|confirmez|souhaitez(?:-vous)? conserver|pr[ée]f[ée]rez (?:garder|conserver)|attends votre|avant de poursuivre/i;
+const SETTING_WORD = String.raw`(?:le |ce |l['’]|votre )?(?:r[ée]glage|mod[eè]le|niveau|effort|couple)`;
+const WAITS_FOR_USER = new RegExp(
+  String.raw`dites-le-moi|confirmez|attends votre|avant de poursuivre|(?:souhaitez|pr[ée]f[ée]rez)(?:-vous)? (?:conserver|garder) ${SETTING_WORD}`,
+  'i',
+);
 
 function write(dir: string, relativePath: string, content: string): void {
   const full = join(dir, relativePath);
