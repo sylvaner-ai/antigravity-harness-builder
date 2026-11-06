@@ -1,13 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
+  const [registrationAllowed, setRegistrationAllowed] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/config')
+      .then((r) => r.json())
+      .then((c) => setRegistrationAllowed(c.registrationAllowed === true))
+      .catch(() => setRegistrationAllowed(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,20 +100,22 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-6 pt-6 border-t border-slate-100 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            setIsRegister(!isRegister);
-            setError(null);
-          }}
-          className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-        >
-          {isRegister
-            ? 'Vous possédez déjà un compte ? Connectez-vous'
-            : 'Pas encore de compte ? Créer un compte'}
-        </button>
-      </div>
+      {registrationAllowed && (
+        <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setError(null);
+            }}
+            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+          >
+            {isRegister
+              ? 'Vous possédez déjà un compte ? Connectez-vous'
+              : 'Pas encore de compte ? Créer un compte'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

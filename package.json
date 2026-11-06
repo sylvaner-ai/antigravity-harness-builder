@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/run-migrate.cjs",
+    "admin:user": "tsx scripts/create-user.ts",
     "fixtures:selection": "tsx scripts/build-selection-fixtures.mts"
   },
   "dependencies": {
