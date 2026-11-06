@@ -1,0 +1,16 @@
+---
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne des fichiers **/*.ts, **/*.tsx — Règle ECC (typescript/testing) : TypeScript/JavaScript Testing"
+---
+
+# TypeScript/JavaScript Testing
+
+> This file extends [common/testing.md](../common/testing.md) with TypeScript/JavaScript specific content.
+
+## E2E Testing
+
+Use **Playwright** as the E2E testing framework for critical user flows.
+
+## Agent Support
+
+- **e2e-runner** - Playwright E2E testing specialist

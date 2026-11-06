@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: "Règle ECC (react/testing) : React Testing"
-globs: "**/*.tsx, **/*.jsx"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne des fichiers **/*.tsx, **/*.jsx — Règle ECC (react/testing) : React Testing"
 ---
 
 # React Testing

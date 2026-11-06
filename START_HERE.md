@@ -2,7 +2,7 @@
 
 **Projet cible :** antigravity-harness-builder  
 **Surface Antigravity ciblée :** `IDE`  
-**Référence ECC :** `v2.2.3` (commit `b38be6a7f6350964d59328b52f0624e1d1d552d1`)  
+**Référence ECC :** `affaan-m/ECC@b38be6a` (commit `b38be6a7f6350964d59328b52f0624e1d1d552d1`)  
 **Identifiant de génération :** `canonical-generation-01`
 
 ---
@@ -42,53 +42,59 @@ Installez les composants dans l'arborescence canonique `.agents/` de Google Anti
 - Documentation de référence : `docs/*.md` et `docs/HARNESS_MANIFEST.json`.
 - Règles modulaires :
 - `.agents/rules/model-effort-governance.md` (always_on)
-- `.agents/rules/common-code-review.md` (always_on)
+- `.agents/rules/api-security-guards.md` (model_decision)
+- `.agents/rules/common-code-review.md` (model_decision)
+- `.agents/rules/common-security.md` (always_on)
 - `.agents/rules/common-testing.md` (always_on)
-- `.agents/rules/react-patterns.md` (glob)
-- `.agents/rules/typescript-security.md` (glob)
-- `.agents/rules/api-security-guards.md` (glob)
-- `.agents/rules/ui-craft-and-5-states.md` (glob)
-- `.agents/rules/plan-first-and-anti-omissions.md` (always_on)
-- `.agents/rules/common-development-workflow.md` (always_on)
-- `.agents/rules/common-patterns.md` (always_on)
+- `.agents/rules/react-patterns.md` (model_decision)
+- `.agents/rules/react-security.md` (model_decision)
+- `.agents/rules/react-testing.md` (model_decision)
+- `.agents/rules/typescript-security.md` (model_decision)
+- `.agents/rules/typescript-testing.md` (model_decision)
+- `.agents/rules/ui-craft-and-5-states.md` (model_decision)
+- `.agents/rules/web-security.md` (model_decision)
+- `.agents/rules/web-testing.md` (model_decision)
+- `.agents/rules/plan-first-and-anti-omissions.md` (model_decision)
+- `.agents/rules/react-coding-style.md` (model_decision)
+- `.agents/rules/common-development-workflow.md` (model_decision)
 - `.agents/rules/common-git-workflow.md` (always_on)
-- `.agents/rules/common-coding-style.md` (always_on)
-- `.agents/rules/common-hooks.md` (always_on)
-- `.agents/rules/common-performance.md` (always_on)
-- `.agents/rules/project-design-system-tokens.md` (glob)
-- `.agents/rules/project-drizzle-orm-guidelines.md` (glob)
+- `.agents/rules/typescript-coding-style.md` (model_decision)
+- `.agents/rules/web-coding-style.md` (model_decision)
+- `.agents/rules/typescript-patterns.md` (model_decision)
+- `.agents/rules/web-patterns.md` (model_decision)
+- `.agents/rules/common-coding-style.md` (model_decision)
+- `.agents/rules/project-drizzle-orm-guidelines.md` (model_decision)
 - Skills natifs (avec divulgation progressive) :
-- `.agents/skills/react-test/SKILL.md`
-- `.agents/skills/agent-payment-x402/SKILL.md`
-- `.agents/skills/ai-regression-testing/SKILL.md`
 - `.agents/skills/backend-patterns/SKILL.md`
-- `.agents/skills/bun-runtime/SKILL.md`
-- `.agents/skills/click-path-audit/SKILL.md`
-- `.agents/skills/codebase-onboarding/SKILL.md`
-- `.agents/skills/coding-standards/SKILL.md`
 - `.agents/skills/deployment-patterns/SKILL.md`
 - `.agents/skills/frontend-patterns/SKILL.md`
-- `.agents/skills/gateguard/SKILL.md`
-- `.agents/skills/healthcare-phi-compliance/SKILL.md`
-- `.agents/skills/mysql-patterns/SKILL.md`
-- `.agents/skills/mybatis-patterns/SKILL.md`
-- `.agents/skills/prompt-optimizer/SKILL.md`
 - `.agents/skills/react-testing/SKILL.md`
 - `.agents/skills/security-review/SKILL.md`
+- `.agents/skills/tdd-workflow/SKILL.md`
+- `.agents/skills/typescript-patterns/SKILL.md`
+- `.agents/skills/verification-loop/SKILL.md`
+- `.agents/skills/react-patterns/SKILL.md`
+- `.agents/skills/api-design/SKILL.md`
+- `.agents/skills/frontend-a11y/SKILL.md`
+- `.agents/skills/database-migrations/SKILL.md`
+- `.agents/skills/docker-patterns/SKILL.md`
+- `.agents/skills/postgres-patterns/SKILL.md`
+- `.agents/skills/design-system/SKILL.md`
+- `.agents/skills/frontend-design-direction/SKILL.md`
 - Sous-agents spécialisés :
-- `.agents/agents/build-error-resolver.md` (couple cible centralisé : `Flagship — Effort Medium`)
+- `.agents/agents/architect.md` (couple cible centralisé : `Flagship — Effort High`)
 - `.agents/agents/code-reviewer.md` (couple cible centralisé : `Flagship — Effort High`)
-- `.agents/agents/performance-optimizer.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/database-reviewer.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/react-reviewer.md` (couple cible centralisé : `Flagship — Effort High`)
 - `.agents/agents/security-auditor.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/ui-craft-reviewer.md` (couple cible centralisé : `Flagship — Effort High`)
 - `.agents/agents/react-build-resolver.md` (couple cible centralisé : `Flagship — Effort Medium`)
-- `.agents/agents/refactor-cleaner.md` (couple cible centralisé : `Flagship — Effort Medium`)
-- `.agents/agents/doc-updater.md` (couple cible centralisé : `Standard — Effort Low`)
 
 ### Étape 6 — Vérification structurelle (Chemins, YAML, Liens et Doublons)
 Après mise en place des fichiers, vérifiez que :
 1. Chaque skill possède bien son fichier `.agents/skills/<name>/SKILL.md` avec frontmatter YAML valide (`name` et `description`).
 2. Chaque sous-agent dans `.agents/agents/<name>.md` utilise exclusivement des outils natifs Antigravity et **ne comporte aucun champ `model`** dans son frontmatter YAML (la gouvernance du couple Modèle / Effort étant centralisée dans `.agents/rules/model-effort-governance.md` et `docs/ORCHESTRATION.md`).
-3. Aucun dossier obsolète `.agents/workflows/` n'est utilisé comme fondation obligatoire (conformément à la dépréciation du 19 octobre 2026).
+3. Aucun dossier `.agents/workflows/` n'est utilisé : la documentation officielle annonce l'arrêt des workflows au 19 octobre 2026 (certaines versions les exécutent encore). Une procédure réutilisable est un skill (`.agents/skills/<nom>/SKILL.md`), appelable par `/<nom>`, qui fonctionne dans les deux cas.
 4. Les liens relatifs entre `AGENTS.md`, `docs/ORCHESTRATION.md`, les skills et les sous-agents sont résolus et sans doublons.
 
 ### Étape 7 — Relecture critique des règles et des hypothèses (`docs/ASSUMPTIONS.md`)

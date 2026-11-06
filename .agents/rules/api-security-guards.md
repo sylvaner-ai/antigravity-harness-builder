@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: Validation stricte Zod, requêtes SQL préparées, zéro fuite de secrets et en-têtes sécurisés
-globs: "**/api/**, **/routes/**, **/server/**, **/db/**, src/**/*.{ts,js}"
+trigger: model_decision
+description: À consulter lorsque la tâche concerne des fichiers **/api/**/*.{ts,js}, **/routes/**/*.{ts,js}, **/server/**/*.{ts,js}, **/db/**/*.{ts,js} — Validation stricte Zod, requêtes SQL préparées, zéro fuite de secrets et en-têtes sécurisés
 ---
 
 # Directives de Sécurité API & Zero-Trust (OWASP)

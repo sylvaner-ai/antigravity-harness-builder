@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: Bonnes pratiques Drizzle ORM, transactions et migrations atomiques
-globs: "**/db/**/*.{ts,js}, **/schema/**/*.{ts,js}, **/migrations/**/*.{ts,js}, src/db/**"
+trigger: model_decision
+description: À consulter lorsque la tâche concerne des fichiers **/db/**/*.{ts,js}, **/schema/**/*.{ts,js}, **/migrations/**/*.{ts,js}, src/db/** — Bonnes pratiques Drizzle ORM, transactions et migrations atomiques
 ---
 
 # Bonnes Pratiques Drizzle ORM & Intégrité des Données

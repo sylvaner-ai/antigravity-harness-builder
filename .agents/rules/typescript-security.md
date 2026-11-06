@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: "Règle ECC (typescript/security) : TypeScript/JavaScript Security"
-globs: "**/*.ts, **/*.tsx"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne des fichiers **/*.ts, **/*.tsx — Règle ECC (typescript/security) : TypeScript/JavaScript Security"
 ---
 
 # TypeScript/JavaScript Security
@@ -24,4 +23,4 @@ if (!apiKey) {
 
 ## Agent Support
 
-- Use **security-reviewer** skill for comprehensive security audits
+- Use **security-auditor** skill for comprehensive security audits

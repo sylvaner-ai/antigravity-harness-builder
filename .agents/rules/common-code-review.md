@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "Règle ECC (common/code-review) : Code Review Standards"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne : code review."
 ---
 
 # Code Review Standards
@@ -43,7 +43,7 @@ Before marking code complete:
 
 ## Security Review Triggers
 
-**STOP and use security-reviewer agent when:**
+**STOP and use security-auditor agent when:**
 
 - Authentication or authorization code
 - User input handling
@@ -69,11 +69,11 @@ Use these agents for code review:
 | Agent | Purpose |
 |-------|---------|
 | **code-reviewer** | General code quality, patterns, best practices |
-| **security-reviewer** | Security vulnerabilities, OWASP Top 10 |
-| **typescript-reviewer** | TypeScript/JavaScript specific issues |
-| **python-reviewer** | Python specific issues |
-| **go-reviewer** | Go specific issues |
-| **rust-reviewer** | Rust specific issues |
+| **security-auditor** | Security vulnerabilities, OWASP Top 10 |
+| **code-reviewer** | TypeScript/JavaScript specific issues |
+| **code-reviewer** | Python specific issues |
+| **code-reviewer** | Go specific issues |
+| **code-reviewer** | Rust specific issues |
 
 ## Review Workflow
 
@@ -123,7 +123,7 @@ Use these agents for code review:
 
 This rule works with:
 
-- [testing.md](testing.md) - Test coverage requirements
-- [security.md](security.md) - Security checklist
+- [common-testing.md](common-testing.md) - Test coverage requirements
+- [common-security.md](common-security.md) - Security checklist
 - [git-workflow.md](git-workflow.md) - Commit standards
-- [agents.md](agents.md) - Agent delegation
+- [AGENTS.md](../../AGENTS.md) - Agent delegation

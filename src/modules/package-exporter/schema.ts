@@ -115,7 +115,7 @@ export const DeterministicPackageInputSchema = z.object({
   packageRootName: KebabSlugSchema,
   eccCommitSha: z.string().regex(/^[0-9a-f]{7,40}$/i),
   eccVersionTag: z.string().min(1).default('v2.2.3'),
-  inputDocuments: z.array(InputDocumentDigestSchema).min(2),
+  inputDocuments: z.array(InputDocumentDigestSchema).min(1),
   profile: ProjectProfileSchema,
   excellencePacks: z.array(z.string()).default([]),
   selectedRules: z.array(SelectedRuleSpecSchema).min(1),

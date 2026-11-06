@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "Règle ECC (common/development-workflow) : Development Workflow"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne : development workflow."
 ---
 
 # Development Workflow
@@ -26,7 +26,7 @@ The Feature Implementation Workflow describes the development pipeline: research
    - Break down into phases
 
 2. **TDD Approach**
-   - Use **tdd-guide** agent
+   - Use **tdd-workflow** agent
    - Write tests first (RED)
    - Implement to pass tests (GREEN)
    - Refactor (IMPROVE)
@@ -40,7 +40,7 @@ The Feature Implementation Workflow describes the development pipeline: research
 4. **Commit & Push**
    - Detailed commit messages
    - Follow conventional commits format
-   - See [git-workflow.md](./git-workflow.md) for commit message format and PR process
+   - See [common-git-workflow.md](common-git-workflow.md) for commit message format and PR process
 
 5. **Pre-Review Checks**
    - Verify all automated checks (CI/CD) are passing

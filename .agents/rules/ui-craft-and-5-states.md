@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: Règle des 5 états UI, respect des tokens visuels et conformité WCAG AA
-globs: "**/*.{tsx,jsx,vue,svelte,html}"
+trigger: model_decision
+description: À consulter lorsque la tâche concerne des fichiers **/*.{tsx,jsx,vue,svelte,html} — Règle des 5 états UI, respect des tokens visuels et conformité WCAG AA
 ---
 
 # Directives Craft UI, Design Tokens & Règle des 5 États

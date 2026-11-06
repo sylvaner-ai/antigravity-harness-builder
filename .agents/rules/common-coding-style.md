@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "Règle ECC (common/coding-style) : Coding Style"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne : coding style."
 ---
 
 # Coding Style

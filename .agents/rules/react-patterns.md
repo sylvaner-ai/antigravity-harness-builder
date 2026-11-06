@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: "Règle ECC (react/patterns) : React Patterns"
-globs: "**/*.tsx, **/*.jsx"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne des fichiers **/*.tsx, **/*.jsx — Règle ECC (react/patterns) : React Patterns"
 ---
 
 # React Patterns

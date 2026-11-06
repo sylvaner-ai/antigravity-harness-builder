@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: Planification préalable obligatoire, workflow TDD strict et checklist de non-régression
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne : plan first and anti omissions."
 ---
 
 # Rigueur de Développement & Prévention des Oublis
