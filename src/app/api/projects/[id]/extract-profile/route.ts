@@ -54,6 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ profile });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur lors de l extraction du profil.';
+    console.error('[extract-profile]', msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
