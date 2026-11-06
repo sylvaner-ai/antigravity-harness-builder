@@ -522,8 +522,8 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
                   className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-sans bg-white focus:ring-2 focus:ring-indigo-500 text-slate-800"
                 >
                   <option value="gemini-3.8-flash">gemini-3.8-flash (Recommandé)</option>
-                  <option value="gemini-3.8-flash-lite">gemini-3.8-flash-lite (Rapide)</option>
                   <option value="gemini-3.5-flash">gemini-3.5-flash (Stable)</option>
+                  <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Rapide)</option>
                 </select>
               </div>
             )}
