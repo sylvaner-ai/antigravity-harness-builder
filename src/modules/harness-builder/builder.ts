@@ -296,12 +296,12 @@ export class HarnessBuilderService {
       const qualityCostRecommendation =
         comp.recommendedModelTier || comp.recommendedEffort
           ? recommendedModelTier === 'flash' && recommendedEffort === 'low'
-            ? 'Couple Flash — Effort Low : latence minimale et coût très réduit pour les tâches légères et documentaires.'
+            ? 'Couple Standard — Effort Low : latence minimale et coût très réduit pour les tâches légères et documentaires.'
             : recommendedModelTier === 'flash'
-              ? 'Couple Flash — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.'
+              ? 'Couple Standard — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.'
               : recommendedEffort === 'high'
-                ? 'Couple Pro — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.'
-                : 'Couple Pro — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le TDD et la résolution chirurgicale d’erreurs.'
+                ? 'Couple Flagship — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.'
+                : 'Couple Flagship — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le TDD et la résolution chirurgicale d’erreurs.'
           : inferredPair.qualityCostRecommendation;
 
       selectedSubagents.push({

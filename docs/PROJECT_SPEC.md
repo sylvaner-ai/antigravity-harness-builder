@@ -96,10 +96,10 @@ flowchart LR
 - **Gouvernance Centralisée Modèle / Niveau d'Effort (`model-effort-governance.md`) :**
   - Suppression de tout champ `model` statique dans le frontmatter YAML des sous-agents.
   - Matrice décisionnelle Coût / Performance par palier de complexité :
-    - **T1 — Léger & Documentaire :** `Flash — Effort Low`
-    - **T2 — Localisé & Vérification :** `Flash — Effort Medium`
-    - **T3 — Ingénierie Standard & TDD :** `Pro — Effort Medium`
-    - **T4 — Architecture, Sécurité & Critique :** `Pro — Effort High`
+    - **T1 — Léger & Documentaire :** `Standard — Effort Low`
+    - **T2 — Localisé & Vérification :** `Standard — Effort Medium`
+    - **T3 — Ingénierie Standard & TDD :** `Flagship — Effort Medium`
+    - **T4 — Architecture, Sécurité & Critique :** `Flagship — Effort High`
   - Gate d'arbitrage pré-tâche incitant l'agent à proposer le bon couple Modèle / Effort avant de démarrer une tâche.
 - **Recommandation Proactive des Commandes Slash :**
   - Consigne intégrée dans `AGENTS.md` et `docs/ORCHESTRATION.md` enjoignant l'agent à recommander proactivement les commandes slash clés à l'utilisateur (`/plan`, `/goal`, `/teamwork`, `/boost`, `/grill-me`, `/learn`).

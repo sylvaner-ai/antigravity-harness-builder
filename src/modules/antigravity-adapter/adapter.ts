@@ -152,7 +152,7 @@ export function inferRecommendedModelEffortPair(params: {
       recommendedModelTier: 'flash',
       recommendedEffort: 'low',
       qualityCostRecommendation:
-        'Couple Flash — Effort Low : latence minimale et coût très réduit pour la documentation et les mises à jour ciblées.',
+        'Couple Standard — Effort Low : latence minimale et coût très réduit pour la documentation et les mises à jour ciblées.',
     };
   }
 
@@ -161,7 +161,7 @@ export function inferRecommendedModelEffortPair(params: {
       recommendedModelTier: 'flash',
       recommendedEffort: 'medium',
       qualityCostRecommendation:
-        'Couple Flash — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.',
+        'Couple Standard — Effort Medium : exécution rapide et économique pour la vérification automatisée et les tâches bornées.',
     };
   }
 
@@ -175,7 +175,7 @@ export function inferRecommendedModelEffortPair(params: {
       recommendedModelTier: 'pro',
       recommendedEffort: 'high',
       qualityCostRecommendation:
-        'Couple Pro — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.',
+        'Couple Flagship — Effort High : raisonnement approfondi requis pour l’architecture, la performance critique, la sécurité et la revue indépendante.',
     };
   }
 
@@ -183,7 +183,7 @@ export function inferRecommendedModelEffortPair(params: {
     recommendedModelTier: 'pro',
     recommendedEffort: 'medium',
     qualityCostRecommendation:
-      'Couple Pro — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le refactoring sûr et la résolution d’erreurs de build.',
+      'Couple Flagship — Effort Medium : ratio coût/performance optimal pour l’ingénierie standard, le refactoring sûr et la résolution d’erreurs de build.',
   };
 }
 
@@ -284,18 +284,18 @@ export function sanitizeClaudeSpecificReferences(markdownBody: string): {
     // Modèles Claude -> Google Antigravity
     {
       regex: /\bHaiku\b/g,
-      replacement: 'Flash',
-      label: 'Haiku -> Flash',
+      replacement: 'Standard',
+      label: 'Haiku -> Standard',
     },
     {
       regex: /\bSonnet\b/g,
-      replacement: 'Pro',
-      label: 'Sonnet -> Pro',
+      replacement: 'Flagship',
+      label: 'Sonnet -> Flagship',
     },
     {
       regex: /\bOpus\b/g,
-      replacement: 'Pro',
-      label: 'Opus -> Pro',
+      replacement: 'Flagship',
+      label: 'Opus -> Flagship',
     },
     // Raccourcis et flags spécifiques Claude Code
     {

@@ -249,7 +249,7 @@ model: pro
       expect(Buffer.byteLength(govFile!.content, 'utf8')).toBeLessThan(3_500);
       const orch = pkg.files.find((f) => f.relativePath === 'docs/ORCHESTRATION.md');
       expect(orch?.content).toContain('`fast-changelog-helper`');
-      expect(orch?.content).toContain('Flash — Effort Low');
+      expect(orch?.content).toContain('Standard — Effort Low');
     });
 
     it('embarque automatiquement la gouvernance Modèle / Effort sans jamais modifier les agents existants de l’utilisateur, dans tous les formats de déploiement (ZIP, Base64 compact, Markdown allégé, Upgrade)', async () => {

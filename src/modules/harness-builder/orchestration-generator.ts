@@ -57,11 +57,11 @@ export function generateOrchestrationPlan(
             return `| **${a.name}** (\`${a.slug}\`) | ${a.description} | **\`${couple}\`** | ${tools} |`;
           })
           .join('\n')
-      : `| **Architect** | Architecture globale, schéma de données, respect des contraintes | **\`Pro — Effort High\`** | Lecture, Analyse, Documentation |
-| **Frontend Engineer** | Composants UI, accessibilité, intégration du Design System | **\`Pro — Effort Medium\`** | Fichiers, Commandes de test UI |
-| **Backend Engineer** | Logique métier, endpoints API, sécurité des données | **\`Pro — Effort Medium\`** | Fichiers, Commandes shell, DB |
-| **Security Reviewer** | Audit de sécurité, détection des vulnérabilités | **\`Pro — Effort High\`** | Lecture seule, Analyse statique |
-| **QA & Verification** | Exécution des tests unitaires et validation des AC | **\`Flash — Effort Medium\`** | Commandes de test, Lecture |`;
+      : `| **Architect** | Architecture globale, schéma de données, respect des contraintes | **\`Flagship — Effort High\`** | Lecture, Analyse, Documentation |
+| **Frontend Engineer** | Composants UI, accessibilité, intégration du Design System | **\`Flagship — Effort Medium\`** | Fichiers, Commandes de test UI |
+| **Backend Engineer** | Logique métier, endpoints API, sécurité des données | **\`Flagship — Effort Medium\`** | Fichiers, Commandes shell, DB |
+| **Security Reviewer** | Audit de sécurité, détection des vulnérabilités | **\`Flagship — Effort High\`** | Lecture seule, Analyse statique |
+| **QA & Verification** | Exécution des tests unitaires et validation des AC | **\`Standard — Effort Medium\`** | Commandes de test, Lecture |`;
 
   const skillsByPhase: Record<string, string[]> = {
     'Cadrage & Exploration': [],
