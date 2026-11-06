@@ -18,6 +18,7 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run typecheck && npm run build
+RUN npx esbuild src/db/migrate.ts --bundle --platform=node --format=cjs --external:pg --outfile=dist/migrate.cjs
 
 # 3. Image finale minimale d'exécution avec utilisateur non-root
 FROM base AS runner
@@ -32,6 +33,9 @@ RUN addgroup --system --gid 1001 nodejs \
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 USER nextjs
 EXPOSE 3000
