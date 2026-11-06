@@ -167,7 +167,7 @@ export function detectLicense(licenseText: string | undefined): string {
 export const REDISTRIBUTABLE_LICENSES = new Set(['MIT', 'Apache-2.0', 'BSD-3-Clause', 'BSD-2-Clause', 'CC-BY-4.0', 'Unlicense']);
 
 /** Dépôt de ce générateur : provenance des composants « curated ». */
-export const GENERATOR_REPOSITORY_URL = 'https://github.com/sylvaner-ai/antigravity-kit';
+export const GENERATOR_REPOSITORY_URL = 'https://github.com/sylvaner-ai/antigravity-harness-builder';
 
 export interface ComponentProvenance {
   repositoryUrl: string;
