@@ -46,10 +46,15 @@ export const BENCH_PLANTED_FILE = 'BENCH-README.md';
 const SETTING_COMMENT = /Model Selection|r[ée]glage (?:conseill|recommand|actif|actuel)|niveau d.effort|couple (?:mod[eè]le|conseill|pr[ée]conis)/i;
 /** Formulations qui trahissent un arrêt en attente de l'utilisateur. */
 const SETTING_WORD = String.raw`(?:le |ce |l['’]|votre )?(?:r[ée]glage|mod[eè]le|niveau|effort|couple)`;
-const WAITS_FOR_USER = new RegExp(
-  String.raw`dites-le-moi|confirmez|attends votre|avant de poursuivre|(?:souhaitez|pr[ée]f[ée]rez)(?:-vous)? (?:conserver|garder) ${SETTING_WORD}`,
-  'i',
-);
+/** Attente d'une décision sur le réglage : repérée n'importe où dans la réponse. */
+const WAITS_ON_SETTING = new RegExp(String.raw`(?:souhaitez|pr[ée]f[ée]rez)(?:-vous)? (?:conserver|garder) ${SETTING_WORD}`, 'i');
+/** Formulations génériques : ne comptent qu'en tête de réponse, où l'agent annonce son réglage (plus loin, ce sont les questions de conception d'un plan). */
+const WAITS_GENERIC = /dites-le-moi|confirmez|attends votre|avant de poursuivre/i;
+const GENERIC_WAIT_WINDOW = 600;
+
+function findWait(response: string): RegExpExecArray | null {
+  return WAITS_ON_SETTING.exec(response) ?? WAITS_GENERIC.exec(response.slice(0, GENERIC_WAIT_WINDOW));
+}
 
 function write(dir: string, relativePath: string, content: string): void {
   const full = join(dir, relativePath);
@@ -250,7 +255,7 @@ export function buildBenchScenarios(nonce: string): BenchScenario[] {
       prepare: () => undefined,
       evaluate: (c) => {
         const delivered = c.response.length >= 1_200;
-        const waitMatch = WAITS_FOR_USER.exec(c.response);
+        const waitMatch = findWait(c.response);
         const waits = waitMatch !== null;
         const waitExcerpt = waitMatch ? ` (« …${c.response.slice(Math.max(0, waitMatch.index - 80), waitMatch.index + waitMatch[0].length + 80).replace(/\s+/g, ' ')}… »)` : '';
         const modified = c.filesChanged.length > 0;
