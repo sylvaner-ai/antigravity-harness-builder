@@ -1,25 +1,41 @@
-# Harnais de Développement Google Antigravity — antigravity-harness-builder
+# Antigravity Harness Builder
 
-Ce paquet autonome a été généré par **Antigravity Harness Builder** pour configurer un environnement de développement agentique sur mesure pour le projet **antigravity-harness-builder**.
+Application web privée qui transforme le cahier des charges et le design system d'un projet en un **harnais de développement sur mesure pour Google Antigravity** : règles, skills, sous-agents, `AGENTS.md`, documentation et script de déploiement, sélectionnés dans un catalogue multi-sources.
 
-## Installation Rapide dans Google Antigravity
+Usage interne. Cahier des charges de référence : [`cahier_des_charges_antigravity_harness_builder.md`](./cahier_des_charges_antigravity_harness_builder.md).
 
-1. Extrayez le contenu de cette archive à la racine de votre projet cible (ou dans un dossier de staging).
-2. Ouvrez une nouvelle conversation dans **Google Antigravity** (surface configurée : `IDE`).
-3. Fournissez le fichier [`START_HERE.md`](./START_HERE.md) à l'agent principal en lui demandant d'exécuter le protocole d'installation en 10 étapes.
+## Fonctionnement
 
-## Structure du Paquet
+1. Import du cahier des charges et du `DESIGN.md` du projet cible.
+2. Extraction d'un profil de projet (LLM Gemini, validé par un schéma Zod), relu et confirmé par l'utilisateur.
+3. Sélection des composants dans le catalogue : ECC, emilkowalski/skills, obra/superpowers, cloudflare/security-audit-skill, dietrichgebert/ponytail et composants « curated » du générateur.
+4. Génération et export du paquet (`START_HERE.md`, `.agents/`, `AGENTS.md`, `docs/`), avec provenance et licences.
 
-- `START_HERE.md` : Prompt et protocole d'installation prudent en 10 étapes.
-- `AGENTS.md` : Instructions permanentes de la racine du projet (sans frontmatter YAML, < 24 Ko).
-- `docs/PROJECT_SPEC.md` : Cahier des charges normalisé avec traçabilité des sources.
-- `docs/DESIGN_SYSTEM.md` : Charte graphique, tokens visuels, composants et règles d'accessibilité.
-- `docs/ARCHITECTURE.md` : Contraintes techniques et décisions d'architecture.
-- `docs/ORCHESTRATION.md` : Politique de décomposition des tâches, délégation aux sous-agents, tiers de modèles et efforts conseillés.
-- `docs/ACCEPTANCE_CRITERIA.md` : Critères d'acceptation vérifiables par fonctionnalité.
-- `docs/ASSUMPTIONS.md` : Hypothèses proposées, déductions et informations manquantes à confirmer.
-- `docs/ECC_SOURCES.md` : Provenance exacte, commit (`v2.2.3` / `b38be6a7f6350964d59328b52f0624e1d1d552d1`) et licence MIT des composants Everything Claude Code (ECC).
-- `docs/HARNESS_MANIFEST.json` : Manifeste machine-readable et rapport de validation.
-- `.agents/rules/` : Règles natives Antigravity (`always_on`, `glob`, `model_decision`).
-- `.agents/skills/` : Skills natifs Antigravity (`SKILL.md` et ressources).
-- `.agents/agents/` : Sous-agents spécialisés à privilèges minimaux.
+Documentation utile : [`docs/CATALOGUE_MULTI_SOURCES.md`](./docs/CATALOGUE_MULTI_SOURCES.md), [`docs/GOUVERNANCE_CONTEXTE.md`](./docs/GOUVERNANCE_CONTEXTE.md), [`docs/AUTO_TEST_ANTIGRAVITY.md`](./docs/AUTO_TEST_ANTIGRAVITY.md), [`docs/BANC_ESSAI_ANTIGRAVITY.md`](./docs/BANC_ESSAI_ANTIGRAVITY.md), [`docs/OPERATIONS_AND_BACKUP.md`](./docs/OPERATIONS_AND_BACKUP.md).
+
+## Stack
+
+Next.js 16, React 19, TypeScript strict, Tailwind CSS, PostgreSQL + Drizzle, Zod 4, `@google/genai`, Vitest. Déploiement Docker (Coolify sur VPS).
+
+## Démarrage en développement
+
+```bash
+cp .env.example .env        # renseigner SESSION_SECRET, GEMINI_API_KEY, etc.
+npm ci
+npm run db:migrate          # PostgreSQL requis (DATABASE_URL)
+npm run dev
+```
+
+Commandes : `npm run typecheck`, `npm test`, `npm run build`.
+
+## Déploiement
+
+`docker compose up -d --build` (application + PostgreSQL 17). Variables : voir `.env.example`. Sauvegarde et exploitation : `docs/OPERATIONS_AND_BACKUP.md`.
+
+## Harnais du dépôt
+
+Ce dépôt est lui-même développé avec un harnais Antigravity généré par l'application : `AGENTS.md`, `START_HERE.md`, `.agents/` et [`docs/HARNESS_README.md`](./docs/HARNESS_README.md).
+
+## Kit historique
+
+L'ancien kit de règles et de BOOTSTRAP est conservé sur la branche `legacy-kit` de ce dépôt, en attendant son déplacement dans un dépôt dédié.
