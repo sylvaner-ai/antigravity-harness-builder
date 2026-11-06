@@ -5,6 +5,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
   private readonly client: GoogleGenAI;
   private readonly defaultFastModel: string;
   private readonly defaultProModel: string;
+  private readonly fallbackModels: string[];
   private readonly inMemoryCache = new Map<string, LLMResponse<any>>();
 
   constructor(apiKey = process.env.GEMINI_API_KEY, options?: { fastModel?: string; proModel?: string }) {
@@ -14,6 +15,10 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
     this.client = new GoogleGenAI({ apiKey });
     this.defaultFastModel = options?.fastModel ?? process.env.GEMINI_MODEL_FAST ?? 'gemini-3.8-flash';
     this.defaultProModel = options?.proModel ?? process.env.GEMINI_MODEL_PRO ?? 'gemini-3.8-pro';
+    this.fallbackModels = (process.env.GEMINI_FALLBACK_MODELS ?? 'gemini-3.5-flash,gemini-3.5-flash-lite')
+      .split(',')
+      .map((m) => m.trim())
+      .filter(Boolean);
   }
 
   async generateStructured<T>(req: StructuredLLMRequest<T>): Promise<LLMResponse<T>> {
@@ -40,8 +45,10 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
 
     // Appel à l'API Gemini avec repli automatique en cascade et gestion des pics de charge (503 / 429) (§8.3)
     const modelsToTry = [model];
-    if (model === 'gemini-3.8-flash') {
-      modelsToTry.push('gemini-3.8-flash-lite', 'gemini-3.5-flash');
+    if (model === this.defaultFastModel) {
+      for (const fallback of this.fallbackModels) {
+        if (!modelsToTry.includes(fallback)) modelsToTry.push(fallback);
+      }
     }
 
     let response: any;
