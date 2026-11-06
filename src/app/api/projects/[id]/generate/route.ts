@@ -116,16 +116,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .select()
       .from(sourceDocuments)
       .where(eq(sourceDocuments.projectId, projectId));
-    const inputDocuments = projectDocuments
-      .filter((d) => d.role !== 'AUDIT_REPORT')
-      .map((d) => ({
-        documentId: d.id,
-        role: d.role as 'SPECIFICATION' | 'DESIGN_SYSTEM' | 'SUPPLEMENTARY',
-        fileName: d.originalName,
-        mimeType: d.mimeType,
-        sizeBytes: d.sizeBytes,
-        sha256: d.sha256Hash,
-      }));
+    const inputDocuments = projectDocuments.map((d) => ({
+      documentId: d.id,
+      role: d.role,
+      fileName: d.originalName,
+      mimeType: d.mimeType,
+      sizeBytes: d.sizeBytes,
+      sha256: d.sha256Hash,
+    }));
 
     const harnessBuilder = new HarnessBuilderService();
     const builtPackage = await harnessBuilder.buildHarness(profile, selection, {

@@ -98,7 +98,7 @@ export type SelectedSubagentSpec = z.infer<typeof SelectedSubagentSpecSchema>;
  */
 export const InputDocumentDigestSchema = z.object({
   documentId: z.string().min(1),
-  role: z.enum(['SPECIFICATION', 'DESIGN_SYSTEM', 'SUPPLEMENTARY']),
+  role: z.enum(['SPECIFICATION', 'DESIGN_SYSTEM', 'SUPPLEMENTARY', 'AUDIT_REPORT']),
   fileName: z.string().min(1),
   mimeType: z.string().min(1),
   sizeBytes: z.number().int().nonnegative(),
