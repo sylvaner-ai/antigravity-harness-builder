@@ -74,9 +74,9 @@ export class HarnessBuilderService {
       supplementaryNotes: sanitizedNotes,
     };
 
-    // Documents d'entrée simulés ou fournis
+    // Documents d'entrée fournis par l'appelant ; sans eux (tests, appels directs), des documents factices sont déclarés
     const inputDocuments: InputDocumentDigest[] =
-      options.inputDocuments && options.inputDocuments.length >= 2
+      options.inputDocuments && options.inputDocuments.length >= 1
         ? options.inputDocuments
         : [
             {

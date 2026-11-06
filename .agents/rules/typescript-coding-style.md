@@ -1,7 +1,6 @@
 ---
-trigger: glob
-description: "Règle ECC (typescript/coding-style) : TypeScript/JavaScript Coding Style"
-globs: "**/*.ts, **/*.tsx"
+trigger: model_decision
+description: "À consulter lorsque la tâche concerne des fichiers **/*.ts, **/*.tsx — Règle ECC (typescript/coding-style) : TypeScript/JavaScript Coding Style"
 ---
 
 # TypeScript/JavaScript Coding Style

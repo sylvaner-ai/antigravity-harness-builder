@@ -1,7 +1,7 @@
 # Provenance des Composants et Licences (ECC)
 
 **Dépôt officiel de référence :** [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)  
-**Version / Tag synchronisé :** `v2.2.3`  
+**Version / Tag synchronisé :** `affaan-m/ECC@b38be6a`  
 **Commit SHA exact :** `b38be6a7f6350964d59328b52f0624e1d1d552d1`
 
 ---
@@ -13,623 +13,627 @@ Le tableau ci-dessous distingue explicitement :
 - `ecc_adapted` : composant issu d'ECC adapté pour la compatibilité native Google Antigravity et le projet ;
 - `project_custom` : composant généré spécifiquement pour le projet cible.
 
-| Type | Chemin dans le paquet | Statut d'origine | Source officielle ECC & Commit | Raison de sélection | Adaptations appliquées |
+| Type | Chemin dans le paquet | Statut d'origine | Source & commit | Raison de sélection | Adaptations appliquées |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Règle | `.agents/rules/common-code-review.md` | `ecc_adapted` | [rules/common/code-review.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/code-review.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, sql, api. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-testing.md` | `ecc_adapted` | [rules/common/testing.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/testing.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, api, testing_focus, pack:extreme-tdd-anti-bug. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/react-patterns.md` | `ecc_adapted` | [rules/react/patterns.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/patterns.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/typescript-security.md` | `ecc_adapted` | [rules/typescript/security.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/security.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/api-security-guards.md` | `ecc_adapted` | [rules/security/api-security-guards.md](https://github.com/OWASP/CheatSheetSeries) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, validation. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/ui-craft-and-5-states.md` | `ecc_adapted` | [rules/design/ui-craft-and-5-states.md](https://github.com/emilkowalski/skills) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, design_engineering_excellence, pack:design-craft-polish. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/plan-first-and-anti-omissions.md` | `ecc_adapted` | [rules/quality/plan-first-and-anti-omissions.md](https://github.com/affaan-m/ECC) (`b38be6a7`) | Mots-clés pertinents détectés : testing_focus, pack:extreme-tdd-anti-bug, bundle:testing_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-development-workflow.md` | `ecc_adapted` | [rules/common/development-workflow.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/development-workflow.md) (`b38be6a7`) | Mots-clés pertinents détectés : api, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-patterns.md` | `ecc_adapted` | [rules/common/patterns.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/patterns.md) (`b38be6a7`) | Mots-clés pertinents détectés : api, pack:security-hardened, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-git-workflow.md` | `ecc_adapted` | [rules/common/git-workflow.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/git-workflow.md) (`b38be6a7`) | Mots-clés pertinents détectés : pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-coding-style.md` | `ecc_adapted` | [rules/common/coding-style.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/coding-style.md) (`b38be6a7`) | Mots-clés pertinents détectés : api. Règle transverse fondamentale de qualité logicielle. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-hooks.md` | `ecc_adapted` | [rules/common/hooks.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/hooks.md) (`b38be6a7`) | Règle transverse fondamentale de qualité logicielle. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/common-performance.md` | `ecc_adapted` | [rules/common/performance.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/performance.md) (`b38be6a7`) | Règle transverse fondamentale de qualité logicielle. | Adapté vers les standards Google Antigravity |
-| Règle | `.agents/rules/project-design-system-tokens.md` | `project_custom` | Généré sur mesure pour le projet | Le catalogue ECC ne fournit que des règles CSS génériques sans les tokens ni la charte graphique de ce projet. | Créé spécifiquement pour le projet cible |
-| Règle | `.agents/rules/project-drizzle-orm-guidelines.md` | `project_custom` | Généré sur mesure pour le projet | Le catalogue standard ne fournit pas de règle dédiée aux conventions de schéma et migrations Drizzle ORM. | Créé spécifiquement pour le projet cible |
-| Skill | `.agents/skills/react-test/SKILL.md` | `ecc_adapted` | [commands/react-test.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/commands/react-test.md) (`b38be6a7`) | Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:react, vitest, api, testing_focus. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/agent-payment-x402/SKILL.md` | `ecc_adapted` | [skills/agent-payment-x402/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/agent-payment-x402/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:java, framework:nextjs, skill. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/ai-regression-testing/SKILL.md` | `ecc_adapted` | [skills/ai-regression-testing/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/ai-regression-testing/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, skill, vitest. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/backend-patterns/SKILL.md` | `ecc_adapted` | [skills/backend-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/backend-patterns/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, skill, sql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/bun-runtime/SKILL.md` | `ecc_adapted` | [skills/bun-runtime/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/bun-runtime/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, skill, sql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/click-path-audit/SKILL.md` | `ecc_adapted` | [skills/click-path-audit/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/click-path-audit/SKILL.md) (`b38be6a7`) | Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:react, skill, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/codebase-onboarding/SKILL.md` | `ecc_adapted` | [skills/codebase-onboarding/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/codebase-onboarding/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/coding-standards/SKILL.md` | `ecc_adapted` | [skills/coding-standards/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/coding-standards/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/deployment-patterns/SKILL.md` | `ecc_adapted` | [skills/deployment-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/deployment-patterns/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, skill, postgresql, docker. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/frontend-patterns/SKILL.md` | `ecc_adapted` | [skills/frontend-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/frontend-patterns/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/gateguard/SKILL.md` | `ecc_adapted` | [skills/gateguard/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/gateguard/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:java, skill, sql, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/healthcare-phi-compliance/SKILL.md` | `ecc_adapted` | [skills/healthcare-phi-compliance/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/healthcare-phi-compliance/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, skill, sql, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/mysql-patterns/SKILL.md` | `ecc_adapted` | [skills/mysql-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/mysql-patterns/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:javascript, skill, sql, postgresql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/mybatis-patterns/SKILL.md` | `ecc_adapted` | [skills/mybatis-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/mybatis-patterns/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:java, skill, sql, postgresql. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/prompt-optimizer/SKILL.md` | `ecc_adapted` | [skills/prompt-optimizer/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/prompt-optimizer/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:java, framework:nextjs, framework:react. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/react-testing/SKILL.md` | `ecc_adapted` | [skills/react-testing/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/react-testing/SKILL.md) (`b38be6a7`) | Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:nextjs, framework:react, skill, vitest. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
-| Skill | `.agents/skills/security-review/SKILL.md` | `ecc_adapted` | [skills/security-review/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/security-review/SKILL.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, skill. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
-| Sous-agent | `.agents/agents/build-error-resolver.md` | `ecc_adapted` | [agents/build-error-resolver.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/build-error-resolver.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, agent. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers la spécification officielle des sous-agents Antigravity |
-| Sous-agent | `.agents/agents/code-reviewer.md` | `ecc_adapted` | [agents/code-reviewer.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/code-reviewer.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers la spécification officielle des sous-agents Antigravity |
-| Sous-agent | `.agents/agents/performance-optimizer.md` | `ecc_adapted` | [agents/performance-optimizer.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/performance-optimizer.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, agent. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers la spécification officielle des sous-agents Antigravity |
-| Sous-agent | `.agents/agents/security-auditor.md` | `ecc_adapted` | [agents/security-auditor.md](https://github.com/OWASP/CheatSheetSeries) (`b38be6a7`) | Mots-clés pertinents détectés : role:security_auditor, pack:security-hardened, bundle:security_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers la spécification officielle des sous-agents Antigravity |
-| Sous-agent | `.agents/agents/react-build-resolver.md` | `ecc_adapted` | [agents/react-build-resolver.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/react-build-resolver.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. | Adapté vers la spécification officielle des sous-agents Antigravity |
-| Sous-agent | `.agents/agents/doc-updater.md` | `ecc_adapted` | [agents/doc-updater.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/doc-updater.md) (`b38be6a7`) | Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, agent, api. | Adapté vers la spécification officielle des sous-agents Antigravity |
+| Règle | `.agents/rules/model-effort-governance.md` | `project_custom` | Généré sur mesure pour le projet | Gouvernance centralisée du couple Modèle / Niveau d'effort (remplace toute référence au modèle dans le frontmatter YAML des agents). | Créé spécifiquement pour le projet cible |
+| Règle | `.agents/rules/api-security-guards.md` | `project_custom` | Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [https://github.com/OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries)) | Fonction « rule:pack:security » (source curated). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, zero-trust, api. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-code-review.md` | `ecc_adapted` | [rules/common/code-review.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/code-review.md) (`b38be6a7`) | Fonction « rule:common:code-review » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, sql, api. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). (chargée à la demande : budget de contexte permanent de 8000 octets) | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-security.md` | `ecc_adapted` | [rules/common/security.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/security.md) (`b38be6a7`) | Fonction « rule:common:security » (source ecc-official). Mots-clés pertinents détectés : sql, api, security_focus, pack:security-hardened. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-testing.md` | `ecc_adapted` | [rules/common/testing.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/testing.md) (`b38be6a7`) | Fonction « rule:common:testing » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, tdd, api, testing_focus. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/react-patterns.md` | `ecc_adapted` | [rules/react/patterns.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/patterns.md) (`b38be6a7`) | Fonction « rule:stack:react:patterns » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/react-security.md` | `ecc_adapted` | [rules/react/security.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/security.md) (`b38be6a7`) | Fonction « rule:stack:react:security » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/react-testing.md` | `ecc_adapted` | [rules/react/testing.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/testing.md) (`b38be6a7`) | Fonction « rule:stack:react:testing » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/typescript-security.md` | `ecc_adapted` | [rules/typescript/security.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/security.md) (`b38be6a7`) | Fonction « rule:stack:typescript:security » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, security_focus. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/typescript-testing.md` | `ecc_adapted` | [rules/typescript/testing.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/testing.md) (`b38be6a7`) | Fonction « rule:stack:typescript:testing » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, testing_focus, pack:extreme-tdd-anti-bug. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/ui-craft-and-5-states.md` | `project_custom` | Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [https://github.com/emilkowalski/skills](https://github.com/emilkowalski/skills)) | Fonction « rule:pack:ui-craft » (source curated). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, design_engineering_excellence, pack:design-craft-polish. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/web-security.md` | `ecc_adapted` | [rules/web/security.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/web/security.md) (`b38be6a7`) | Fonction « rule:web:security » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:tailwind, security_focus, pack:security-hardened, bundle:security_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/web-testing.md` | `ecc_adapted` | [rules/web/testing.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/web/testing.md) (`b38be6a7`) | Fonction « rule:web:testing » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:tailwind, testing_focus, pack:design-craft-polish, pack:extreme-tdd-anti-bug. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/plan-first-and-anti-omissions.md` | `project_custom` | Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)) | Fonction « rule:pack:workflow » (source curated). Mots-clés pertinents détectés : tdd, testing_focus, pack:extreme-tdd-anti-bug, bundle:testing_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. (chargée à la demande : budget de contexte permanent de 8000 octets) | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/react-coding-style.md` | `ecc_adapted` | [rules/react/coding-style.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/react/coding-style.md) (`b38be6a7`) | Fonction « rule:stack:react:coding-style » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:react, framework:nextjs. Règle transverse fondamentale de qualité logicielle. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-development-workflow.md` | `ecc_adapted` | [rules/common/development-workflow.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/development-workflow.md) (`b38be6a7`) | Fonction « rule:common:development-workflow » (source ecc-official). Mots-clés pertinents détectés : tdd, api, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). (chargée à la demande : budget de contexte permanent de 8000 octets) | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-git-workflow.md` | `ecc_adapted` | [rules/common/git-workflow.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/git-workflow.md) (`b38be6a7`) | Fonction « rule:common:git-workflow » (source ecc-official). Mots-clés pertinents détectés : tdd, pack:extreme-tdd-anti-bug. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/typescript-coding-style.md` | `ecc_adapted` | [rules/typescript/coding-style.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/coding-style.md) (`b38be6a7`) | Fonction « rule:stack:typescript:coding-style » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript. Règle transverse fondamentale de qualité logicielle. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/web-coding-style.md` | `ecc_adapted` | [rules/web/coding-style.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/web/coding-style.md) (`b38be6a7`) | Fonction « rule:web:coding-style » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:tailwind. Règle transverse fondamentale de qualité logicielle. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/typescript-patterns.md` | `ecc_adapted` | [rules/typescript/patterns.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/typescript/patterns.md) (`b38be6a7`) | Fonction « rule:stack:typescript:patterns » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/web-patterns.md` | `ecc_adapted` | [rules/web/patterns.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/web/patterns.md) (`b38be6a7`) | Fonction « rule:web:patterns » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:tailwind. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/common-coding-style.md` | `ecc_adapted` | [rules/common/coding-style.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/rules/common/coding-style.md) (`b38be6a7`) | Fonction « rule:common:coding-style » (source ecc-official). Mots-clés pertinents détectés : api. Règle transverse fondamentale de qualité logicielle. (chargée à la demande : budget de contexte permanent de 8000 octets) | Adapté vers les standards Google Antigravity |
+| Règle | `.agents/rules/project-drizzle-orm-guidelines.md` | `project_custom` | Généré sur mesure pour le projet | Le catalogue standard ne fournit pas de règle dédiée aux conventions de schéma et migrations Drizzle ORM. Convertie de « glob » en « model_decision » : le déclenchement par fichier n'est pas fiable (voir docs/AUTO_TEST_RESULTATS.md). | Créé spécifiquement pour le projet cible |
+| Skill | `.agents/skills/backend-patterns/SKILL.md` | `ecc_adapted` | [skills/backend-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/backend-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:backend:patterns » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, sql, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/deployment-patterns/SKILL.md` | `ecc_adapted` | [skills/deployment-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/deployment-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:ops:deployment » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, postgresql, docker, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/frontend-patterns/SKILL.md` | `ecc_adapted` | [skills/frontend-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/frontend-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:frontend:patterns » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, api. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/react-testing/SKILL.md` | `ecc_adapted` | [skills/react-testing/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/react-testing/SKILL.md) (`b38be6a7`) | Fonction « skill:stack:react:testing » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:nextjs, framework:react, vitest, tdd. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/security-review/SKILL.md` | `ecc_adapted` | [skills/security-review/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/security-review/SKILL.md) (`b38be6a7`) | Fonction « skill:security:review » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, framework:react, sql. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/tdd-workflow/SKILL.md` | `ecc_adapted` | [skills/tdd-workflow/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/tdd-workflow/SKILL.md) (`b38be6a7`) | Fonction « skill:workflow:tdd » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:react, vitest, tdd. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/typescript-patterns/SKILL.md` | `ecc_adapted` | [skills/typescript-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/typescript-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:stack:typescript:patterns » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/verification-loop/SKILL.md` | `ecc_adapted` | [skills/verification-loop/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/verification-loop/SKILL.md) (`b38be6a7`) | Fonction « skill:workflow:verification » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/react-patterns/SKILL.md` | `ecc_adapted` | [skills/react-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/react-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:stack:react:patterns » (source ecc-official). Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:nextjs, framework:react, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/api-design/SKILL.md` | `ecc_adapted` | [skills/api-design/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/api-design/SKILL.md) (`b38be6a7`) | Fonction « skill:backend:api-design » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, framework:nextjs, sql, api. | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/frontend-a11y/SKILL.md` | `ecc_adapted` | [skills/frontend-a11y/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/frontend-a11y/SKILL.md) (`b38be6a7`) | Fonction « skill:ui:accessibility » (source ecc-official). Préféré à : accessibility. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : framework:nextjs, framework:react, pack:design-craft-polish. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/database-migrations/SKILL.md` | `ecc_adapted` | [skills/database-migrations/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/database-migrations/SKILL.md) (`b38be6a7`) | Fonction « skill:database:migrations » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:typescript, sql, postgresql, database_focus. Répond aux contraintes d'architecture ou de sécurité spécifiées. | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/docker-patterns/SKILL.md` | `ecc_adapted` | [skills/docker-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/docker-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:stack:docker:patterns » (source ecc-official). Mots-clés pertinents détectés : sql, postgresql, docker, api. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/postgres-patterns/SKILL.md` | `ecc_adapted` | [skills/postgres-patterns/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/postgres-patterns/SKILL.md) (`b38be6a7`) | Fonction « skill:stack:postgres:patterns » (source ecc-official). Mots-clés pertinents détectés : sql, postgresql, api, pack:security-hardened. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/design-system/SKILL.md` | `ecc_adapted` | [skills/design-system/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/design-system/SKILL.md) (`b38be6a7`) | Fonction « skill:ui:design-system » (source ecc-official). Mots-clés pertinents détectés : pack:design-craft-polish. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards de compétences Google Antigravity |
+| Skill | `.agents/skills/frontend-design-direction/SKILL.md` | `ecc_adapted` | [skills/frontend-design-direction/SKILL.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/skills/frontend-design-direction/SKILL.md) (`b38be6a7`) | Fonction « skill:ui:design-engineering » (source ecc-official). Préféré à : make-interfaces-feel-better. Mots-clés pertinents détectés : pack:design-craft-polish. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). | Adapté vers les standards de compétences Google Antigravity |
+| Sous-agent | `.agents/agents/architect.md` | `ecc_adapted` | [agents/architect.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/architect.md) (`b38be6a7`) | Fonction « agent:architect » (source ecc-official). Préféré à : code-architect. Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:javascript, framework:nextjs, agent, postgresql. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/code-reviewer.md` | `ecc_adapted` | [agents/code-reviewer.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/code-reviewer.md) (`b38be6a7`) | Fonction « agent:review:general » (source ecc-official). Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/database-reviewer.md` | `ecc_adapted` | [agents/database-reviewer.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/database-reviewer.md) (`b38be6a7`) | Fonction « agent:database » (source ecc-official). Correspondance directe avec les langages [typescript]. Mots-clés pertinents détectés : lang:javascript, agent, sql, postgresql. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/react-reviewer.md` | `ecc_adapted` | [agents/react-reviewer.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/react-reviewer.md) (`b38be6a7`) | Fonction « agent:review:stack » (source ecc-official). Préféré à : typescript-reviewer. Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Sélectionné au titre du Pack d'Excellence Rigueur TDD (prévention des régressions et zéro oubli). | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/security-auditor.md` | `project_custom` | Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [https://github.com/OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries)) | Fonction « agent:security » (source curated). Préféré à : security-reviewer. Mots-clés pertinents détectés : zero-trust, security_focus, role:security_auditor, pack:security-hardened. Répond aux contraintes d'architecture ou de sécurité spécifiées. Sélectionné au titre du Pack d'Excellence Sécurité Renforcée (protection OWASP et Zero-Trust). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/ui-craft-reviewer.md` | `project_custom` | Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [https://github.com/emilkowalski/skills](https://github.com/emilkowalski/skills)) | Fonction « agent:review:ui » (source curated). Mots-clés pertinents détectés : role:code_reviewer, design_engineering_excellence, pack:design-craft-polish, bundle:ui_craft_synergy. Répond aux contraintes d'architecture ou de sécurité spécifiées. Règle transverse fondamentale de qualité logicielle. Sélectionné au titre du Pack d'Excellence Design & Craft UI (règle des 5 états et accessibilité). Synergie d'écosystème renforcée avec la stack et les outils du projet. | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
+| Sous-agent | `.agents/agents/react-build-resolver.md` | `ecc_adapted` | [agents/react-build-resolver.md](https://github.com/affaan-m/ECC/blob/b38be6a7f6350964d59328b52f0624e1d1d552d1/agents/react-build-resolver.md) (`b38be6a7`) | Fonction « agent:build » (source ecc-official). Préféré à : build-error-resolver. Correspondance directe avec les langages [typescript]. Adapté aux frameworks utilisés [next.js, react, tailwind css]. Mots-clés pertinents détectés : lang:typescript, lang:javascript, framework:nextjs, framework:react. | Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML) |
 
 ---
 
 ## 2. Principaux Candidats Écartés (Pertinence avant quantité)
 
-- **`dart-testing`** : Incompatible avec la stack du projet : composant ciblant [dart] alors que le projet utilise [typescript].
+- **`brand-voice`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`csharp-coding-style`** : Non applicable : technologie absente du projet (csharp).
+- **`java-coding-style`** : Non applicable : technologie absente du projet (java).
+- **`kotlin-testing`** : Non applicable : technologie absente du projet (kotlin).
+- **`ruby-coding-style`** : Non applicable : technologie absente du projet (ruby).
+- **`swift-patterns`** : Non applicable : technologie absente du projet (swift).
 - **`flutter-build`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
-- **`arkts-security`** : Technologie spécifique [arkts] non utilisée dans la stack de ce projet.
-- **`flutter-test`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
-- **`gan-build`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
-- **`arkts-testing`** : Technologie spécifique [arkts] non utilisée dans la stack de ce projet.
-- **`common-agents`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
+- **`hookify-help`** : « hookify-help » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`aside`** : « aside » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`astra-review`** : Incompatible avec la stack du projet : composant ciblant [sql] alors que le projet utilise [typescript].
+- **`auto-update`** : « auto-update » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`checkpoint`** : « checkpoint » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`cost-report`** : « cost-report » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`cpp-build`** : Technologie spécifique [cpp] non utilisée dans la stack de ce projet.
 - **`cpp-review`** : Technologie spécifique [cpp] non utilisée dans la stack de ce projet.
 - **`cpp-test`** : Technologie spécifique [cpp] non utilisée dans la stack de ce projet.
-- **`flutter-review`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
+- **`evolve`** : « evolve » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`fastapi-review`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`flutter-review`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
+- **`flutter-test`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
+- **`gan-build`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
 - **`gan-design`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
 - **`go-build`** : Incompatible avec la stack du projet : composant ciblant [go] alors que le projet utilise [typescript].
 - **`go-review`** : Incompatible avec la stack du projet : composant ciblant [go, sql] alors que le projet utilise [typescript].
 - **`go-test`** : Incompatible avec la stack du projet : composant ciblant [go, sql] alors que le projet utilise [typescript].
 - **`gradle-build`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`hookify`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`harness-audit`** : « harness-audit » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`hookify`** : « hookify » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`hookify-configure`** : « hookify-configure » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`hookify-list`** : « hookify-list » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`instinct-export`** : « instinct-export » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`instinct-import`** : « instinct-import » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`instinct-status`** : « instinct-status » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`kotlin-build`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
 - **`kotlin-review`** : Incompatible avec la stack du projet : composant ciblant [java, kotlin, sql] alors que le projet utilise [typescript].
 - **`kotlin-test`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`pm2`** : Incompatible avec la stack du projet : composant ciblant [javascript, python] alors que le projet utilise [typescript].
-- **`project-init`** : Framework non ciblé : composant prévu pour [tailwindcss, docker] non présent dans la stack [next.js, react, tailwind css].
+- **`learn`** : « learn » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`learn-eval`** : « learn-eval » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`loop-start`** : « loop-start » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`loop-status`** : « loop-status » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`model-route`** : « model-route » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`arkts-testing`** : Non applicable : technologie absente du projet (arkts).
+- **`project-init`** : « project-init » repose sur des mécanismes propres à Claude Code (6 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`promote`** : « promote » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`prp-implement`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`cpp-coding-style`** : Non applicable : technologie absente du projet (cpp).
+- **`prune`** : « prune » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`python-review`** : Incompatible avec la stack du projet : composant ciblant [python, sql] alors que le projet utilise [typescript].
+- **`swift-security`** : Non applicable : technologie absente du projet (swift).
+- **`resume-session`** : « resume-session » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`rust-build`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
 - **`rust-review`** : Incompatible avec la stack du projet : composant ciblant [rust, sql] alors que le projet utilise [typescript].
 - **`rust-test`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
 - **`santa-loop`** : Incompatible avec la stack du projet : composant ciblant [rust, sql] alors que le projet utilise [typescript].
-- **`save-session`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
+- **`save-session`** : « save-session » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`sessions`** : « sessions » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`skill-create`** : « skill-create » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`skill-health`** : « skill-health » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`test-coverage`** : Framework non ciblé : composant prévu pour [vitest] non présent dans la stack [next.js, react, tailwind css].
 - **`update-codemaps`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
 - **`update-docs`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
 - **`vue-review`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`angular-coding-style`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`angular-hooks`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`angular-patterns`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`angular-security`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`angular-testing`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`arkts-coding-style`** : Technologie spécifique [arkts] non utilisée dans la stack de ce projet.
-- **`arkts-hooks`** : Technologie spécifique [arkts] non utilisée dans la stack de ce projet.
-- **`arkts-patterns`** : Technologie spécifique [arkts] non utilisée dans la stack de ce projet.
-- **`dart-security`** : Incompatible avec la stack du projet : composant ciblant [dart] alors que le projet utilise [typescript].
-- **`common-security`** : Incompatible avec la stack du projet : composant ciblant [sql] alors que le projet utilise [typescript].
-- **`cpp-coding-style`** : Incompatible avec la stack du projet : composant ciblant [cpp, c++] alors que le projet utilise [typescript].
-- **`cpp-hooks`** : Incompatible avec la stack du projet : composant ciblant [cpp, c++] alors que le projet utilise [typescript].
-- **`cpp-patterns`** : Incompatible avec la stack du projet : composant ciblant [cpp, c++] alors que le projet utilise [typescript].
-- **`cpp-security`** : Incompatible avec la stack du projet : composant ciblant [cpp, c++] alors que le projet utilise [typescript].
-- **`cpp-testing`** : Incompatible avec la stack du projet : composant ciblant [cpp, c++] alors que le projet utilise [typescript].
-- **`csharp-coding-style`** : Incompatible avec la stack du projet : composant ciblant [csharp, c#] alors que le projet utilise [typescript].
-- **`csharp-hooks`** : Incompatible avec la stack du projet : composant ciblant [csharp, c#] alors que le projet utilise [typescript].
-- **`csharp-patterns`** : Incompatible avec la stack du projet : composant ciblant [csharp, c#] alors que le projet utilise [typescript].
-- **`csharp-security`** : Incompatible avec la stack du projet : composant ciblant [csharp, c#] alors que le projet utilise [typescript].
-- **`csharp-testing`** : Incompatible avec la stack du projet : composant ciblant [csharp, c#] alors que le projet utilise [typescript].
-- **`dart-coding-style`** : Incompatible avec la stack du projet : composant ciblant [dart] alors que le projet utilise [typescript].
-- **`dart-hooks`** : Incompatible avec la stack du projet : composant ciblant [dart] alors que le projet utilise [typescript].
-- **`dart-patterns`** : Incompatible avec la stack du projet : composant ciblant [dart] alors que le projet utilise [typescript].
-- **`fsharp-coding-style`** : Incompatible avec la stack du projet : composant ciblant [fsharp] alors que le projet utilise [typescript].
-- **`fsharp-hooks`** : Incompatible avec la stack du projet : composant ciblant [fsharp] alors que le projet utilise [typescript].
-- **`fsharp-patterns`** : Incompatible avec la stack du projet : composant ciblant [fsharp] alors que le projet utilise [typescript].
-- **`fsharp-security`** : Incompatible avec la stack du projet : composant ciblant [fsharp] alors que le projet utilise [typescript].
-- **`fsharp-testing`** : Incompatible avec la stack du projet : composant ciblant [fsharp] alors que le projet utilise [typescript].
-- **`golang-coding-style`** : Incompatible avec la stack du projet : composant ciblant [go, golang] alors que le projet utilise [typescript].
-- **`kotlin-patterns`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`golang-hooks`** : Incompatible avec la stack du projet : composant ciblant [go, golang] alors que le projet utilise [typescript].
-- **`golang-patterns`** : Incompatible avec la stack du projet : composant ciblant [go, golang] alors que le projet utilise [typescript].
-- **`golang-security`** : Incompatible avec la stack du projet : composant ciblant [go, golang] alors que le projet utilise [typescript].
-- **`golang-testing`** : Incompatible avec la stack du projet : composant ciblant [go, golang] alors que le projet utilise [typescript].
-- **`java-coding-style`** : Incompatible avec la stack du projet : composant ciblant [java] alors que le projet utilise [typescript].
-- **`java-hooks`** : Incompatible avec la stack du projet : composant ciblant [java] alors que le projet utilise [typescript].
-- **`java-patterns`** : Incompatible avec la stack du projet : composant ciblant [java] alors que le projet utilise [typescript].
-- **`java-security`** : Incompatible avec la stack du projet : composant ciblant [java] alors que le projet utilise [typescript].
-- **`java-testing`** : Incompatible avec la stack du projet : composant ciblant [java] alors que le projet utilise [typescript].
-- **`kotlin-coding-style`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`kotlin-hooks`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`kotlin-security`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`kotlin-testing`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`nuxt-coding-style`** : Framework non ciblé : composant prévu pour [nuxt, vue] non présent dans la stack [next.js, react, tailwind css].
-- **`nuxt-hooks`** : Framework non ciblé : composant prévu pour [nuxt, vue] non présent dans la stack [next.js, react, tailwind css].
-- **`nuxt-patterns`** : Framework non ciblé : composant prévu pour [nuxt, vue] non présent dans la stack [next.js, react, tailwind css].
-- **`nuxt-security`** : Framework non ciblé : composant prévu pour [nuxt, vue] non présent dans la stack [next.js, react, tailwind css].
-- **`nuxt-testing`** : Framework non ciblé : composant prévu pour [nuxt, vue] non présent dans la stack [next.js, react, tailwind css].
-- **`perl-coding-style`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`perl-hooks`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`perl-patterns`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`perl-security`** : Incompatible avec la stack du projet : composant ciblant [sql] alors que le projet utilise [typescript].
-- **`perl-testing`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`php-coding-style`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`php-hooks`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`php-patterns`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`php-security`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`php-testing`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`python-coding-style`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`python-fastapi`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`python-hooks`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`python-patterns`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`python-security`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`python-testing`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`react-native-accessibility`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-coding-style`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-hooks`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-patterns`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-performance`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-production-readiness`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-security`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-native-testing`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`ruby-coding-style`** : Incompatible avec la stack du projet : composant ciblant [ruby] alors que le projet utilise [typescript].
-- **`rust-patterns`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`ruby-hooks`** : Incompatible avec la stack du projet : composant ciblant [ruby] alors que le projet utilise [typescript].
-- **`ruby-patterns`** : Incompatible avec la stack du projet : composant ciblant [ruby] alors que le projet utilise [typescript].
-- **`ruby-security`** : Incompatible avec la stack du projet : composant ciblant [ruby] alors que le projet utilise [typescript].
-- **`ruby-testing`** : Incompatible avec la stack du projet : composant ciblant [ruby] alors que le projet utilise [typescript].
-- **`rust-coding-style`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`rust-hooks`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`rust-security`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`rust-testing`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`swift-coding-style`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swift-hooks`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swift-patterns`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`vue-patterns`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`swift-security`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swift-testing`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`vue-security`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`vue-coding-style`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`vue-hooks`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`vue-testing`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`web-coding-style`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-design-quality`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-hooks`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-patterns`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-performance`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-security`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`web-testing`** : Incompatible avec la stack du projet : composant ciblant [css, html] alors que le projet utilise [typescript].
-- **`accessibility`** : Incompatible avec la stack du projet : composant ciblant [kotlin, swift] alors que le projet utilise [typescript].
+- **`angular-coding-style`** : Non applicable : technologie absente du projet (angular).
+- **`angular-hooks`** : « angular-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`angular-patterns`** : Non applicable : technologie absente du projet (angular).
+- **`angular-security`** : Non applicable : technologie absente du projet (angular).
+- **`angular-testing`** : Non applicable : technologie absente du projet (angular).
+- **`arkts-coding-style`** : Non applicable : technologie absente du projet (arkts).
+- **`arkts-hooks`** : « arkts-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`arkts-patterns`** : Non applicable : technologie absente du projet (arkts).
+- **`arkts-security`** : Non applicable : technologie absente du projet (arkts).
+- **`common-agents`** : « common-agents » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`common-hooks`** : « common-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`cpp-hooks`** : « cpp-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`cpp-patterns`** : Non applicable : technologie absente du projet (cpp).
+- **`cpp-security`** : Non applicable : technologie absente du projet (cpp).
+- **`cpp-testing`** : Non applicable : technologie absente du projet (cpp).
+- **`csharp-hooks`** : « csharp-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`csharp-patterns`** : Non applicable : technologie absente du projet (csharp).
+- **`csharp-security`** : Non applicable : technologie absente du projet (csharp).
+- **`csharp-testing`** : Non applicable : technologie absente du projet (csharp).
+- **`dart-coding-style`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`dart-hooks`** : « dart-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`dart-patterns`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`dart-security`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`dart-testing`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`fsharp-coding-style`** : Non applicable : technologie absente du projet (fsharp).
+- **`java-hooks`** : « java-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`fsharp-hooks`** : « fsharp-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`fsharp-patterns`** : Non applicable : technologie absente du projet (fsharp).
+- **`fsharp-security`** : Non applicable : technologie absente du projet (fsharp).
+- **`fsharp-testing`** : Non applicable : technologie absente du projet (fsharp).
+- **`golang-coding-style`** : Non applicable : technologie absente du projet (go).
+- **`java-patterns`** : Non applicable : technologie absente du projet (java).
+- **`golang-hooks`** : « golang-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`golang-patterns`** : Non applicable : technologie absente du projet (go).
+- **`golang-security`** : Non applicable : technologie absente du projet (go).
+- **`golang-testing`** : Non applicable : technologie absente du projet (go).
+- **`java-security`** : Non applicable : technologie absente du projet (java).
+- **`java-testing`** : Non applicable : technologie absente du projet (java).
+- **`kotlin-coding-style`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-hooks`** : « kotlin-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`kotlin-patterns`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-security`** : Non applicable : technologie absente du projet (kotlin).
+- **`nuxt-coding-style`** : Non applicable : technologie absente du projet (nuxt).
+- **`nuxt-hooks`** : « nuxt-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`nuxt-patterns`** : Non applicable : technologie absente du projet (nuxt).
+- **`nuxt-security`** : Non applicable : technologie absente du projet (nuxt).
+- **`nuxt-testing`** : Non applicable : technologie absente du projet (nuxt).
+- **`perl-coding-style`** : Non applicable : technologie absente du projet (perl).
+- **`perl-hooks`** : « perl-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`perl-patterns`** : Non applicable : technologie absente du projet (perl).
+- **`perl-security`** : Non applicable : technologie absente du projet (perl).
+- **`perl-testing`** : Non applicable : technologie absente du projet (perl).
+- **`php-coding-style`** : Non applicable : technologie absente du projet (php).
+- **`swift-testing`** : Non applicable : technologie absente du projet (swift).
+- **`php-hooks`** : « php-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`php-patterns`** : Non applicable : technologie absente du projet (php).
+- **`php-security`** : Non applicable : technologie absente du projet (php).
+- **`php-testing`** : Non applicable : technologie absente du projet (php).
+- **`python-coding-style`** : Non applicable : technologie absente du projet (python).
+- **`python-fastapi`** : Non applicable : technologie absente du projet (python).
+- **`python-hooks`** : « python-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`python-patterns`** : Non applicable : technologie absente du projet (python).
+- **`python-security`** : Non applicable : technologie absente du projet (python).
+- **`python-testing`** : Non applicable : technologie absente du projet (python).
+- **`react-hooks`** : « react-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`react-native-accessibility`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-coding-style`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-hooks`** : « react-native-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`react-native-patterns`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-performance`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-production-readiness`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-security`** : Non applicable : technologie absente du projet (react-native).
+- **`react-native-testing`** : Non applicable : technologie absente du projet (react-native).
+- **`ruby-hooks`** : « ruby-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`ruby-patterns`** : Non applicable : technologie absente du projet (ruby).
+- **`ruby-security`** : Non applicable : technologie absente du projet (ruby).
+- **`ruby-testing`** : Non applicable : technologie absente du projet (ruby).
+- **`rust-coding-style`** : Non applicable : technologie absente du projet (rust).
+- **`rust-hooks`** : « rust-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`rust-patterns`** : Non applicable : technologie absente du projet (rust).
+- **`rust-security`** : Non applicable : technologie absente du projet (rust).
+- **`rust-testing`** : Non applicable : technologie absente du projet (rust).
+- **`swift-coding-style`** : Non applicable : technologie absente du projet (swift).
+- **`swift-hooks`** : « swift-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`typescript-hooks`** : « typescript-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`vue-coding-style`** : Non applicable : technologie absente du projet (vue).
+- **`vue-hooks`** : « vue-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`vue-patterns`** : Non applicable : technologie absente du projet (vue).
+- **`vue-security`** : Non applicable : technologie absente du projet (vue).
+- **`vue-testing`** : Non applicable : technologie absente du projet (vue).
+- **`angular-developer`** : Non applicable : technologie absente du projet (angular).
+- **`web-hooks`** : « web-hooks » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`agent-architecture-audit`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
 - **`agent-eval`** : Framework non ciblé : composant prévu pour [docker] non présent dans la stack [next.js, react, tailwind css].
-- **`agentic-os`** : Incompatible avec la stack du projet : composant ciblant [python, postgresql] alors que le projet utilise [typescript].
-- **`android-clean-architecture`** : Incompatible avec la stack du projet : composant ciblant [kotlin, sql] alors que le projet utilise [typescript].
-- **`angular-developer`** : Technologie spécifique [angular] non utilisée dans la stack de ce projet.
-- **`bengali-nlp`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, sql, postgresql] alors que le projet utilise [typescript].
+- **`agent-payment-x402`** : Le composant 'agent-payment-x402' est spécifique aux micro-paiements crypto/web3 autonomes pour agents et ne convient pas aux applications web de paiement standard ou SEPA.
+- **`agent-security-hardening`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`agent-sort`** : « agent-sort » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`agentic-os`** : « agentic-os » repose sur des mécanismes propres à Claude Code (23 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`android-clean-architecture`** : Non applicable : technologie absente du projet (android).
+- **`api-connector-builder`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`article-writing`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`automation-audit-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`autonomous-agent-harness`** : « autonomous-agent-harness » repose sur des mécanismes propres à Claude Code (14 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`autonomous-loops`** : « autonomous-loops » repose sur des mécanismes propres à Claude Code (7 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
 - **`benchmark`** : Framework non ciblé : composant prévu pour [docker] non présent dans la stack [next.js, react, tailwind css].
-- **`blender-motion-state-inspection`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`brand-discovery`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`blender-motion-state-inspection`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
 - **`blueprint`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
-- **`browser-qa`** : Framework non ciblé : composant prévu pour [playwright] non présent dans la stack [next.js, react, tailwind css].
-- **`docs-governance`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
-- **`compose-multiplatform-patterns`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
+- **`bun-runtime`** : Non applicable : technologie absente du projet (bun).
+- **`carrier-relationship-management`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`cisco-ios-patterns`** : Technologie spécifique [ios] non utilisée dans la stack de ce projet.
+- **`ck`** : « ck » repose sur des mécanismes propres à Claude Code (11 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`claude-devfleet`** : « claude-devfleet » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`clickhouse-io`** : Non applicable : technologie absente du projet (clickhouse).
+- **`codebase-onboarding`** : « codebase-onboarding » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`competitive-platform-analysis`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`connections-optimizer`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`competitive-report-structure`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`compose-multiplatform-patterns`** : Non applicable : technologie absente du projet (android / kotlin).
+- **`config-gc`** : « config-gc » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`configure-ecc`** : « configure-ecc » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`content-engine`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
 - **`content-hash-cache-pattern`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`cost-aware-llm-pipeline`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`cpp-coding-standards`** : Technologie spécifique [cpp] non utilisée dans la stack de ce projet.
-- **`cpp-testing`** : Technologie spécifique [cpp] non utilisée dans la stack de ce projet.
-- **`csharp-testing`** : Incompatible avec la stack du projet : composant ciblant [csharp, postgresql] alors que le projet utilise [typescript].
-- **`dart-flutter-patterns`** : Technologie spécifique [dart] non utilisée dans la stack de ce projet.
+- **`continuous-learning`** : « continuous-learning » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`continuous-learning-v2`** : « continuous-learning-v2 » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`cost-aware-llm-pipeline`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`cost-tracking`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`counterparty-channel-discipline`** : Module ECC « operator-desk-patterns » : usage métier ou opérationnel, hors développement logiciel.
+- **`cpp-coding-standards`** : Non applicable : technologie absente du projet (cpp).
+- **`cpp-testing`** : Non applicable : technologie absente du projet (cpp).
+- **`crosspost`** : Module ECC « social-distribution » : usage métier ou opérationnel, hors développement logiciel.
+- **`csharp-testing`** : Non applicable : technologie absente du projet (csharp).
+- **`customer-billing-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`customs-trade-compliance`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`dart-flutter-patterns`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`dashboard-builder`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
 - **`data-throughput-accelerator`** : Incompatible avec la stack du projet : composant ciblant [sql] alors que le projet utilise [typescript].
-- **`database-migrations`** : Framework non ciblé : composant prévu pour [django] non présent dans la stack [next.js, react, tailwind css].
-- **`deep-research`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`delivery-gate`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`design-system`** : Framework non ciblé : composant prévu pour [tailwindcss] non présent dans la stack [next.js, react, tailwind css].
-- **`django-celery`** : Technologie spécifique [django] non utilisée dans la stack de ce projet.
-- **`django-patterns`** : Technologie spécifique [django] non utilisée dans la stack de ce projet.
-- **`django-security`** : Technologie spécifique [django] non utilisée dans la stack de ce projet.
-- **`django-tdd`** : Technologie spécifique [django] non utilisée dans la stack de ce projet.
-- **`django-verification`** : Technologie spécifique [django] non utilisée dans la stack de ce projet.
-- **`dotnet-patterns`** : Incompatible avec la stack du projet : composant ciblant [csharp] alors que le projet utilise [typescript].
-- **`e2e-testing`** : Framework non ciblé : composant prévu pour [playwright] non présent dans la stack [next.js, react, tailwind css].
-- **`energy-procurement`** : Framework non ciblé : composant prévu pour [spring] non présent dans la stack [next.js, react, tailwind css].
-- **`exa-search`** : Incompatible avec la stack du projet : composant ciblant [python, rust] alors que le projet utilise [typescript].
-- **`fal-ai-media`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`fastapi-patterns`** : Technologie spécifique [fastapi] non utilisée dans la stack de ce projet.
-- **`flutter-dart-code-review`** : Technologie spécifique [flutter] non utilisée dans la stack de ce projet.
+- **`deep-research`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`deepseek-harness-setup`** : « deepseek-harness-setup » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`email-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`defi-amm-security`** : Non applicable : domaine métier « blockchain / crypto » absent du cahier des charges.
+- **`delivery-gate`** : « delivery-gate » repose sur des mécanismes propres à Claude Code (7 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`django-celery`** : Non applicable : technologie absente du projet (django).
+- **`django-patterns`** : Non applicable : technologie absente du projet (django).
+- **`django-security`** : Non applicable : technologie absente du projet (django).
+- **`django-tdd`** : Non applicable : technologie absente du projet (django).
+- **`django-verification`** : Non applicable : technologie absente du projet (django).
+- **`dmux-workflows`** : « dmux-workflows » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`docs-governance`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
+- **`documentation-lookup`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`dotnet-patterns`** : Non applicable : technologie absente du projet (csharp / fsharp).
+- **`e2e-testing`** : Non applicable : aucun outil de test de bout en bout (Playwright, Cypress).
+- **`ecc-guide`** : « ecc-guide » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`ecc-recipes`** : « ecc-recipes » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`ecc-tools-cost-audit`** : « ecc-tools-cost-audit » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`energy-procurement`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`esign-field-placement`** : Module ECC « operator-desk-patterns » : usage métier ou opérationnel, hors développement logiciel.
+- **`eval-harness`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`evm-token-decimals`** : Non applicable : domaine métier « blockchain / crypto » absent du cahier des charges.
+- **`exa-search`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`fal-ai-media`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`fastapi-patterns`** : Non applicable : technologie absente du projet (fastapi).
+- **`finance-billing-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`master-agreement-generator`** : Module ECC « operator-desk-patterns » : usage métier ou opérationnel, hors développement logiciel.
+- **`flox-environments`** : Le composant 'flox-environments' requiert l'outillage Flox non présent dans l'infrastructure du projet.
+- **`flutter-dart-code-review`** : Non applicable : technologie absente du projet (flutter).
 - **`foundation-models-on-device`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`frontend-slides`** : Incompatible avec la stack du projet : composant ciblant [javascript, python] alors que le projet utilise [typescript].
-- **`fsharp-testing`** : Incompatible avec la stack du projet : composant ciblant [csharp] alors que le projet utilise [typescript].
+- **`fsharp-testing`** : Non applicable : technologie absente du projet (fsharp).
 - **`gan-style-harness`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
+- **`gateguard`** : « gateguard » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
 - **`generating-python-installer`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`golang-patterns`** : Incompatible avec la stack du projet : composant ciblant [go, sql, postgresql] alors que le projet utilise [typescript].
-- **`golang-testing`** : Technologie spécifique [golang] non utilisée dans la stack de ce projet.
-- **`hexagonal-architecture`** : Framework non ciblé : composant prévu pour [spring] non présent dans la stack [next.js, react, tailwind css].
+- **`github-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`golang-patterns`** : Non applicable : technologie absente du projet (go).
+- **`golang-testing`** : Non applicable : technologie absente du projet (go).
+- **`google-workspace-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`healthcare-cdss-patterns`** : Non applicable : domaine métier « santé » absent du cahier des charges.
+- **`healthcare-emr-patterns`** : Non applicable : domaine métier « santé » absent du cahier des charges.
+- **`healthcare-phi-compliance`** : Non applicable : domaine métier « santé » absent du cahier des charges.
+- **`hipaa-compliance`** : Non applicable : domaine métier « santé » absent du cahier des charges.
 - **`homelab-pihole-dns`** : Framework non ciblé : composant prévu pour [docker] non présent dans la stack [next.js, react, tailwind css].
-- **`inherit-legacy-style`** : Incompatible avec la stack du projet : composant ciblant [java, swift, php] alors que le projet utilise [typescript].
-- **`laravel-plugin-discovery`** : Technologie spécifique [laravel] non utilisée dans la stack de ce projet.
+- **`hookify-rules`** : « hookify-rules » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`i18n-sync`** : Non applicable : domaine métier « internationalisation » absent du cahier des charges.
+- **`inherit-legacy-style`** : « inherit-legacy-style » repose sur des mécanismes propres à Claude Code (11 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`inventory-demand-planning`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`investor-materials`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`investor-outreach`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
 - **`ios-icon-gen`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`iterative-retrieval`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`ito-baskets`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`java-coding-standards`** : Incompatible avec la stack du projet : composant ciblant [java, sql] alors que le projet utilise [typescript].
-- **`jpa-patterns`** : Incompatible avec la stack du projet : composant ciblant [java, sql, postgresql] alors que le projet utilise [typescript].
-- **`knowledge-ops`** : Incompatible avec la stack du projet : composant ciblant [sql, postgresql] alors que le projet utilise [typescript].
-- **`kotlin-coroutines-flows`** : Incompatible avec la stack du projet : composant ciblant [kotlin] alors que le projet utilise [typescript].
-- **`kotlin-exposed-patterns`** : Incompatible avec la stack du projet : composant ciblant [kotlin, sql, postgresql] alors que le projet utilise [typescript].
-- **`kotlin-ktor-patterns`** : Incompatible avec la stack du projet : composant ciblant [kotlin, postgresql] alors que le projet utilise [typescript].
-- **`kotlin-patterns`** : Incompatible avec la stack du projet : composant ciblant [java, kotlin, sql, postgresql] alors que le projet utilise [typescript].
-- **`kotlin-testing`** : Technologie spécifique [kotlin] non utilisée dans la stack de ce projet.
-- **`laravel-patterns`** : Incompatible avec la stack du projet : composant ciblant [php] alors que le projet utilise [typescript].
-- **`laravel-security`** : Technologie spécifique [laravel] non utilisée dans la stack de ce projet.
-- **`laravel-tdd`** : Technologie spécifique [laravel] non utilisée dans la stack de ce projet.
-- **`laravel-verification`** : Technologie spécifique [laravel] non utilisée dans la stack de ce projet.
-- **`lead-intelligence`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`issue-review`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`iterative-retrieval`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`ito-baskets`** : Module ECC « prediction-market-skills » : usage métier ou opérationnel, hors développement logiciel.
+- **`ito-compute`** : Module ECC « ito-compute » : usage métier ou opérationnel, hors développement logiciel.
+- **`ito-inference`** : Module ECC « ito-compute » : usage métier ou opérationnel, hors développement logiciel.
+- **`ito-training`** : Module ECC « ito-compute » : usage métier ou opérationnel, hors développement logiciel.
+- **`java-coding-standards`** : Non applicable : technologie absente du projet (java).
+- **`jira-integration`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`jpa-patterns`** : Non applicable : technologie absente du projet (jpa / hibernate).
+- **`knowledge-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`kotlin-coroutines-flows`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-exposed-patterns`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-ktor-patterns`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-patterns`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-testing`** : Non applicable : technologie absente du projet (kotlin).
+- **`kubernetes-patterns`** : Non applicable : technologie absente du projet (kubernetes).
+- **`laravel-patterns`** : Non applicable : technologie absente du projet (laravel).
+- **`laravel-plugin-discovery`** : Non applicable : technologie absente du projet (laravel).
+- **`laravel-security`** : Non applicable : technologie absente du projet (laravel).
+- **`laravel-tdd`** : Non applicable : technologie absente du projet (laravel).
+- **`laravel-verification`** : Non applicable : technologie absente du projet (laravel).
+- **`lead-intelligence`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
 - **`liquid-glass-design`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`ml-adoption-playbook`** : Framework non ciblé : composant prévu pour [django, fastapi] non présent dans la stack [next.js, react, tailwind css].
+- **`llm-trading-agent-security`** : Non applicable : domaine métier « blockchain / crypto » absent du cahier des charges.
+- **`logistics-exception-management`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`mailtrap-email-integration`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`manim-video`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`market-research`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`marketing-campaign`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`mcp-server-patterns`** : Non applicable : domaine métier « serveurs MCP » absent du cahier des charges.
+- **`messages-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`ml-adoption-playbook`** : Non applicable : domaine métier « machine learning » absent du cahier des charges.
+- **`mle-workflow`** : Non applicable : domaine métier « machine learning » absent du cahier des charges.
 - **`module-regression`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`mybatis-patterns`** : Non applicable : technologie absente du projet (mybatis).
+- **`mysql-patterns`** : Non applicable : technologie absente du projet (mysql / mariadb).
+- **`nasiko-control-plane`** : Module ECC « nasiko-control-plane » : usage métier ou opérationnel, hors développement logiciel.
+- **`nestjs-patterns`** : Non applicable : technologie absente du projet (nestjs).
 - **`netmiko-ssh-automation`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
 - **`network-bgp-diagnostics`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`openclaw-persona-forge`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
 - **`network-interface-health`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`nextjs-turbopack`** : Incompatible avec la stack du projet : composant ciblant [rust] alors que le projet utilise [typescript].
-- **`nuxt4-patterns`** : Framework non ciblé : composant prévu pour [vue, nuxt] non présent dans la stack [next.js, react, tailwind css].
-- **`operator-approval-loop`** : Incompatible avec la stack du projet : composant ciblant [python, sql] alors que le projet utilise [typescript].
-- **`perl-patterns`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`repo-scan`** : Incompatible avec la stack du projet : composant ciblant [java, swift] alors que le projet utilise [typescript].
-- **`perl-security`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`perl-testing`** : Technologie spécifique [perl] non utilisée dans la stack de ce projet.
-- **`prompt-caching-strategy`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`python-patterns`** : Technologie spécifique [python] non utilisée dans la stack de ce projet.
-- **`python-testing`** : Technologie spécifique [python] non utilisée dans la stack de ce projet.
-- **`pytorch-patterns`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`quarkus-patterns`** : Technologie spécifique [quarkus] non utilisée dans la stack de ce projet.
-- **`quarkus-security`** : Technologie spécifique [quarkus] non utilisée dans la stack de ce projet.
-- **`quarkus-tdd`** : Technologie spécifique [quarkus] non utilisée dans la stack de ce projet.
-- **`quarkus-verification`** : Technologie spécifique [quarkus] non utilisée dans la stack de ce projet.
-- **`rails-patterns`** : Incompatible avec la stack du projet : composant ciblant [javascript, ruby] alors que le projet utilise [typescript].
-- **`react-native-patterns`** : Technologie spécifique [react-native] non utilisée dans la stack de ce projet.
-- **`react-performance`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
+- **`nodejs-keccak256`** : Non applicable : domaine métier « blockchain / crypto » absent du cahier des charges.
+- **`nutrient-document-processing`** : Module ECC « document-processing » : usage métier ou opérationnel, hors développement logiciel.
+- **`nuxt4-patterns`** : Non applicable : technologie absente du projet (nuxt).
+- **`openclaw-persona-forge`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`opensource-pipeline`** : « opensource-pipeline » repose sur des mécanismes propres à Claude Code (11 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`operator-approval-loop`** : Module ECC « operator-desk-patterns » : usage métier ou opérationnel, hors développement logiciel.
+- **`osint-investigation`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`perl-patterns`** : Non applicable : technologie absente du projet (perl).
+- **`perl-security`** : Non applicable : technologie absente du projet (perl).
+- **`perl-testing`** : Non applicable : technologie absente du projet (perl).
+- **`plankton-code-quality`** : « plankton-code-quality » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`prediction-market-oracle-research`** : Module ECC « prediction-market-skills » : usage métier ou opérationnel, hors développement logiciel.
+- **`prediction-market-risk-review`** : Module ECC « prediction-market-skills » : usage métier ou opérationnel, hors développement logiciel.
+- **`prisma-patterns`** : Non applicable : technologie absente du projet (prisma).
+- **`product-capability`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`production-scheduling`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`project-flow-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`prompt-caching-strategy`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`prompt-optimizer`** : « prompt-optimizer » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`python-patterns`** : Non applicable : technologie absente du projet (python).
+- **`python-testing`** : Non applicable : technologie absente du projet (python).
+- **`pytorch-patterns`** : Non applicable : technologie absente du projet (pytorch).
+- **`quality-nonconformance`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`quarkus-patterns`** : Non applicable : technologie absente du projet (quarkus).
+- **`quarkus-security`** : Non applicable : technologie absente du projet (quarkus).
+- **`quarkus-tdd`** : Non applicable : technologie absente du projet (quarkus).
+- **`redis-patterns`** : Non applicable : technologie absente du projet (redis).
+- **`quarkus-verification`** : Non applicable : technologie absente du projet (quarkus).
+- **`rails-patterns`** : Non applicable : technologie absente du projet (rails).
+- **`react-native-patterns`** : Non applicable : technologie absente du projet (react-native).
+- **`terminal-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
 - **`recsys-pipeline-architect`** : Framework non ciblé : composant prévu pour [fastapi] non présent dans la stack [next.js, react, tailwind css].
-- **`redis-patterns`** : Incompatible avec la stack du projet : composant ciblant [python, postgresql] alors que le projet utilise [typescript].
-- **`rust-patterns`** : Technologie spécifique [rust] non utilisée dans la stack de ce projet.
-- **`rust-testing`** : Technologie spécifique [rust] non utilisée dans la stack de ce projet.
+- **`regex-vs-llm-structured-text`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`remotion-video-creation`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`repo-scan`** : Incompatible avec la stack du projet : composant ciblant [java, swift] alors que le projet utilise [typescript].
+- **`research-ops`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`returns-reverse-logistics`** : Module ECC « supply-chain-domain » : usage métier ou opérationnel, hors développement logiciel.
+- **`rules-distill`** : « rules-distill » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`rust-patterns`** : Non applicable : technologie absente du projet (rust).
+- **`rust-testing`** : Non applicable : technologie absente du projet (rust).
 - **`safety-guard`** : Framework non ciblé : composant prévu pour [docker] non présent dans la stack [next.js, react, tailwind css].
-- **`scientific-db-pubmed-database`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`scientific-db-uspto-database`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`scientific-pkg-gget`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`springboot-patterns`** : Technologie spécifique [springboot] non utilisée dans la stack de ce projet.
-- **`search-first`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`skill-stocktake`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`springboot-security`** : Technologie spécifique [springboot] non utilisée dans la stack de ce projet.
-- **`springboot-tdd`** : Technologie spécifique [springboot] non utilisée dans la stack de ce projet.
-- **`springboot-verification`** : Technologie spécifique [springboot] non utilisée dans la stack de ce projet.
-- **`swift-actor-persistence`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swift-concurrency-6-2`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swift-protocol-di-testing`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`swiftui-patterns`** : Incompatible avec la stack du projet : composant ciblant [swift] alors que le projet utilise [typescript].
-- **`taste-application`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`taste-distillation`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`tasteforge-video`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
+- **`scientific-db-pubmed-database`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`scientific-db-uspto-database`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`scientific-pkg-gget`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`scientific-thinking-literature-review`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`scientific-thinking-scholar-evaluation`** : Module ECC « research-apis » : usage métier ou opérationnel, hors développement logiciel.
+- **`search-first`** : « search-first » repose sur des mécanismes propres à Claude Code (7 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`security-scan`** : « security-scan » repose sur des mécanismes propres à Claude Code (17 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`seo`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`opensource-sanitizer`** : Framework non ciblé : composant prévu pour [docker] non présent dans la stack [next.js, react, tailwind css].
+- **`skill-comply`** : « skill-comply » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`skill-host-compat`** : « skill-host-compat » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`skill-scout`** : « skill-scout » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`skill-stocktake`** : « skill-stocktake » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`social-graph-ranker`** : Module ECC « business-content » : usage métier ou opérationnel, hors développement logiciel.
+- **`social-publisher`** : Module ECC « social-distribution » : usage métier ou opérationnel, hors développement logiciel.
+- **`springboot-patterns`** : Non applicable : technologie absente du projet (springboot).
+- **`springboot-security`** : Non applicable : technologie absente du projet (springboot).
+- **`springboot-tdd`** : Non applicable : technologie absente du projet (springboot).
+- **`springboot-verification`** : Non applicable : technologie absente du projet (springboot).
+- **`strategic-compact`** : « strategic-compact » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`swift-actor-persistence`** : Non applicable : technologie absente du projet (swift).
+- **`swift-concurrency-6-2`** : Non applicable : technologie absente du projet (swift).
+- **`swift-protocol-di-testing`** : Non applicable : technologie absente du projet (swift).
+- **`swiftui-patterns`** : Non applicable : technologie absente du projet (swiftui).
+- **`taste`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`taste-application`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`taste-distillation`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`tasteforge-video`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`team-builder`** : « team-builder » repose sur des mécanismes propres à Claude Code (7 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`tinystruct-patterns`** : Non applicable : technologie absente du projet (tinystruct).
 - **`token-budget-advisor`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`ui-demo`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
+- **`token-card`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`rag-pipeline-reviewer`** : Non applicable : domaine métier « agents IA / LLM » absent du cahier des charges.
+- **`ui-demo`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
 - **`ui-to-vue`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
 - **`uncloud`** : Incompatible avec la stack du projet : composant ciblant [postgresql] alors que le projet utilise [typescript].
-- **`video-editing`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`videodb`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`visa-doc-translate`** : Incompatible avec la stack du projet : composant ciblant [python] alors que le projet utilise [typescript].
-- **`vue-patterns`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`a11y-architect`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`agent-evaluator`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`architect`** : Incompatible avec la stack du projet : composant ciblant [javascript, postgresql] alors que le projet utilise [typescript].
-- **`bengali-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, postgresql] alors que le projet utilise [typescript].
-- **`comment-analyzer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`chief-of-staff`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`code-architect`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`code-explorer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`code-simplifier`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`commit-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`conversation-analyzer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`cpp-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`cpp-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`csharp-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, csharp, sql] alors que le projet utilise [typescript].
-- **`dart-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`database-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, sql, postgresql] alors que le projet utilise [typescript].
-- **`django-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, postgresql] alors que le projet utilise [typescript].
-- **`django-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, sql] alors que le projet utilise [typescript].
-- **`docs-lookup`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`e2e-runner`** : Framework non ciblé : composant prévu pour [playwright] non présent dans la stack [next.js, react, tailwind css].
-- **`fastapi-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, sql] alors que le projet utilise [typescript].
-- **`network-config-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`flutter-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`fsharp-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, sql] alors que le projet utilise [typescript].
-- **`gan-evaluator`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
+- **`unified-memory`** : Module ECC « skill-unified-memory » : usage métier ou opérationnel, hors développement logiciel.
+- **`unified-notifications-ops`** : Module ECC « operator-workflows » : usage métier ou opérationnel, hors développement logiciel.
+- **`video-editing`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`videodb`** : Module ECC « media-generation » : usage métier ou opérationnel, hors développement logiciel.
+- **`visa-doc-translate`** : Module ECC « document-processing » : usage métier ou opérationnel, hors développement logiciel.
+- **`vite-patterns`** : Non applicable : technologie absente du projet (vite).
+- **`vue-patterns`** : Non applicable : technologie absente du projet (vue).
+- **`workspace-surface-audit`** : « workspace-surface-audit » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`x-api`** : Module ECC « social-distribution » : usage métier ou opérationnel, hors développement logiciel.
+- **`chief-of-staff`** : Framework non ciblé : composant prévu pour [playwright] non présent dans la stack [next.js, react, tailwind css].
+- **`e2e-runner`** : Non applicable : aucun outil de test de bout en bout (Playwright, Cypress).
+- **`cpp-build-resolver`** : Non applicable : technologie absente du projet (cpp).
+- **`cpp-reviewer`** : Non applicable : technologie absente du projet (cpp).
+- **`csharp-reviewer`** : Non applicable : technologie absente du projet (csharp).
+- **`dart-build-resolver`** : Non applicable : technologie absente du projet (dart / flutter).
+- **`mle-reviewer`** : Non applicable : domaine métier « machine learning » absent du cahier des charges.
+- **`django-build-resolver`** : Non applicable : technologie absente du projet (django).
+- **`django-reviewer`** : Non applicable : technologie absente du projet (django).
+- **`fastapi-reviewer`** : Non applicable : technologie absente du projet (fastapi).
+- **`flutter-reviewer`** : Non applicable : technologie absente du projet (flutter).
+- **`fsharp-reviewer`** : Non applicable : technologie absente du projet (fsharp).
+- **`gan-evaluator`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
 - **`gan-generator`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
-- **`gan-planner`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`go-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, go] alors que le projet utilise [typescript].
-- **`go-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, go, sql] alors que le projet utilise [typescript].
+- **`gan-planner`** : Technologie spécifique [gan] non utilisée dans la stack de ce projet.
+- **`go-build-resolver`** : Non applicable : technologie absente du projet (go).
+- **`go-reviewer`** : Non applicable : technologie absente du projet (go).
 - **`harmonyos-app-resolver`** : Technologie spécifique [harmonyos] non utilisée dans la stack de ce projet.
-- **`harness-optimizer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`healthcare-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`homelab-architect`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`java-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, java] alors que le projet utilise [typescript].
-- **`java-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, java, sql] alors que le projet utilise [typescript].
-- **`kotlin-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, java, kotlin] alors que le projet utilise [typescript].
-- **`kotlin-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, java, kotlin] alors que le projet utilise [typescript].
-- **`loop-operator`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`marketing-agent`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`mle-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, sql] alors que le projet utilise [typescript].
-- **`network-architect`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`network-troubleshooter`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`opensource-forker`** : Incompatible avec la stack du projet : composant ciblant [javascript, postgresql] alors que le projet utilise [typescript].
-- **`opensource-packager`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, postgresql] alors que le projet utilise [typescript].
-- **`opensource-sanitizer`** : Incompatible avec la stack du projet : composant ciblant [javascript, postgresql] alors que le projet utilise [typescript].
-- **`php-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, php, sql] alors que le projet utilise [typescript].
-- **`planner`** : Incompatible avec la stack du projet : composant ciblant [javascript, sql] alors que le projet utilise [typescript].
-- **`pr-test-analyzer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`python-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, python, sql] alors que le projet utilise [typescript].
-- **`pytorch-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, python] alors que le projet utilise [typescript].
-- **`rag-pipeline-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`ruby-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, ruby, sql] alors que le projet utilise [typescript].
-- **`rust-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, rust] alors que le projet utilise [typescript].
-- **`rust-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, rust, sql] alors que le projet utilise [typescript].
-- **`security-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, sql] alors que le projet utilise [typescript].
-- **`seo-specialist`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`silent-failure-hunter`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`spec-miner`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`swift-build-resolver`** : Incompatible avec la stack du projet : composant ciblant [javascript, swift] alors que le projet utilise [typescript].
-- **`swift-reviewer`** : Incompatible avec la stack du projet : composant ciblant [javascript, swift, sql] alors que le projet utilise [typescript].
-- **`tdd-guide`** : Incompatible avec la stack du projet : composant ciblant [javascript, sql] alors que le projet utilise [typescript].
-- **`type-design-analyzer`** : Incompatible avec la stack du projet : composant ciblant [javascript] alors que le projet utilise [typescript].
-- **`vue-reviewer`** : Technologie spécifique [vue] non utilisée dans la stack de ce projet.
-- **`react-review`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`react-security`** : Doublon fonctionnel évité : le rôle/famille "RULE:react" est déjà couvert par le composant prioritaire "react-patterns".
-- **`react-testing`** : Doublon fonctionnel évité : le rôle/famille "RULE:react" est déjà couvert par le composant prioritaire "react-patterns".
-- **`typescript-testing`** : Doublon fonctionnel évité : le rôle/famille "RULE:typescript" est déjà couvert par le composant prioritaire "typescript-security".
-- **`tdd-workflow`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`tinystruct-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`typescript-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`vite-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`react-reviewer`** : Doublon fonctionnel évité : le rôle/famille "SUBAGENT:code-reviewer" est déjà couvert par le composant prioritaire "code-reviewer".
-- **`typescript-reviewer`** : Doublon fonctionnel évité : le rôle/famille "SUBAGENT:code-reviewer" est déjà couvert par le composant prioritaire "code-reviewer".
-- **`ui-craft-reviewer`** : Doublon fonctionnel évité : le rôle/famille "SUBAGENT:code-reviewer" est déjà couvert par le composant prioritaire "code-reviewer".
-- **`architecture-decision-records`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`code-review`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`agent-runtime-gateway-smoke-test`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`autonomous-loops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`brownfield-retrospective`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`contract-first`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`healthcare-emr-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`mailtrap-email-integration`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`nestjs-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-pipeline`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`plankton-code-quality`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`test-collaboration`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`verification-loop`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`continuous-learning-v2`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`react-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`react-coding-style`** : Doublon fonctionnel évité : le rôle/famille "RULE:react" est déjà couvert par le composant prioritaire "react-patterns".
-- **`agentic-engineering`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`healthcare-cdss-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`story-lifecycle`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`api-design`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`error-handling`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`prisma-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`multi-execute`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`frontend-a11y`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`motion-foundations`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`motion-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`team-builder`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-review`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`review-pr`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`agent-security-hardening`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`git-workflow`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`production-audit`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`security-bounty-hunter`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`agent-architecture-audit`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`defi-amm-security`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`github-ops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`security-scan`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`workspace-surface-audit`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`react-build`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`react-hooks`** : Doublon fonctionnel évité : le rôle/famille "RULE:react" est déjà couvert par le composant prioritaire "react-patterns".
-- **`agent-sort`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`automation-audit-ops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`ecc-tools-cost-audit`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`llm-trading-agent-security`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`docker-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`flox-environments`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`healthcare-eval-harness`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`homelab-wireguard-vpn`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`kubernetes-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`mle-workflow`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`plan-orchestrate`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`postgres-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`harness-audit`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`agent-self-evaluation`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`claude-devfleet`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`code-tour`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`continuous-learning`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`data-scraper-agent`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`dmux-workflows`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`eval-harness`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`hipaa-compliance`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`hookify-rules`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`intent-driven-development`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`issue-review`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`jira-integration`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`market-research`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`mcp-dependency-review`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`network-config-validation`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`nutrient-document-processing`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`opensource-pipeline`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`prediction-market-risk-review`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`product-capability`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`santa-method`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`social-publisher`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`windows-desktop-e2e`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`x-api`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`typescript-coding-style`** : Doublon fonctionnel évité : le rôle/famille "RULE:typescript" est déjà couvert par le composant prioritaire "typescript-security".
-- **`clickhouse-io`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`jira`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`multi-backend`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`prp-plan`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`skill-create`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`ai-first-engineering`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`autonomous-agent-harness`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`carrier-relationship-management`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`codehealth-mcp`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`config-gc`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`council`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`customs-trade-compliance`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`dynamic-workflow-mode`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`ecc-guide`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`ecc-recipes`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`enterprise-agent-ops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`frontend-design-direction`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`homelab-network-readiness`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`homelab-vlan-segmentation`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`logistics-exception-management`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`marketing-campaign`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-add-feature`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-build-mvp`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-change-feature`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`orch-fix-defect`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`osint-investigation`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`prediction-market-oracle-research`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`product-lens`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`quality-nonconformance`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`ralphinho-rfc-pipeline`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`regex-vs-llm-structured-text`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`returns-reverse-logistics`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`rules-distill`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`skill-comply`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`skill-scout`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`strategic-compact`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`team-agent-orchestration`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`terminal-ops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`unified-notifications-ops`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`api-connector-builder`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`mcp-server-patterns`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`refactor-cleaner`** : Quota maximum de sous-agents (6) atteint pour le preset THOROUGH.
-- **`instinct-status`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`evolve`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`feature-dev`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`instinct-export`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`multi-frontend`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`multi-plan`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`multi-workflow`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`plan`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`plan-prd`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`pr`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`prp-pr`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`documentation-lookup`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`motion-advanced`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`refactor-clean`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`typescript-patterns`** : Doublon fonctionnel évité : le rôle/famille "RULE:typescript" est déjà couvert par le composant prioritaire "typescript-security".
-- **`evm-token-decimals`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`nodejs-keccak256`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`resume-session`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`agent-harness-construction`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`benchmark-methodology`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`remotion-video-creation`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`taste`** : Quota maximum de compétences / skills (16) atteint pour le preset THOROUGH.
-- **`build-fix`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`prp-commit`** : Doublon fonctionnel évité : le rôle/famille "COMMAND_CONVERTED:workflow-converted" est déjà couvert par le composant prioritaire "react-test".
-- **`typescript-hooks`** : Doublon fonctionnel évité : le rôle/famille "RULE:typescript" est déjà couvert par le composant prioritaire "typescript-security".
-- **`article-writing`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`brand-voice`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`canary-watch`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`change-impact`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`configure-ecc`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`connections-optimizer`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`content-engine`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`conventional-commit-review`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`counterparty-channel-discipline`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`crosspost`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`customer-billing-ops`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`dashboard-builder`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`esign-field-placement`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`hermes-imports`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`inventory-demand-planning`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`ito-compute`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`ito-inference`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`ito-training`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`latency-critical-systems`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`module-governance`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`parallel-execution-optimizer`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`production-scheduling`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`recursive-decision-ledger`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`social-graph-ranker`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`token-card`** : Score de pertinence (14/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`aside`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`learn`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`learn-eval`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`skill-health`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`agent-introspection-debugging`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`benchmark-optimization-loop`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`brand-discovery`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`cisco-ios-patterns`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`ck`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`competitive-platform-analysis`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`competitive-report-structure`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`email-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`context-and-decisions`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`context-budget`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`continuous-agent-loop`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`cost-tracking`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`council-multi-model`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`deepseek-harness-setup`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`dev-team`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`finance-billing-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`google-workspace-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`growth-log`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`homelab-network-setup`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`i18n-sync`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`investor-materials`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`investor-outreach`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`living-docs-governance`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`loop-design-check`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`make-interfaces-feel-better`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`manim-video`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`master-agreement-generator`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`messages-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`nanoclaw-repl`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`nasiko-control-plane`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`orch-refine-code`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`plan-canvas`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`research-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`project-flow-ops`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`scientific-thinking-literature-review`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`scientific-thinking-scholar-evaluation`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`seo`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`skill-host-compat`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`terminal-opener`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`unified-memory`** : Score de pertinence (7/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`checkpoint`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`auto-update`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`cost-report`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-claim`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-decompose`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-publish`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-review`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-sync`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-unblock`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`epic-validate`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`instinct-import`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`hookify-configure`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`hookify-help`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`hookify-list`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`loop-start`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`loop-status`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`model-route`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`projects`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`promote`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`prp-prd`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`prune`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`quality-gate`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`sessions`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
-- **`setup-pm`** : Score de pertinence (0/100) inférieur au seuil requis (15/100) pour le preset THOROUGH.
+- **`network-architect`** : Non applicable : domaine métier « réseau » absent du cahier des charges.
+- **`harness-optimizer`** : « harness-optimizer » décrit l'outillage de Claude Code ou de la bibliothèque source, sans équivalent dans Antigravity.
+- **`healthcare-reviewer`** : Non applicable : domaine métier « santé » absent du cahier des charges.
+- **`java-build-resolver`** : Non applicable : technologie absente du projet (java).
+- **`java-reviewer`** : Non applicable : technologie absente du projet (java).
+- **`kotlin-build-resolver`** : Non applicable : technologie absente du projet (kotlin).
+- **`kotlin-reviewer`** : Non applicable : technologie absente du projet (kotlin).
+- **`opensource-forker`** : Framework non ciblé : composant prévu pour [fastapi, docker] non présent dans la stack [next.js, react, tailwind css].
+- **`opensource-packager`** : « opensource-packager » repose sur des mécanismes propres à Claude Code (24 références : hooks, CLAUDE.md, ~/.claude, /ecc:…).
+- **`php-reviewer`** : Non applicable : technologie absente du projet (php).
+- **`python-reviewer`** : Non applicable : technologie absente du projet (python).
+- **`pytorch-build-resolver`** : Non applicable : technologie absente du projet (pytorch).
+- **`ruby-reviewer`** : Non applicable : technologie absente du projet (ruby).
+- **`rust-build-resolver`** : Non applicable : technologie absente du projet (rust).
+- **`rust-reviewer`** : Non applicable : technologie absente du projet (rust).
+- **`seo-specialist`** : Non applicable : domaine métier « SEO » absent du cahier des charges.
+- **`spec-miner`** : Framework non ciblé : composant prévu pour [django, spring] non présent dans la stack [next.js, react, tailwind css].
+- **`swift-build-resolver`** : Non applicable : technologie absente du projet (swift).
+- **`swift-reviewer`** : Non applicable : technologie absente du projet (swift).
+- **`vue-reviewer`** : Non applicable : technologie absente du projet (vue).
+- **`brownfield-retrospective`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`browser-qa`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`build-fix`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`code-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-claim`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-decompose`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-publish`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-sync`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-unblock`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`epic-validate`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`feature-dev`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`jira`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`multi-backend`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`multi-execute`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`multi-frontend`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`multi-plan`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`multi-workflow`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`plan`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`plan-prd`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`pm2`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`pr`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`projects`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`prp-commit`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`prp-plan`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`prp-pr`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`prp-prd`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`quality-gate`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`react-build`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`react-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`react-test`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`refactor-clean`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`review-pr`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`setup-pm`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`common-patterns`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`common-performance`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`web-design-quality`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`web-performance`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`agent-harness-construction`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`agent-introspection-debugging`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`agent-runtime-gateway-smoke-test`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`agent-self-evaluation`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`agentic-engineering`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`ai-first-engineering`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`ai-regression-testing`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`architecture-decision-records`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`benchmark-methodology`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`benchmark-optimization-loop`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`bengali-nlp`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`canary-watch`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`change-impact`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`click-path-audit`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`code-tour`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`codehealth-mcp`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`coding-standards`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`context-and-decisions`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`context-budget`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`continuous-agent-loop`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`contract-first`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`conventional-commit-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`council`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`council-multi-model`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`data-scraper-agent`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`dev-team`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`dynamic-workflow-mode`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`enterprise-agent-ops`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`error-handling`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`frontend-slides`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`git-workflow`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`growth-log`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`healthcare-eval-harness`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`hermes-imports`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`hexagonal-architecture`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`homelab-network-readiness`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`homelab-network-setup`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`homelab-vlan-segmentation`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`homelab-wireguard-vpn`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`intent-driven-development`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`latency-critical-systems`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`living-docs-governance`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`loop-design-check`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`mcp-dependency-review`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`module-governance`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`motion-advanced`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`motion-foundations`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-fix-defect`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`motion-patterns`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`nanoclaw-repl`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`network-config-validation`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`nextjs-turbopack`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`orch-add-feature`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-build-mvp`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-change-feature`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-pipeline`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`orch-refine-code`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`parallel-execution-optimizer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`plan-canvas`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`plan-orchestrate`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`product-lens`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`production-audit`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`ralphinho-rfc-pipeline`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`react-performance`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`recursive-decision-ledger`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`santa-method`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`security-bounty-hunter`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`story-lifecycle`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`team-agent-orchestration`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`terminal-opener`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`performance-optimizer`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`test-collaboration`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`windows-desktop-e2e`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`a11y-architect`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`agent-evaluator`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`bengali-reviewer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`code-explorer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`conversation-analyzer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`code-simplifier`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`comment-analyzer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`commit-reviewer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`doc-updater`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`docs-lookup`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`homelab-architect`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`loop-operator`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`marketing-agent`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`network-config-reviewer`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`network-troubleshooter`** : Aucune fonction identifiée pour ce composant dans un projet de développement ; sélectionnable manuellement.
+- **`planner`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`pr-test-analyzer`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`refactor-cleaner`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`silent-failure-hunter`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`tdd-guide`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`type-design-analyzer`** : Composant de palier « extended », non inclus dans le preset BALANCED.
+- **`accessibility`** : Doublon fonctionnel évité : la fonction « skill:ui:accessibility » est couverte par « frontend-a11y » (source ecc-official, priorité 50).
+- **`make-interfaces-feel-better`** : Doublon fonctionnel évité : la fonction « skill:ui:design-engineering » est couverte par « frontend-design-direction » (source ecc-official, priorité 50).
+- **`typescript-reviewer`** : Doublon fonctionnel évité : la fonction « agent:review:stack » est couverte par « react-reviewer » (source ecc-official, priorité 50).
+- **`build-error-resolver`** : Doublon fonctionnel évité : la fonction « agent:build » est couverte par « react-build-resolver » (source ecc-official, priorité 50).
+- **`code-architect`** : Doublon fonctionnel évité : la fonction « agent:architect » est couverte par « architect » (source ecc-official, priorité 50).
+- **`security-reviewer`** : Doublon fonctionnel évité : la fonction « agent:security » est couverte par « security-auditor » (source curated, priorité 100).
 
 ---
 
-## 3. Licence et Attribution Obligatoire (Everything Claude Code — MIT License)
+## 3. Licences et attributions
 
-Les composants marqués `ecc_verbatim` ou `ecc_adapted` proviennent du projet open-source **Everything Claude Code (ECC)** créé par **Affaan Mustafa** ([https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)), distribué sous licence **MIT** :
+- **Affaan Mustafa** — [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) — licence **MIT** — commit `b38be6a7` — 39 composant(s)
+
+Les composants marqués `curated` sont écrits pour ce générateur.
+
+Texte de la licence MIT, applicable aux dépôts ci-dessus sous cette licence :
 
 ```text
 MIT License
 
-Copyright (c) 2026 Affaan Mustafa
+Copyright (c) Affaan Mustafa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

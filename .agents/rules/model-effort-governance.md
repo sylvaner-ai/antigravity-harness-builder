@@ -1,6 +1,6 @@
 ---
 trigger: always_on
-description: "Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques ; aucune intervention sur les tâches courtes."
+description: Arbitrage coût/performance du couple Modèle / Niveau d'effort pour les tâches longues ou critiques ; aucune intervention sur les tâches courtes.
 ---
 
 # Gouvernance Modèle / Effort — antigravity-harness-builder

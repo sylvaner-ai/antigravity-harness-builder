@@ -7,6 +7,7 @@ import {
   eccComponents,
   harnessGenerations,
   generatedArtifacts,
+  sourceDocuments,
 } from '@/db';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { SelectionEngine, CatalogCandidateInput } from '@/modules/selection-engine';
@@ -110,8 +111,25 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     // 4. Construction déterministe du harnais
+    // Documents d'entrée réels du projet (nom, taille et empreinte enregistrés à l'import) pour le manifeste
+    const projectDocuments = await db
+      .select()
+      .from(sourceDocuments)
+      .where(eq(sourceDocuments.projectId, projectId));
+    const inputDocuments = projectDocuments
+      .filter((d) => d.role !== 'AUDIT_REPORT')
+      .map((d) => ({
+        documentId: d.id,
+        role: d.role as 'SPECIFICATION' | 'DESIGN_SYSTEM' | 'SUPPLEMENTARY',
+        fileName: d.originalName,
+        mimeType: d.mimeType,
+        sizeBytes: d.sizeBytes,
+        sha256: d.sha256Hash,
+      }));
+
     const harnessBuilder = new HarnessBuilderService();
     const builtPackage = await harnessBuilder.buildHarness(profile, selection, {
+      ...(inputDocuments.length > 0 ? { inputDocuments } : {}),
       eccCommitSha: activeSync?.commitSha ?? '25278e7d8050e82c5f94d9305ea6a0fceec3ea42',
       eccVersionTag: activeSync?.versionTag ?? 'v2.2.3',
       generatedAtIso: new Date().toISOString(),
