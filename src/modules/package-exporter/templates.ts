@@ -583,7 +583,7 @@ Aucun sous-agent (\`.agents/agents/<name>.md\`) n'embarque de propriété \`mode
 
 1. **Tâche courte** (question, relecture, correction bornée dans un seul fichier) : exécution directe, sans commentaire sur le modèle.
 2. **Tâche longue ou à enjeu :** avant de commencer, une seule fois, l'agent principal compare le réglage actif au couple conseillé ; si l'écart est net, il formule **un seul couple préconisé** en une phrase et poursuit immédiatement.
-3. **Action difficilement réversible (migration destructive, suppression, refonte appliquée au code) :** si le réglage actif est inférieur au couple préconisé (\`Pro — Effort High\`), l'agent s'arrête et demande à l'utilisateur de modifier \`Model Selection\`. Planifier ou analyser n'est jamais une raison de s'arrêter.
+3. **Action difficilement réversible (migration destructive, suppression, refonte appliquée au code) :** si le réglage actif est inférieur au couple préconisé (\`Flagship — Effort High\`), l'agent s'arrête et demande à l'utilisateur de modifier \`Model Selection\`. Planifier ou analyser n'est jamais une raison de s'arrêter.
 4. **Délégation proportionnée :** un sous-agent n'est sollicité que pour une sous-tâche indépendante, bornée et volumineuse ; les revues et audits sont en lecture seule.
 
 ### Matrice des Sous-Agents Retenus

@@ -73,13 +73,13 @@ Aucun sous-agent (`.agents/agents/<name>.md`) n'embarque de propriété `model` 
 
 | Sous-agent (`.agents/agents/`) | Rôle & Responsabilité | Couple Unique Préconisé (Session) | Justification Qualité / Coût | Outils Autorisés (Moindre Privilège) |
 | :--- | :--- | :--- | :--- | :--- |
-| `build-error-resolver` | Résolution d'erreurs de build et TypeScript | **`Pro — Effort Medium`** | Compromis coût/performance optimal pour corriger les erreurs de typage sans dérive architecturale. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
-| `code-reviewer` | Revue indépendante de code, qualité et maintenabilité | **`Pro — Effort High`** | Raisonnement approfondi requis pour l'audit critique en lecture seule. | `view_file, grep_search, find_by_name, run_command` |
-| `performance-optimizer` | Analyse de performance et optimisation runtime | **`Pro — Effort High`** | Raisonnement approfondi requis pour le profilage et l'optimisation algorithmique. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
-| `security-auditor` | Auditeur de Sécurité & Conformité OWASP | **`Pro — Effort High`** | Raisonnement approfondi requis pour l'audit critique de sécurité. | `view_file, grep_search, find_by_name, run_command` |
-| `react-build-resolver` | Résolution d'erreurs de build React / Next.js | **`Pro — Effort Medium`** | Précision chirurgicale sur les frontières JSX/Server/Client sans surcoût excessif. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
-| `refactor-cleaner` | Suppression de code mort et consolidation | **`Pro — Effort Medium`** | Fiabilité élevée pour vérifier les graphes d'imports avant nettoyage. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
-| `doc-updater` | Mise à jour de documentation et codemaps | **`Flash — Effort Low`** | Latence minimale et coût très réduit pour la maintenance documentaire. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
+| `build-error-resolver` | Résolution d'erreurs de build et TypeScript | **`Flagship — Effort Medium`** | Compromis coût/performance optimal pour corriger les erreurs de typage sans dérive architecturale. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
+| `code-reviewer` | Revue indépendante de code, qualité et maintenabilité | **`Flagship — Effort High`** | Raisonnement approfondi requis pour l'audit critique en lecture seule. | `view_file, grep_search, find_by_name, run_command` |
+| `performance-optimizer` | Analyse de performance et optimisation runtime | **`Flagship — Effort High`** | Raisonnement approfondi requis pour le profilage et l'optimisation algorithmique. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
+| `security-auditor` | Auditeur de Sécurité & Conformité OWASP | **`Flagship — Effort High`** | Raisonnement approfondi requis pour l'audit critique de sécurité. | `view_file, grep_search, find_by_name, run_command` |
+| `react-build-resolver` | Résolution d'erreurs de build React / Next.js | **`Flagship — Effort Medium`** | Précision chirurgicale sur les frontières JSX/Server/Client sans surcoût excessif. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
+| `refactor-cleaner` | Suppression de code mort et consolidation | **`Flagship — Effort Medium`** | Fiabilité élevée pour vérifier les graphes d'imports avant nettoyage. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
+| `doc-updater` | Mise à jour de documentation et codemaps | **`Standard — Effort Low`** | Latence minimale et coût très réduit pour la maintenance documentaire. | `view_file, write_to_file, replace_file_content, run_command, grep_search, find_by_name` |
 
 ---
 

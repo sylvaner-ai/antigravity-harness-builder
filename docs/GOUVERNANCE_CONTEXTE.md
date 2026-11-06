@@ -50,3 +50,7 @@ Liste issue de la documentation officielle (https://antigravity.google/docs/slas
 ## Workflows
 
 La page officielle « workflows to skills » (https://antigravity.google/docs/migration/workflows-to-skills/) annonce que les répertoires `.agents/workflows/` ne seront plus indexés ni exécutables à partir du 19 octobre 2026. **L'auto-test du 3 novembre 2026 (T9) montre qu'un workflow s'exécute encore dans la version testée.** Le harnais ne génère que des skills (`/<nom>` les appelle), qui fonctionnent dans les deux cas. La cible `--target antigravity` d'ECC, qui convertit des commandes en workflows, ne doit pas être utilisée telle quelle.
+
+## Niveaux de modèle : Standard et Flagship
+
+Les noms de modèles changent souvent et diffèrent d'un projet à l'autre. La règle de gouvernance et les recommandations des harnais générés parlent donc de deux niveaux, associés à un effort : **Standard** (modèle rapide et économique du sélecteur, anciennement « Flash ») et **Flagship** (modèle le plus capable, anciennement « Pro »), par exemple `Flagship — Effort Medium`. L'agent choisit dans la liste du sélecteur le modèle qui correspond au niveau demandé. Les noms Claude présents dans du contenu importé (Haiku, Sonnet, Opus) sont traduits en Standard ou Flagship. Le champ technique `model: flash|pro` des sous-agents est inchangé.

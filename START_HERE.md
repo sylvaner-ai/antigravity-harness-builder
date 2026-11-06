@@ -76,13 +76,13 @@ Installez les composants dans l'arborescence canonique `.agents/` de Google Anti
 - `.agents/skills/react-testing/SKILL.md`
 - `.agents/skills/security-review/SKILL.md`
 - Sous-agents spécialisés :
-- `.agents/agents/build-error-resolver.md` (couple cible centralisé : `Pro — Effort Medium`)
-- `.agents/agents/code-reviewer.md` (couple cible centralisé : `Pro — Effort High`)
-- `.agents/agents/performance-optimizer.md` (couple cible centralisé : `Pro — Effort High`)
-- `.agents/agents/security-auditor.md` (couple cible centralisé : `Pro — Effort High`)
-- `.agents/agents/react-build-resolver.md` (couple cible centralisé : `Pro — Effort Medium`)
-- `.agents/agents/refactor-cleaner.md` (couple cible centralisé : `Pro — Effort Medium`)
-- `.agents/agents/doc-updater.md` (couple cible centralisé : `Flash — Effort Low`)
+- `.agents/agents/build-error-resolver.md` (couple cible centralisé : `Flagship — Effort Medium`)
+- `.agents/agents/code-reviewer.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/performance-optimizer.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/security-auditor.md` (couple cible centralisé : `Flagship — Effort High`)
+- `.agents/agents/react-build-resolver.md` (couple cible centralisé : `Flagship — Effort Medium`)
+- `.agents/agents/refactor-cleaner.md` (couple cible centralisé : `Flagship — Effort Medium`)
+- `.agents/agents/doc-updater.md` (couple cible centralisé : `Standard — Effort Low`)
 
 ### Étape 6 — Vérification structurelle (Chemins, YAML, Liens et Doublons)
 Après mise en place des fichiers, vérifiez que :

@@ -15,7 +15,7 @@ export function formatModelEffortCouple(
   modelTier: RecommendedModelTier,
   effort: ReasoningEffortTier
 ): string {
-  const modelLabel = modelTier === 'flash' ? 'Flash' : 'Pro';
+  const modelLabel = modelTier === 'flash' ? 'Standard' : 'Flagship';
   const effortLabel = effort.charAt(0).toUpperCase() + effort.slice(1);
   return `${modelLabel} — Effort ${effortLabel}`;
 }
@@ -52,12 +52,12 @@ Surface : ${targetSurface}. Le modèle et l'effort se règlent dans l'interface 
 
 | Palier | Tâches | Couple préconisé |
 | :--- | :--- | :--- |
-| **T1** Léger | Questions, recherche ponctuelle, documentation, formatage | \`Flash — Effort Low\` |
-| **T2** Localisé | Modification bornée, exécution de tests existants, vérifications de saisie | \`Flash — Effort Medium\` |
-| **T3** Standard | Fonctionnalités, routes API, TDD, corrections de build ou de types | \`Pro — Effort Medium\` |
-| **T4** Critique | Architecture, schéma de base de données, sécurité, débogage difficile, revue finale | \`Pro — Effort High\` |
+| **T1** Léger | Questions, recherche ponctuelle, documentation, formatage | \`Standard — Effort Low\` |
+| **T2** Localisé | Modification bornée, exécution de tests existants, vérifications de saisie | \`Standard — Effort Medium\` |
+| **T3** Standard | Fonctionnalités, routes API, TDD, corrections de build ou de types | \`Flagship — Effort Medium\` |
+| **T4** Critique | Architecture, schéma de base de données, sécurité, débogage difficile, revue finale | \`Flagship — Effort High\` |
 
-Traduisez Flash / Pro vers le libellé exact du sélecteur lorsqu'il est visible dans la session.
+**Standard** désigne le modèle rapide et économique proposé par le sélecteur, **Flagship** le plus capable ; ces niveaux ne dépendent d'aucun nom de modèle, qui change souvent. Choisissez dans la liste du sélecteur le modèle qui correspond au niveau demandé.
 
 ## 3. Délégation à un sous-agent
 
