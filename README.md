@@ -38,4 +38,4 @@ Ce dépôt est lui-même développé avec un harnais Antigravity généré par l
 
 ## Kit historique
 
-L'ancien kit de règles et de BOOTSTRAP n'est plus dans ce dépôt : il vit dans [`sylvaner-ai/antigravity-kit`](https://github.com/sylvaner-ai/antigravity-kit) (branche `legacy-kit`).
+L'ancien kit de règles et de BOOTSTRAP n'est plus maintenu et n'est plus dans ce dépôt. Il est archivé, en lecture seule, dans [`sylvaner-ai/antigravity-kit`](https://github.com/sylvaner-ai/antigravity-kit) (branche `legacy-kit`) ; ce dépôt n'en dépend pas.
