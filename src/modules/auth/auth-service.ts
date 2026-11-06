@@ -9,6 +9,23 @@ export interface UserSession {
   sessionId: string;
 }
 
+const SECRET_PLACEHOLDER = 'replace_with_at_least_32_bytes_random_hex_secret';
+let ephemeralSecret: Buffer | undefined;
+
+/**
+ * Secret de signature des jetons de déploiement. Sans SESSION_SECRET valide (32 caractères au moins, hors valeur d'exemple),
+ * un secret aléatoire propre au processus est utilisé : aucun jeton ne peut être forgé, mais ils cessent d'être valides au redémarrage.
+ */
+export function deploymentSecret(): string | Buffer {
+  const configured = process.env.SESSION_SECRET;
+  if (configured && configured.length >= 32 && configured !== SECRET_PLACEHOLDER) return configured;
+  if (!ephemeralSecret) {
+    ephemeralSecret = crypto.randomBytes(32);
+    console.warn('SESSION_SECRET absent ou trop faible (32 caractères minimum) : secret temporaire utilisé, les liens de déploiement expireront au redémarrage.');
+  }
+  return ephemeralSecret;
+}
+
 export class AuthService {
   private readonly db: AppDatabase;
 
@@ -180,7 +197,7 @@ export class AuthService {
    */
   generateDeploymentToken(projectId: string, ttlHours = 48): string {
     const expiresAt = Date.now() + ttlHours * 3600 * 1000;
-    const secret = process.env.SESSION_SECRET || 'ahb-deployment-salt-secret-key-2026';
+    const secret = deploymentSecret();
     const payload = `${projectId}:${expiresAt}`;
     const hmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
     return `${expiresAt}.${hmac}`;
@@ -200,7 +217,7 @@ export class AuthService {
     if (!expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
       return false; // Expiré ou invalide
     }
-    const secret = process.env.SESSION_SECRET || 'ahb-deployment-salt-secret-key-2026';
+    const secret = deploymentSecret();
     const payload = `${projectId}:${expiresAt}`;
     const expectedHmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
 
