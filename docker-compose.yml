@@ -6,12 +6,27 @@ services:
     container_name: ahb-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT_WEB:-3001}:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://ahb_user:ahb_password@postgres:5432/ahb_db
-      - PRIVATE_STORAGE_DIR=/data/storage
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://ahb_user:ahb_password@postgres:5432/ahb_db}
+      - PRIVATE_STORAGE_DIR=${PRIVATE_STORAGE_DIR:-/data/storage}
       - NEXT_TELEMETRY_DISABLED=1
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - SESSION_SECRET=${SESSION_SECRET:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL_FAST=${GEMINI_MODEL_FAST:-gemini-3.8-flash}
+      - GEMINI_MODEL_PRO=${GEMINI_MODEL_PRO:-gemini-3.8-pro}
+      - GEMINI_FALLBACK_MODELS=${GEMINI_FALLBACK_MODELS:-gemini-3.5-flash,gemini-3.5-flash-lite}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-20}
+      - MAX_PROJECT_FILES=${MAX_PROJECT_FILES:-15}
+      - MAX_LLM_CALLS_PER_GENERATION=${MAX_LLM_CALLS_PER_GENERATION:-12}
+      - MAX_LLM_TOKENS_PER_GENERATION=${MAX_LLM_TOKENS_PER_GENERATION:-250000}
+      - ECC_REPO_OWNER=${ECC_REPO_OWNER:-affaan-m}
+      - ECC_REPO_NAME=${ECC_REPO_NAME:-ECC}
+      - ECC_DEFAULT_REF=${ECC_DEFAULT_REF:-main}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     volumes:
       - ahb_storage:/data/storage
     depends_on:
@@ -29,17 +44,19 @@ services:
     container_name: ahb-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ahb_user
-      POSTGRES_PASSWORD: ahb_password
-      POSTGRES_DB: ahb_db
+      POSTGRES_USER: ${POSTGRES_USER:-ahb_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ahb_password}
+      POSTGRES_DB: ${POSTGRES_DB:-ahb_db}
     volumes:
       - ahb_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ahb_user -d ahb_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ahb_user} -d ${POSTGRES_DB:-ahb_db}"]
       interval: 5s
       timeout: 3s
       retries: 5
 
 volumes:
   ahb_postgres_data:
+    name: ahb_postgres_data
   ahb_storage:
+    name: ahb_storage
