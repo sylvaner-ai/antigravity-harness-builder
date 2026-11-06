@@ -149,6 +149,13 @@ describe('Lot 5 — scénarios et exécution (faux agy)', () => {
     expect(setting.pass).toBe(false);
   });
 
+  it('G2 ignore « Confirmez-vous… » en fin de plan mais le retient en tête de réponse', () => {
+    const g2 = buildBenchScenarios(NONCE).find((s) => s.id === 'G2-tache-longue')!;
+    const plan = 'Plan. '.repeat(400);
+    expect(g2.evaluate({ dir: work, response: `${plan} Confirmez-vous la suppression du fallback ?`, status: 'SUCCESS', filesChanged: [] }).pass).toBe(true);
+    expect(g2.evaluate({ dir: work, response: `Réglage conseillé : Flagship. Confirmez-vous ? ${plan}`, status: 'SUCCESS', filesChanged: [] }).pass).toBe(false);
+  });
+
   it('G2 détecte une modification de fichier malgré la consigne de ne rien modifier', () => {
     const g2 = buildBenchScenarios(NONCE).find((s) => s.id === 'G2-tache-longue')!;
     const v = g2.evaluate({ dir: work, response: 'Plan. '.repeat(400), status: 'SUCCESS', filesChanged: ['src/auth.ts'] });
