@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '../../../../modules/auth';
+import { clientIp, loginThrottle } from '../../../../modules/auth/login-throttle';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,8 +9,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email et mot de passe requis.' }, { status: 400 });
     }
 
+    const ip = clientIp(req.headers);
+    const retryAfter = loginThrottle.retryAfterSeconds(String(email), ip);
+    if (retryAfter > 0) {
+      return NextResponse.json(
+        { error: `Trop de tentatives échouées. Réessayez dans ${Math.ceil(retryAfter / 60)} minute(s).` },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+      );
+    }
+
     const auth = new AuthService();
-    const session = await auth.login(email, password);
+    let session;
+    try {
+      session = await auth.login(email, password);
+    } catch (err) {
+      loginThrottle.recordFailure(String(email), ip);
+      throw err;
+    }
+    loginThrottle.recordSuccess(String(email));
 
     const isSecure = req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
 

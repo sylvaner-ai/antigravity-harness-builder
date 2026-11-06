@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '../../../../modules/auth';
+import { isRegistrationAllowed } from '../../../../modules/auth/registration';
 
 export async function POST(req: NextRequest) {
+  if (!isRegistrationAllowed()) {
+    return NextResponse.json(
+      { error: 'Les inscriptions sont fermées. Demandez la création de votre compte à un administrateur.' },
+      { status: 403 }
+    );
+  }
   try {
     const { email, password } = await req.json();
     if (!email || !password || password.length < 8) {

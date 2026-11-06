@@ -65,6 +65,19 @@ export class AuthService {
   }
 
   /**
+   * Réinitialise le mot de passe d'un compte existant et révoque toutes ses sessions.
+   */
+  async setPassword(email: string, password: string): Promise<void> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const [user] = await this.db.select().from(users).where(eq(users.email, normalizedEmail));
+    if (!user) {
+      throw new Error('Aucun compte avec cette adresse email.');
+    }
+    await this.db.update(users).set({ passwordHash: this.hashPassword(password) }).where(eq(users.id, user.id));
+    await this.db.delete(sessions).where(eq(sessions.userId, user.id));
+  }
+
+  /**
    * Connexion avec vérification des identifiants (§10 Écran 1).
    */
   async login(email: string, password: string): Promise<UserSession> {

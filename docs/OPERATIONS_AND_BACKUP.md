@@ -134,3 +134,20 @@ Si un nouveau déploiement présente une anomalie bloquante :
 3. **Vérification** :
    Validez que `/api/health` renvoie HTTP 200 et que le catalogue ECC est opérationnel.
 `;
+
+
+## Administration des comptes
+
+Les inscriptions publiques sont fermées (`ALLOW_REGISTRATION` doit valoir exactement `true` pour les ouvrir). Les comptes se gèrent en ligne de commande, avec saisie masquée du mot de passe (12 caractères minimum, jamais passé en argument) :
+
+```bash
+# Créer un compte (rôle USER par défaut)
+docker exec -it <conteneur-application> node dist/create-user.cjs prenom@exemple.fr --role ADMIN
+
+# Réinitialiser un mot de passe (toutes les sessions du compte sont révoquées)
+docker exec -it <conteneur-application> node dist/create-user.cjs prenom@exemple.fr --reset
+```
+
+En développement : `npm run admin:user -- prenom@exemple.fr [--role ADMIN] [--reset]`.
+
+Les connexions sont limitées : 5 échecs consécutifs bloquent une adresse e-mail et 20 échecs une adresse IP pendant 15 minutes (mémoire de l'instance, remise à zéro au redémarrage).

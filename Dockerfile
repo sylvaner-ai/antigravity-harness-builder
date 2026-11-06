@@ -19,6 +19,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run typecheck && npm run build
 RUN npx esbuild src/db/migrate.ts --bundle --platform=node --format=cjs --external:pg --outfile=dist/migrate.cjs
+RUN npx esbuild scripts/create-user.ts --bundle --platform=node --format=cjs --external:pg --outfile=dist/create-user.cjs
 
 # 3. Image finale minimale d'exécution avec utilisateur non-root
 FROM base AS runner

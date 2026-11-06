@@ -8,9 +8,17 @@ async function seed() {
   const auth = new AuthService(db);
 
   console.log('--- SEEDING INITIAL ADMIN ---');
-  let [admin] = await db.select().from(users).where(eq(users.email, 'admin@antigravity.builder'));
+  const adminEmail = (process.env.INITIAL_ADMIN_EMAIL ?? '').trim().toLowerCase();
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD ?? '';
+  if (!adminEmail) {
+    throw new Error('INITIAL_ADMIN_EMAIL est requis (aucun compte administrateur par défaut).');
+  }
+  let [admin] = await db.select().from(users).where(eq(users.email, adminEmail));
   if (!admin) {
-    const session = await auth.register('admin@antigravity.builder', 'Antigravity2026!', 'ADMIN');
+    if (adminPassword.length < 12) {
+      throw new Error('INITIAL_ADMIN_PASSWORD est requis (12 caractères minimum) pour créer le compte administrateur.');
+    }
+    const session = await auth.register(adminEmail, adminPassword, 'ADMIN');
     const [created] = await db.select().from(users).where(eq(users.id, session.userId));
     admin = created!;
     console.log('Admin user created:', admin.email, admin.id);
