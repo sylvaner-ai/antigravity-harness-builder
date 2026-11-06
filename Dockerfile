@@ -9,8 +9,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # 1. Installation des dépendances avec verrouillage strict
 FROM base AS deps
+ENV NODE_ENV=development
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # 2. Vérification TypeScript strict et Build de production Next.js (standalone)
 FROM base AS builder
