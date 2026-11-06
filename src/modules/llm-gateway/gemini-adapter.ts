@@ -6,6 +6,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
   private readonly defaultFastModel: string;
   private readonly defaultProModel: string;
   private readonly fallbackModels: string[];
+  private readonly requestTimeoutMs: number;
   private readonly inMemoryCache = new Map<string, LLMResponse<any>>();
 
   constructor(apiKey = process.env.GEMINI_API_KEY, options?: { fastModel?: string; proModel?: string }) {
@@ -15,6 +16,8 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
     this.client = new GoogleGenAI({ apiKey });
     this.defaultFastModel = options?.fastModel ?? process.env.GEMINI_MODEL_FAST ?? 'gemini-3.8-flash';
     this.defaultProModel = options?.proModel ?? process.env.GEMINI_MODEL_PRO ?? 'gemini-3.8-pro';
+    const configuredTimeout = Number(process.env.GEMINI_TIMEOUT_MS);
+    this.requestTimeoutMs = Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 60_000;
     this.fallbackModels = (process.env.GEMINI_FALLBACK_MODELS ?? 'gemini-3.5-flash,gemini-3.5-flash-lite')
       .split(',')
       .map((m) => m.trim())
@@ -69,6 +72,7 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
               temperature: req.temperature ?? 0.1,
               maxOutputTokens: req.maxTokens ?? 8192,
               responseMimeType: 'application/json',
+              abortSignal: AbortSignal.timeout(this.requestTimeoutMs),
             },
           });
           successfulModel = targetModel;
@@ -77,6 +81,16 @@ export class GeminiLLMAdapter implements LLMGatewayPort {
           attempt++;
           lastError = err;
           const errMsg = String(err?.message ?? err);
+          const isTimeout =
+            err?.name === 'TimeoutError' || err?.name === 'AbortError' || /aborted|timed out|timeout/i.test(errMsg);
+          if (isTimeout) {
+            console.error(`[gemini] délai de ${this.requestTimeoutMs} ms dépassé avec le modèle ${targetModel}`);
+            lastError = new Error(
+              `Le modèle ${targetModel} n'a pas répondu en ${Math.round(this.requestTimeoutMs / 1000)} s.`
+            );
+            break; // pas de nouvel essai sur un modèle qui ne répond pas : repli sur le suivant
+          }
+          console.error(`[gemini] erreur avec le modèle ${targetModel} : ${errMsg.slice(0, 300)}`);
           const isTransient =
             errMsg.includes('503') ||
             errMsg.includes('UNAVAILABLE') ||
