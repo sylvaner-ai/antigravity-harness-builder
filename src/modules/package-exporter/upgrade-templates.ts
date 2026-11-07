@@ -28,6 +28,39 @@ export function sanitizeOperationalTestCommand(cmd?: string): string | undefined
   return trimmed;
 }
 
+/** Paquet d'installation récupéré par l'agent via un lien temporaire, au lieu d'être recopié dans le prompt. */
+export interface PackageSource {
+  url: string;
+  expiresAt: Date;
+  files: ReadonlyArray<{ relativePath: string; sha256: string }>;
+}
+
+const STAGING_DIR = '.harness-staging';
+
+/** Section du prompt qui fait télécharger, extraire et vérifier le paquet d'installation. */
+function renderPackageRetrievalMarkdown(source: PackageSource): string {
+  const expires = source.expiresAt.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+  const table = source.files.map((f) => `| \`${f.relativePath}\` | \`${f.sha256}\` |`).join('\n');
+  return `## Récupération des fichiers du harnais
+
+Les ${source.files.length} fichiers ne sont pas recopiés dans ce prompt (taille) : récupère-les dans un dossier temporaire, à la racine du projet, **avant d'écrire quoi que ce soit ailleurs**.
+
+1. Télécharge et extrais l'archive (lien valable jusqu'au ${expires}) :
+   \`\`\`bash
+   mkdir -p ${STAGING_DIR} && curl -fsSL "${source.url}" -o ${STAGING_DIR}/harness.zip && unzip -q -o ${STAGING_DIR}/harness.zip -d ${STAGING_DIR}/files
+   \`\`\`
+   Sous Windows sans \`unzip\` : \`tar -xf ${STAGING_DIR}/harness.zip -C ${STAGING_DIR}/files\` (après \`mkdir ${STAGING_DIR}\\files\`).
+2. Vérifie l'empreinte SHA-256 de **chaque** fichier extrait (\`sha256sum\` ou \`shasum -a 256\`) contre la table ci-dessous. Si une empreinte diffère ou si un fichier manque, arrête-toi et signale-le.
+3. Le contenu à installer pour un chemin \`X\` est le fichier \`${STAGING_DIR}/files/X\`. Copie-le à l'identique (aucune réécriture).
+4. Ne commite jamais \`${STAGING_DIR}/\` et supprime-le à la fin de l'intervention.
+5. Si le téléchargement échoue (réseau bloqué, lien expiré), demande à l'utilisateur d'ouvrir le lien dans son navigateur et de déposer l'archive obtenue dans \`${STAGING_DIR}/harness.zip\`, ou de copier à nouveau le prompt depuis Antigravity Harness Builder.
+
+| Fichier | SHA-256 attendu |
+| --- | --- |
+${table}
+`;
+}
+
 /**
  * 11. Génère le prompt / script de déploiement Markdown autonome pour Google Antigravity.
  * Permet de déployer l'intégralité du harnais directement dans le workspace du projet
@@ -37,8 +70,10 @@ export function renderDeploymentPromptMarkdown(params: {
   projectName: string;
   targetSurface?: string;
   files: Array<{ relativePath: string; content: string }>;
+  /** Mode lien : les fichiers sont téléchargés par l'agent au lieu d'être recopiés dans le prompt. */
+  packageSource?: PackageSource;
 }): string {
-  const { projectName, targetSurface = 'IDE', files } = params;
+  const { projectName, targetSurface = 'IDE', files, packageSource } = params;
 
   // Calcul dynamique du nombre de backticks pour isoler les blocs de code imbriqués
   const getSafeFencing = (content: string): string => {
@@ -78,7 +113,7 @@ ${fence}`;
 
 2. **Écriture de l'arborescence et des fichiers** :
    - Crée automatiquement les sous-dossiers requis (\`.agents/rules/\`, \`.agents/skills/\`, \`.agents/agents/\`, \`docs/\`).
-   - Écris fidèlement chacun des **${files.length} fichiers** ci-dessous à son chemin relatif exact à l'aide de tes outils de création de fichier.
+   - ${packageSource ? `Récupère d'abord le paquet (section « Récupération des fichiers du harnais »), puis installe chacun des **${files.length} fichiers** à son chemin relatif exact.` : `Écris fidèlement chacun des **${files.length} fichiers** ci-dessous à son chemin relatif exact à l'aide de tes outils de création de fichier.`}
    - Préserve l'intégralité exacte du contenu (frontmatters YAML, balises de configuration, retours à la ligne).
 
 3. **Validation finale** :
@@ -88,7 +123,10 @@ ${fence}`;
 
 ---
 
-## Sommaire des fichiers (${files.length}) :
+${
+  packageSource
+    ? renderPackageRetrievalMarkdown(packageSource)
+    : `## Sommaire des fichiers (${files.length}) :
 ${filesSummary}
 
 ---
@@ -96,7 +134,8 @@ ${filesSummary}
 ## Fichiers à déployer :
 
 ${fileEntriesMarkdown}
-`;
+`
+}`;
 }
 
 /**
@@ -110,8 +149,10 @@ export function renderUpgradePromptMarkdown(params: {
   operationalTestCommand?: string;
   /** Plan calculé à partir d'un audit 2.0 ; sans lui, l'agent établit lui-même le plan (protocole général). */
   plan?: readonly UpgradePlanEntry[];
+  /** Mode lien : les fichiers sont téléchargés par l'agent au lieu d'être recopiés dans le prompt. */
+  packageSource?: PackageSource;
 }): string {
-  const { projectName, targetSurface = 'IDE', operationalTestCommand, plan } = params;
+  const { projectName, targetSurface = 'IDE', operationalTestCommand, plan, packageSource } = params;
   // Les fichiers déjà identiques n'ont pas besoin d'être recopiés dans le prompt.
   const unchanged = new Set((plan ?? []).filter((e) => e.action === 'UNCHANGED').map((e) => e.path));
   const files = params.files.filter((f) => !unchanged.has(f.relativePath));
@@ -175,7 +216,7 @@ Avant toute modification ou création :
 1. Crée un dossier de sauvegarde horodaté : \`.agents/.harness-backup/<YYYYMMDD-HHMMSS>/\`.
 2. Avant de modifier ou de retirer un fichier existant (dont \`AGENTS.md\`), copie-le dans ce dossier en conservant son chemin relatif. Ne sauvegarde que les fichiers que tu vas réellement modifier.
 3. Vérifie l'état Git (\`git status --porcelain\`). Si des changements non commités existent, signale-les avant de continuer.
-
+${packageSource ? "4. Récupère et vérifie le paquet d'installation (section « Récupération des fichiers du harnais » en fin de document).\n" : ''}
 ### Phase 2 — Mode Simulation préalable (Dry-Run d'Impact)
 ${plan ? "Présente à l'utilisateur le **plan calculé** (section « Plan de mise à niveau » ci-dessous) après avoir vérifié les empreintes indiquées, puis demande sa confirmation avant toute écriture. Les catégories ci-dessous ne servent que pour un fichier absent du plan." : "Inspecte l'arborescence actuelle et présente un tableau récapitulatif des actions prévues :"}
 - **\`[KEEP / PRESERVE]\`** : Fichiers et règles personnalisées rédigées par l'équipe qui ne font pas partie du catalogue géré — **Ne jamais écraser**.
@@ -188,7 +229,7 @@ Demande explicitement confirmation à l'utilisateur avant d'engager les écritur
 ### Phase 3 — Déploiement et Fusion Intelligente (Delimited Managed Sections)
 
 1. **Règle d'or de fusion pour \`AGENTS.md\`** :
-   - Si \`AGENTS.md\` n'existe pas : crée-le avec le contenu fourni ci-dessous.
+   - Si \`AGENTS.md\` n'existe pas : crée-le avec le contenu fourni (ci-dessous, ou dans le paquet récupéré).
    - Si \`AGENTS.md\` existe déjà :
      - Recherche les balises délimitées :
        \`<!-- BEGIN ANTIGRAVITY HARNESS BUILDER MANAGED -->\`
@@ -216,11 +257,14 @@ Demande explicitement confirmation à l'utilisateur avant d'engager les écritur
 1. Vérifie la syntaxe de tous les fichiers créés ou modifiés.
 2. Vérifie la validité des liens de documentation dans \`docs/\`.
 ${smokeTestInstructions}
-4. Affiche un rapport de fin d'intervention récapitulant les composants modernisés, les éléments préservés et le chemin de la sauvegarde (\`.agents/.harness-backup/\`).
+4. Affiche un rapport de fin d'intervention récapitulant les composants modernisés, les éléments préservés et le chemin de la sauvegarde (\`.agents/.harness-backup/\`).${packageSource ? `\n5. Supprime le dossier temporaire \`${STAGING_DIR}/\`.` : ''}
 
 ---
 
-${plan ? renderUpgradePlanMarkdown(plan) + '\n---\n\n' : ''}## Sommaire des ${files.length} fichiers gérés à intégrer :
+${plan ? renderUpgradePlanMarkdown(plan) + '\n---\n\n' : ''}${
+  packageSource
+    ? renderPackageRetrievalMarkdown(packageSource)
+    : `## Sommaire des ${files.length} fichiers gérés à intégrer :
 ${filesSummary}
 
 ---
@@ -228,5 +272,6 @@ ${filesSummary}
 ## Contenus des fichiers gérés :
 
 ${fileEntriesMarkdown}
-`;
+`
+}`;
 }

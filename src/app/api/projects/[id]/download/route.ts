@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq, desc } from 'drizzle-orm';
-import { getDb, harnessGenerations, generatedArtifacts, projects, sourceDocuments } from '@/db';
+import { getDb, harnessGenerations, projects, sourceDocuments } from '@/db';
 import { AntigravityAuditReport, parseAuditReportText } from '@/modules/project-profile/audit-extractor';
 import { computeUpgradePlan } from '@/modules/package-exporter/upgrade-plan';
-import { filesForProjectInstall } from '@/modules/package-exporter/install-files';
+import { createInstallLink, loadInstallFiles, publicOrigin } from '@/modules/package-exporter/install-link';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { LocalDiskStorage } from '@/modules/documents/storage';
 import {
@@ -35,19 +35,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const target = url.searchParams.get('target') || 'zip';
 
     if (target === 'upgrade_markdown' || target === 'upgrade_script') {
-      const artifacts = await db
-        .select()
-        .from(generatedArtifacts)
-        .where(eq(generatedArtifacts.generationId, generation.id));
-
-      const files = filesForProjectInstall(
-        artifacts
-          .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
-          .map((a: typeof generatedArtifacts.$inferSelect) => ({
-            relativePath: a.relativePath,
-            content: a.content,
-          }))
-      );
+      // Le prompt ne transporte qu'un lien temporaire : l'agent télécharge le paquet et vérifie les empreintes.
+      const files = await loadInstallFiles(db, generation.id);
+      const link = await createInstallLink(db, generation.id);
+      const packageSource = {
+        url: `${publicOrigin(req.headers, url.origin)}/api/install/${link.token}`,
+        expiresAt: link.expiresAt,
+        files,
+      };
 
       // Plan calculé à partir du dernier audit importé (audit 2.0) et de la commande de test du projet
       const [auditDoc] = await db
@@ -76,6 +71,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         files,
         operationalTestCommand: audit?.operationalCommands?.test,
         plan,
+        packageSource,
       });
 
       const disposition = url.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment';
@@ -90,24 +86,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     if (target === 'deploy_markdown' || target === 'deploy_script' || target === 'markdown') {
-      const artifacts = await db
-        .select()
-        .from(generatedArtifacts)
-        .where(eq(generatedArtifacts.generationId, generation.id));
-
-      const files = filesForProjectInstall(
-        artifacts
-          .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
-          .map((a: typeof generatedArtifacts.$inferSelect) => ({
-            relativePath: a.relativePath,
-            content: a.content,
-          }))
-      );
+      // Le prompt ne transporte qu'un lien temporaire : l'agent télécharge le paquet et vérifie les empreintes.
+      const files = await loadInstallFiles(db, generation.id);
+      const link = await createInstallLink(db, generation.id);
+      const packageSource = {
+        url: `${publicOrigin(req.headers, url.origin)}/api/install/${link.token}`,
+        expiresAt: link.expiresAt,
+        files,
+      };
 
       const deploymentPrompt = renderDeploymentPromptMarkdown({
         projectName: project.name,
         targetSurface: project.targetSurface || 'IDE',
         files,
+        packageSource,
       });
 
       const disposition = url.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment';
