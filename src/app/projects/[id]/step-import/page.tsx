@@ -187,7 +187,7 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l analyse IA');
 
-      router.push(`/projects/${projectId}/step-profile`);
+      router.push(`/projects/${projectId}/step-profile${data.extractor === 'local' ? '?extracteur=local' : ''}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur d extraction');
       setExtracting(false);

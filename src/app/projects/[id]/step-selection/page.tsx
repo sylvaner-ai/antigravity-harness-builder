@@ -7,72 +7,9 @@ import StepNavigation from '@/components/StepNavigation';
 import { ExcellencePack, PresetMode, SelectionResult } from '../../../../modules/selection-engine/schema';
 import { Search, X, HelpCircle, Shield, Palette, Beaker, Sparkles, Check } from 'lucide-react';
 
-// Descriptions claires et détaillées de ce que fait chaque composant
-const ECC_DESCRIPTIONS_FR: Record<string, string> = {
-  // Règles de développement et qualité
-  'react-testing': 'Directives pour les tests de composants React (React Testing Library, Vitest/Jest, mocks MSW et couverture comportementale).',
-  'typescript-testing': 'Standards de test TypeScript/JavaScript : typage strict des tests, fixtures, suites unitaires et assertions fiables.',
-  'common-testing': 'Exigences fondamentales de test logiciel : isolation unitaire, couverture des cas limites et non-régression.',
-  'common-code-review': 'Critères de revue de code : lisibilité, architecture, sécurité, gestion des erreurs et maintenabilité.',
-  'common-security': 'Garde-fous impératifs de sécurité : prévention des injections, assainissement des entrées et gestion sécurisée des secrets.',
-  'common-performance': 'Directives d’optimisation de performance transversale : requêtes économes, limitation des re-rendus et mise en cache.',
-  'common-patterns': 'Design patterns recommandés et anti-patterns à proscrire pour garantir la modularité et l’évolutivité du code.',
-  'common-git-workflow': 'Normes de versioning Git : commits conventionnels, organisation des branches et messages explicites.',
-  'common-development-workflow': 'Cycle de développement local et qualité continue : validation progressive, linting et tests avant commit.',
-  'arkts-testing': 'Standards de tests pour les applications ArkTS / OpenHarmony.',
-  'react-native-coding-style': 'Conventions de style et patterns spécifiques à React Native mobile.',
-
-  // Sous-agents spécialisés
-  'architect': 'Architecte logiciel : conçoit l’architecture globale du système, évalue les arbitrages techniques et garantit la scalabilité.',
-  'database-reviewer': 'Spécialiste PostgreSQL & SQL : optimise les schémas relationnels, les requêtes, index et stratégies de migration.',
-  'code-reviewer': 'Revue de code senior : analyse la qualité, la maintenabilité, la lisibilité et la sécurité des modifications.',
-  'build-error-resolver': 'Résolution de compilation : diagnostique et corrige les erreurs de build Next.js, imports cassés et erreurs de typage TypeScript.',
-
-  // Skills & Commandes
-  'codebase-onboarding': 'Cartographie et guide d’onboarding pour explorer rapidement une base de code et comprendre son architecture.',
-  'react-build': 'Résolution incrémentale des échecs de build React (Vite, Next.js, webpack) et typages JSX/TSX.',
-
-  // Skills de Design Engineering & Motion UI (Emil Kowalski)
-  'emil-design-eng': 'Design Engineering UI : finitions d’interface, micro-interactions, cohérence des composants et détails invisibles qui rendent le logiciel agréable.',
-  'animate': 'Conception d’animations web fluides et performantes (courbes cubic-bezier précises, durées < 300ms, transitions légères).',
-  'animate-expo': 'Animations et micro-interactions React Native & Expo (gestes, haptiques et transitions d’écrans fluides).',
-  'review-animations': 'Revue critique du motion design (audit anti-saccades, élimination des transitions lentes et des shifts de layout).',
-  'improve-animations': 'Plan d’optimisation priorisé pour moderniser et fluidifier les animations existantes d’une application.',
-  'animation-performance': 'Diagnostic et résolution des chutes de framerate (accélération GPU, optimisation des repaints).',
-  'apple-design': 'Principes de design Apple adaptés au web : physique fluide, profondeur de matière et transitions naturelles.',
-  'mobile-native': 'Optimisations ergonomiques pour rendre une application web aussi fluide qu’une application mobile native (touch, scroll, safe areas).',
-  'pick-ui-library': 'Guide de sélection rigoureux de bibliothèques d’interface et de composants headless adaptés.',
-  'prototype': 'Génération rapide de variantes interactives de design pour comparaison visuelle en direct.',
-
-  // Règles projet sur-mesure & Gouvernance automatique
-  'model-effort-governance':
-    "Gouvernance du couple Modèle / Niveau d'effort (always_on, environ 2,5 Ko) : pour une tâche longue ou critique, l'agent compare une seule fois le réglage actif au couple conseillé et propose un seul couple en cas d'écart net ; les tâches courtes s'exécutent sans commentaire — aucun modèle figé dans le YAML des sous-agents.",
-  'project-design-system-tokens': 'Application stricte des tokens visuels (palette de couleurs, typographies, règles UX) du projet.',
-  'project-security-compliance-guard': 'Application impérative des règles de conformité et des contraintes de sécurité spécifiques au projet.',
-
-  // Composants d'Excellence & Garde-fous
-  'api-security-guards': 'Garde-fous de sécurité API & OWASP : validation stricte Zod, requêtes SQL/ORM préparées, zéro fuite de secrets et en-têtes sécurisés.',
-  'ui-craft-and-5-states': 'Excellence Craft UI & Design : règle obligatoire des 5 états UI (normal, loading skeleton, empty, error, toast), tokens Tailwind et WCAG AA.',
-  'plan-first-and-anti-omissions': 'Rigueur d ingénierie logicielle : plan d implémentation préalable obligatoire, cycle TDD (couverture >80%) et checklist pré-commit.',
-  'security-auditor': 'Auditeur de sécurité senior : inspection du code en lecture seule pour détecter les injections, failles OWASP et secrets exposés (couple cible gouverné dans model-effort-governance).',
-  'ui-craft-reviewer': 'Revue d ergonomie & accessibilité : vérification des finitions visuelles, contrastes WCAG et fluidité des micro-interactions.',
-};
-
-function getComponentDescription(comp: { slug: string; kind: string; description?: string }): string {
-  const customDesc = ECC_DESCRIPTIONS_FR[comp.slug];
-  if (customDesc) {
-    return customDesc;
-  }
-  if (comp.description && comp.description.trim()) {
-    if (comp.description.startsWith('Règle ECC')) {
-      const parts = comp.description.split(' : ');
-      if (parts.length > 1 && parts[1]) {
-        return `Règle de qualité et standards pour ${parts.slice(1).join(' : ')}.`;
-      }
-    }
-    return comp.description;
-  }
-  return 'Composant de configuration et bonnes pratiques logicielles.';
+// La description affichée est celle du catalogue (ou de la règle sur mesure) : aucune copie locale à maintenir.
+function getComponentDescription(comp: { description?: string }): string {
+  return comp.description?.trim() || 'Aucune description fournie par la source.';
 }
 
 export default function StepSelectionPage({ params }: { params: Promise<{ id: string }> }) {

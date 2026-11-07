@@ -234,11 +234,33 @@ export function parseAuditReportText(rawText: string): AntigravityAuditReport {
 
   const result = AntigravityAuditReportSchema.safeParse(parsed);
   if (!result.success) {
-    const errorDetails = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
-    throw new Error(`Format de rapport d'audit invalide (${errorDetails}).`);
+    const errorDetails = result.error.issues.slice(0, 5).map((i) => `${describeAuditPath(i.path)} : ${i.message}`).join(' ; ');
+    const more = result.error.issues.length > 5 ? ` (+ ${result.error.issues.length - 5} autres)` : '';
+    throw new Error(`Rapport d'audit invalide — ${errorDetails}${more}.`);
   }
 
   return result.data;
+}
+
+const AUDIT_SECTION_LABELS: Record<string, string> = {
+  existingAiHarness: 'harnais existant',
+  functionalDocuments: 'document fonctionnel',
+  previousGeneration: 'génération précédente',
+  techStack: 'pile technique',
+  files: 'fichier',
+};
+
+/** Rend un chemin de validation compréhensible : « document fonctionnel n°2 › sha256 » plutôt que « functionalDocuments.1.sha256 ». */
+function describeAuditPath(path: ReadonlyArray<PropertyKey>): string {
+  if (path.length === 0) return 'rapport';
+  return path
+    .map((part, i) => {
+      if (typeof part === 'number') return `n°${part + 1}`;
+      const label = AUDIT_SECTION_LABELS[String(part)] ?? String(part);
+      return typeof path[i + 1] === 'number' ? `${label}` : label;
+    })
+    .join(' › ')
+    .replace(/(\S+) › n°/g, '$1 n°');
 }
 
 export const AUDIT_MISSING_FEATURES_ID = 'feat-missing-from-audit';
