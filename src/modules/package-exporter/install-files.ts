@@ -3,7 +3,7 @@
  *
  * L'archive ZIP garde la documentation de traçabilité complète. Dans le projet, seul ce qui sert à l'agent
  * ou à la prochaine mise à niveau est installé, pour que le prompt reste collable :
- * - `docs/ECC_SOURCES.md` perd la liste des candidats écartés, mais garde la traçabilité des composants
+ * - `docs/SOURCES.md` perd la liste des candidats écartés, mais garde la traçabilité des composants
  *   retenus et les licences (attribution MIT obligatoire) ;
  * - `docs/HARNESS_MANIFEST.json` perd le détail des composants (scores, justifications), mais garde
  *   l'inventaire des fichiers et leurs empreintes, base du plan de la prochaine mise à niveau.
@@ -11,11 +11,11 @@
 
 import crypto from 'node:crypto';
 
-const ECC_SOURCES = 'docs/ECC_SOURCES.md';
+const SOURCES_DOC = 'docs/SOURCES.md';
 const MANIFEST = 'docs/HARNESS_MANIFEST.json';
 const REJECTED_SECTION = /\n## 2\. Principaux Candidats Écartés[\s\S]*?(?=\n## 3\. )/;
 
-function compactEccSources(content: string): string {
+function compactSourcesDoc(content: string): string {
   return content.replace(
     REJECTED_SECTION,
     "\n## 2. Principaux Candidats Écartés\n\nLa liste des candidats écartés figure dans l'archive ZIP et dans Antigravity Harness Builder.\n"
@@ -49,8 +49,8 @@ function compactManifest(content: string, installedHashes: Map<string, string>):
 export function filesForProjectInstall<T extends { relativePath: string; content: string }>(files: readonly T[]): T[] {
   const installedHashes = new Map<string, string>();
   const transformed = files.map((f) => {
-    if (f.relativePath !== ECC_SOURCES) return f;
-    const content = compactEccSources(f.content);
+    if (f.relativePath !== SOURCES_DOC) return f;
+    const content = compactSourcesDoc(f.content);
     installedHashes.set(f.relativePath, crypto.createHash('sha256').update(content).digest('hex'));
     return { ...f, content };
   });

@@ -2,13 +2,13 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/db';
 import { adminAction } from '@/lib/admin-route';
-import { GitHubOfficialEccFetcher } from '@/modules/ecc-catalog/catalog-service';
+import { GitHubCatalogFetcher } from '@/modules/catalog/catalog-service';
 import {
   analyzeCatalogSource,
   deleteCatalogSource,
   repinCatalogSource,
   setCatalogSourceStatus,
-} from '@/modules/ecc-catalog/source-registry';
+} from '@/modules/catalog/source-registry';
 
 const ActionSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('analyze') }).strict(),
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = ActionSchema.parse(await req.json());
     const db = getDb();
-    const fetcher = new GitHubOfficialEccFetcher();
+    const fetcher = new GitHubCatalogFetcher();
     switch (body.action) {
       case 'analyze':
         return { source: await analyzeCatalogSource(db, fetcher, id) };

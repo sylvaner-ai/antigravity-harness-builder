@@ -19,7 +19,7 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
       content: '---\nname: modern-web\ndescription: Bonnes pratiques du web moderne\n---\nDirectives de skill.',
     },
     {
-      relativePath: 'docs/ECC_SOURCES.md',
+      relativePath: 'docs/SOURCES.md',
       content: '# Références lourdes (> 80 Ko)\n' + 'Explications théoriques répétitives...\n'.repeat(500),
     },
   ];

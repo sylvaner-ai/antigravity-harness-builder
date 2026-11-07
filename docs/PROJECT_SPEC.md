@@ -126,7 +126,7 @@ flowchart LR
 | Jalon / Évolution | Module Clé | Statut | Tests de Validation |
 | :--- | :--- | :--- | :--- |
 | **M1 : Moteur Déterministe** | `selection-engine`, `antigravity-adapter` | Complété | `milestone1-deterministic-engine.test.ts` |
-| **M2 : Catalogue & Sync ECC** | `ecc-catalog`, `jobs-observability` | Complété | `milestone2-ecc-catalog-and-jobs.test.ts` |
+| **M2 : Catalogue & Sync ECC** | `catalog` (ex-`ecc-catalog`) | Complété | `milestone2-catalog.test.ts` |
 | **M3 : Documents & Profil** | `project-profile`, `documents` | Complété | `milestone3-documents-and-profile.test.ts` |
 | **M4 : Wizard 5 Étapes & UI** | `src/app/projects/[id]/*`, `components/StepNavigation` | Complété | `golden-dataset.test.ts` |
 | **M5 : Auth & Isolation** | `auth`, `middleware.ts` | Complété | `milestone5-auth-and-isolation.test.ts` |

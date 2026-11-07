@@ -521,7 +521,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
           rejected.length > 0 && (
             <details className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4" open>
               <summary className="text-base font-semibold text-slate-900 cursor-pointer flex items-center justify-between">
-                <span>Registre d&apos;Explicabilité : Candidats ECC écartés ({rejected.length})</span>
+                <span>Registre d&apos;Explicabilité : Candidats écartés ({rejected.length})</span>
                 <span className="text-xs font-normal text-indigo-600 hover:underline">
                   Cliquez pour replier / déplier
                 </span>

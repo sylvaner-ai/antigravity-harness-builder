@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_CATALOG_SOURCES,
   getBuiltinCuratedExcellenceComponents,
-} from '../src/modules/ecc-catalog/catalog-service';
-import { parseAndQualifyEccRepositoryEntries } from '../src/modules/ecc-catalog/indexer';
+} from '../src/modules/catalog/catalog-service';
+import { parseAndQualifyRepositoryEntries } from '../src/modules/catalog/indexer';
 import { SelectionEngine } from '../src/modules/selection-engine/engine';
 import { SAAS_MULTI_TENANT_PROFILE } from './golden-dataset/archetypes';
 
@@ -121,7 +121,7 @@ Clarify intent first.
       },
     ];
 
-    const result = parseAndQualifyEccRepositoryEntries(
+    const result = parseAndQualifyRepositoryEntries(
       mockEntries,
       'commit123',
       'https://github.com/obra/superpowers'
@@ -200,7 +200,7 @@ Comprehensive security vulnerability detection and zero false-positive validatio
       },
     ];
 
-    const result = parseAndQualifyEccRepositoryEntries(
+    const result = parseAndQualifyRepositoryEntries(
       mockEntries,
       'cf12345',
       'https://github.com/cloudflare/security-audit-skill'

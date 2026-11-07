@@ -43,7 +43,7 @@ const ALLOWED_DOCS_FILES = new Set([
   'docs/ORCHESTRATION.md',
   'docs/ACCEPTANCE_CRITERIA.md',
   'docs/ASSUMPTIONS.md',
-  'docs/ECC_SOURCES.md',
+  'docs/SOURCES.md',
   'docs/HARNESS_MANIFEST.json',
 ]);
 

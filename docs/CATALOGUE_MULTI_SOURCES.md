@@ -49,3 +49,12 @@ Le moteur retient un composant par slot : source prioritaire, puis composant le 
 Ajouter un composant à la sélection automatique : lui donner une entrée dans les tables de `component-classifier.ts` (slot, palier, conditions) et ajouter un cas dans `tests/multi-source-slots.test.ts`.
 
 Les catalogues ad hoc (composants non indexés par le constructeur, sans `parsedMeta.sourceId`) conservent l'ancien comportement : seuil de score et quotas par type.
+
+## Traçabilité dans le harnais
+
+Chaque reconstruction du catalogue enregistre les sources réellement intégrées (table `catalog_syncs`, colonne `sources` : dépôt, commit, licence, mention de copyright, nombre de composants). Le harnais généré en rend compte :
+
+- `docs/HARNESS_MANIFEST.json` (format 2.0.0) : bloc `catalog` avec l'étiquette de version et, pour chaque source, son dépôt, son commit, sa licence, son auteur et le nombre de composants retenus ;
+- `docs/SOURCES.md` (ancien `ECC_SOURCES.md`) : tableau des sources, puis provenance de chaque composant (`source_verbatim`, `source_adapted`, `project_custom`) et attributions de licence.
+
+Un manifeste 1.0.0 (référence ECC unique) reste lisible : `parseHarnessManifest` le convertit au format 2.0.0. Lors d'une mise à niveau, l'ancien `docs/ECC_SOURCES.md` figure dans l'inventaire de la génération précédente : le plan le retire au profit de `docs/SOURCES.md`.

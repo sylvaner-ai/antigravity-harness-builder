@@ -32,13 +32,13 @@ export type ValidationKind = z.infer<typeof ValidationKindSchema>;
 
 /**
  * Statut d'origine et d'adaptation d'un composant (§4.5 & §5.2) :
- * - ecc_verbatim   : Fichier ECC utilisé tel quel
- * - ecc_adapted    : Fichier ECC adapté pour Antigravity et le projet
+ * - source_verbatim : Fichier d'une source du catalogue utilisé tel quel
+ * - source_adapted  : Fichier d'une source du catalogue adapté pour Antigravity et le projet
  * - project_custom : Fichier créé spécifiquement pour le projet cible
  */
 export const ComponentOriginStatusSchema = z.enum([
-  'ecc_verbatim',
-  'ecc_adapted',
+  'source_verbatim',
+  'source_adapted',
   'project_custom',
 ]);
 export type ComponentOriginStatus = z.infer<typeof ComponentOriginStatusSchema>;

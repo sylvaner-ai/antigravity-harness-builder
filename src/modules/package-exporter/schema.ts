@@ -15,21 +15,22 @@ import {
 import { ProjectProfileSchema } from '../project-profile/schema';
 
 /**
- * Référence de provenance d'un composant ECC (pour ECC_SOURCES.md et HARNESS_MANIFEST.json — §4.5 & §5.2).
+ * Provenance d'un composant issu d'une source du catalogue (pour SOURCES.md et HARNESS_MANIFEST.json — §4.5 & §5.2).
  */
-export const EccProvenanceSchema = z.object({
-  repositoryUrl: z.string().url().default('https://github.com/affaan-m/ECC'),
+export const SourceProvenanceSchema = z.object({
+  repositoryUrl: z.string().url(),
+  /** Absent pour un composant curated, écrit pour ce générateur. */
   commitSha: z
     .string()
-    .regex(/^[0-9a-f]{7,40}$/i, 'Le commit SHA ECC doit être un identifiant hexadécimal Git valide.'),
-  versionTag: z.string().min(1).default('v2.2.3'),
+    .regex(/^[0-9a-f]{7,40}$/i, 'Le commit doit être un identifiant hexadécimal Git valide.')
+    .optional(),
   sourceRelativePath: z.string().min(1),
   sourceUrl: z.string().url(),
-  license: z.string().min(1).default('MIT'),
-  author: z.string().min(1).default('Affaan Mustafa'),
+  license: z.string().min(1),
+  author: z.string().min(1),
   adaptationNotes: z.array(z.string()).default([]),
 });
-export type EccProvenance = z.infer<typeof EccProvenanceSchema>;
+export type SourceProvenance = z.infer<typeof SourceProvenanceSchema>;
 
 /**
  * Spécification d'une règle retenue pour le paquet (.agents/rules/<slug>.md).
@@ -41,7 +42,7 @@ export const SelectedRuleSpecSchema = z.object({
   markdownBody: z.string().min(1),
   selectionRationale: z.string().min(1),
   originStatus: ComponentOriginStatusSchema,
-  eccProvenance: EccProvenanceSchema.optional(),
+  provenance: SourceProvenanceSchema.optional(),
 });
 export type SelectedRuleSpec = z.infer<typeof SelectedRuleSpecSchema>;
 
@@ -69,7 +70,7 @@ export const SelectedSkillSpecSchema = z.object({
   resources: z.array(SkillResourceFileSchema).default([]),
   selectionRationale: z.string().min(1),
   originStatus: ComponentOriginStatusSchema,
-  eccProvenance: EccProvenanceSchema.optional(),
+  provenance: SourceProvenanceSchema.optional(),
 });
 export type SelectedSkillSpec = z.infer<typeof SelectedSkillSpecSchema>;
 
@@ -89,7 +90,7 @@ export const SelectedSubagentSpecSchema = z.object({
   qualityCostRecommendation: z.string().min(1),
   selectionRationale: z.string().min(1),
   originStatus: ComponentOriginStatusSchema,
-  eccProvenance: EccProvenanceSchema.optional(),
+  provenance: SourceProvenanceSchema.optional(),
 });
 export type SelectedSubagentSpec = z.infer<typeof SelectedSubagentSpecSchema>;
 
@@ -107,14 +108,31 @@ export const InputDocumentDigestSchema = z.object({
 export type InputDocumentDigest = z.infer<typeof InputDocumentDigestSchema>;
 
 /**
+ * Sources du catalogue ayant servi à la génération, avec le nombre de composants retenus dans le harnais.
+ */
+export const CatalogSourceReferenceSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  repositoryUrl: z.string().url(),
+  commitSha: z.string().regex(/^[0-9a-f]{7,40}$/i),
+  license: z.string().min(1),
+  author: z.string(),
+  selectedComponents: z.number().int().nonnegative(),
+});
+export const CatalogReferenceSchema = z.object({
+  versionTag: z.string().min(1),
+  sources: z.array(CatalogSourceReferenceSchema),
+});
+export type CatalogReference = z.infer<typeof CatalogReferenceSchema>;
+
+/**
  * Entrée complète permettant au moteur déterministe (Jalon 1) de construire le paquet.
  */
 export const DeterministicPackageInputSchema = z.object({
   generationId: z.string().min(1),
   generatedAtIso: z.string().datetime(),
   packageRootName: KebabSlugSchema,
-  eccCommitSha: z.string().regex(/^[0-9a-f]{7,40}$/i),
-  eccVersionTag: z.string().min(1).default('v2.2.3'),
+  catalog: CatalogReferenceSchema,
   inputDocuments: z.array(InputDocumentDigestSchema).min(1),
   profile: ProjectProfileSchema,
   excellencePacks: z.array(z.string()).default([]),
@@ -136,17 +154,12 @@ export type DeterministicPackageInput = z.infer<typeof DeterministicPackageInput
  * Schéma machine-readable strict de `docs/HARNESS_MANIFEST.json` (§5.2 CDC).
  */
 export const HarnessManifestSchema = z.object({
-  manifestSchemaVersion: z.literal('1.0.0'),
+  manifestSchemaVersion: z.literal('2.0.0'),
   generationId: z.string().min(1),
   generatedAt: z.string().datetime(),
   packageRootName: z.string().min(1),
   targetSurface: AntigravitySurfaceSchema,
-  eccReference: z.object({
-    repositoryUrl: z.string().url(),
-    commitSha: z.string(),
-    versionTag: z.string(),
-    license: z.string(),
-  }),
+  catalog: CatalogReferenceSchema,
   inputDocuments: z.array(InputDocumentDigestSchema),
   profileDigest: z.object({
     projectId: z.string(),
@@ -211,3 +224,39 @@ export const HarnessManifestSchema = z.object({
   }),
 });
 export type HarnessManifest = z.infer<typeof HarnessManifestSchema>;
+
+/** Valeurs d'origine des manifestes 1.0.0, quand le catalogue ne comptait qu'ECC. */
+const LEGACY_ORIGIN_STATUS: Record<string, string> = { ecc_adapted: 'source_adapted', ecc_verbatim: 'source_verbatim' };
+
+/**
+ * Lit un manifeste quelle que soit sa version : un manifeste 1.0.0 (référence ECC unique, origines `ecc_*`)
+ * est converti au format 2.0.0 avant validation.
+ */
+export function parseHarnessManifest(raw: unknown): HarnessManifest {
+  const m = raw as Record<string, any>;
+  if (m?.manifestSchemaVersion !== '1.0.0') return HarnessManifestSchema.parse(raw);
+  const { eccReference, ...rest } = m;
+  const repo = String(eccReference?.repositoryUrl ?? 'https://github.com/affaan-m/ECC');
+  return HarnessManifestSchema.parse({
+    ...rest,
+    manifestSchemaVersion: '2.0.0',
+    catalog: {
+      versionTag: String(eccReference?.versionTag ?? 'inconnue'),
+      sources: eccReference?.commitSha
+        ? [{
+            id: 'ecc-official',
+            name: 'Everything Claude Code (ECC)',
+            repositoryUrl: repo,
+            commitSha: eccReference.commitSha,
+            license: eccReference.license ?? 'MIT',
+            author: '',
+            selectedComponents: 0,
+          }]
+        : [],
+    },
+    components: (m.components ?? []).map((c: Record<string, unknown>) => ({
+      ...c,
+      originStatus: LEGACY_ORIGIN_STATUS[String(c.originStatus)] ?? c.originStatus,
+    })),
+  });
+}

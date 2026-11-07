@@ -1,15 +1,15 @@
 import { and, desc, eq, ilike, inArray, or } from 'drizzle-orm';
 import {
   AppDatabase,
-  eccComponents,
-  eccSyncs,
+  catalogComponents,
+  catalogSyncs,
   getDb,
 } from '../../db';
 import { sanitizeErrorMessage } from '../../lib/sanitize-error';
 import { extractTarGzTextFilesInMemory } from './tar-extractor';
 
-export type EccSyncRecord = typeof eccSyncs.$inferSelect;
-export type EccComponentRecord = typeof eccComponents.$inferSelect;
+export type CatalogSyncRecord = typeof catalogSyncs.$inferSelect;
+export type CatalogComponentRecord = typeof catalogComponents.$inferSelect;
 
 import { CatalogSourceConfig, DEFAULT_CATALOG_SOURCES, SyncedSourceSnapshot } from './catalog-sources';
 import { buildMultiSourceCatalog, SourceSnapshot } from './catalog-builder';
@@ -24,7 +24,7 @@ export { getBuiltinCuratedExcellenceComponents };
 /**
  * Interface de transport permettant d'injecter un client GitHub réel ou un mock déterministe en test (FR-04).
  */
-export interface EccRemoteFetcher {
+export interface CatalogFetcher {
   resolveRefCommitSha(owner: string, repo: string, ref: string): Promise<string>;
   downloadRepositoryTarball(owner: string, repo: string, commitSha: string): Promise<Uint8Array>;
 }
@@ -32,7 +32,7 @@ export interface EccRemoteFetcher {
 /**
  * Client HTTP officiel vers GitHub API + codeload.github.com (sans scraping HTML — §4.2 CDC).
  */
-export class GitHubOfficialEccFetcher implements EccRemoteFetcher {
+export class GitHubCatalogFetcher implements CatalogFetcher {
   private readonly githubToken?: string;
 
   constructor(githubToken = process.env.GITHUB_TOKEN) {
@@ -98,7 +98,7 @@ export class GitHubOfficialEccFetcher implements EccRemoteFetcher {
 }
 
 export interface SearchCatalogOptions {
-  eccSyncId?: string;
+  catalogSyncId?: string;
   kinds?: Array<'RULE' | 'SKILL' | 'SUBAGENT' | 'COMMAND_CONVERTED'>;
   query?: string;
   languages?: string[];
@@ -109,15 +109,15 @@ export interface SearchCatalogOptions {
 }
 
 /**
- * Service de gestion, synchronisation atomique et recherche du catalogue ECC (FR-04 & §4.2-4.3).
+ * Service de gestion, synchronisation atomique et recherche du catalogue multi-sources (FR-04 & §4.2-4.3).
  */
-export class EccCatalogService {
+export class CatalogService {
   private readonly db: AppDatabase;
-  private readonly fetcher: EccRemoteFetcher;
+  private readonly fetcher: CatalogFetcher;
 
   constructor(
     db: AppDatabase = getDb(),
-    fetcher: EccRemoteFetcher = new GitHubOfficialEccFetcher()
+    fetcher: CatalogFetcher = new GitHubCatalogFetcher()
   ) {
     this.db = db;
     this.fetcher = fetcher;
@@ -126,12 +126,12 @@ export class EccCatalogService {
   /**
    * Retourne le catalogue actif de référence (`isActiveCatalog = true` et `status = 'VALID'`).
    */
-  async getActiveCatalogSync(): Promise<EccSyncRecord | null> {
+  async getActiveCatalogSync(): Promise<CatalogSyncRecord | null> {
     const [active] = await this.db
       .select()
-      .from(eccSyncs)
-      .where(and(eq(eccSyncs.isActiveCatalog, true), eq(eccSyncs.status, 'VALID')))
-      .orderBy(desc(eccSyncs.syncedAt))
+      .from(catalogSyncs)
+      .where(and(eq(catalogSyncs.isActiveCatalog, true), eq(catalogSyncs.status, 'VALID')))
+      .orderBy(desc(catalogSyncs.syncedAt))
       .limit(1);
 
     return active ?? null;
@@ -153,7 +153,7 @@ export class EccCatalogService {
     /** Sources à synchroniser ; par défaut, les sources actives en base. */
     sources?: CatalogSourceConfig[];
     includeCuratedExcellence?: boolean;
-  }): Promise<EccSyncRecord> {
+  }): Promise<CatalogSyncRecord> {
     let resolvedSha = 'unknown';
 
     try {
@@ -213,7 +213,7 @@ export class EccCatalogService {
       // Transaction atomique : insertion du nouveau snapshot + insertion par lots des composants + bascule du catalogue actif
       const committedSync = await this.db.transaction(async (tx) => {
         const [newSync] = await tx
-          .insert(eccSyncs)
+          .insert(catalogSyncs)
           .values({
             commitSha: resolvedSha,
             versionTag,
@@ -234,9 +234,9 @@ export class EccCatalogService {
         const batchSize = 50;
         for (let i = 0; i < allComponents.length; i += batchSize) {
           const batch = allComponents.slice(i, i + batchSize);
-          await tx.insert(eccComponents).values(
+          await tx.insert(catalogComponents).values(
             batch.map((c) => ({
-              eccSyncId: newSync.id,
+              catalogSyncId: newSync.id,
               externalId: c.externalId,
               slug: c.slug,
               kind: c.kind,
@@ -258,14 +258,14 @@ export class EccCatalogService {
 
         // Désactiver l'ancien catalogue actif et activer le nouveau de manière atomique
         await tx
-          .update(eccSyncs)
+          .update(catalogSyncs)
           .set({ isActiveCatalog: false })
-          .where(eq(eccSyncs.isActiveCatalog, true));
+          .where(eq(catalogSyncs.isActiveCatalog, true));
 
         const [activatedSync] = await tx
-          .update(eccSyncs)
+          .update(catalogSyncs)
           .set({ isActiveCatalog: true })
-          .where(eq(eccSyncs.id, newSync.id))
+          .where(eq(catalogSyncs.id, newSync.id))
           .returning();
 
         return activatedSync!;
@@ -276,7 +276,7 @@ export class EccCatalogService {
       const safeErr = sanitizeErrorMessage(err);
 
       // Enregistrer la tentative échouée sans jamais toucher au catalogue actif existant (FR-04)
-      await this.db.insert(eccSyncs).values({
+      await this.db.insert(catalogSyncs).values({
         commitSha: resolvedSha,
         versionTag: 'unknown',
         status: 'FAILED',
@@ -295,10 +295,10 @@ export class EccCatalogService {
 
   /**
    * Recherche hybride (filtres de type/compatibilité + recherche lexicale et métadonnées stack)
-   * dans le catalogue actif (ou dans une version spécifique `eccSyncId`).
+   * dans le catalogue actif (ou dans une version spécifique `catalogSyncId`).
    */
-  async searchComponents(options: SearchCatalogOptions = {}): Promise<EccComponentRecord[]> {
-    let targetSyncId = options.eccSyncId;
+  async searchComponents(options: SearchCatalogOptions = {}): Promise<CatalogComponentRecord[]> {
+    let targetSyncId = options.catalogSyncId;
     if (!targetSyncId) {
       const active = await this.getActiveCatalogSync();
       if (!active) {
@@ -307,15 +307,15 @@ export class EccCatalogService {
       targetSyncId = active.id;
     }
 
-    const conditions = [eq(eccComponents.eccSyncId, targetSyncId)];
+    const conditions = [eq(catalogComponents.catalogSyncId, targetSyncId)];
 
     if (options.kinds && options.kinds.length > 0) {
-      conditions.push(inArray(eccComponents.kind, options.kinds));
+      conditions.push(inArray(catalogComponents.kind, options.kinds));
     }
 
     if (options.onlyCompatible !== false) {
       conditions.push(
-        inArray(eccComponents.compatibilityStatus, ['AUTO_VALIDATED', 'DOC_COMPATIBLE'])
+        inArray(catalogComponents.compatibilityStatus, ['AUTO_VALIDATED', 'DOC_COMPATIBLE'])
       );
     }
 
@@ -325,14 +325,14 @@ export class EccCatalogService {
         .split(/\s+/)
         .filter((t) => t.length >= 2);
       if (terms.length > 0) {
-        const termFilters = terms.map((term) => ilike(eccComponents.searchText, `%${term}%`));
+        const termFilters = terms.map((term) => ilike(catalogComponents.searchText, `%${term}%`));
         conditions.push(or(...termFilters)!);
       }
     }
 
     const candidates = await this.db
       .select()
-      .from(eccComponents)
+      .from(catalogComponents)
       .where(and(...conditions))
       .limit(options.limit ?? 250);
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  adaptEccAgentMarkdown,
+  adaptAgentMarkdown,
   serializeAntigravitySubagent,
   splitMarkdownFrontmatter,
 } from '../src/modules/antigravity-adapter/adapter';
@@ -12,9 +12,9 @@ import {
   validateRulesAndContextBudget,
   validateSubagents,
 } from '../src/modules/antigravity-adapter/validators';
-import { getBuiltinCuratedExcellenceComponents } from '../src/modules/ecc-catalog/curated-excellence';
+import { getBuiltinCuratedExcellenceComponents } from '../src/modules/catalog/curated-excellence';
 import { HarnessBuilderService, generateOrchestrationPlan } from '../src/modules/harness-builder';
-import { HarnessManifestSchema } from '../src/modules/package-exporter/schema';
+import { parseHarnessManifest } from '../src/modules/package-exporter/schema';
 import { SelectionEngine } from '../src/modules/selection-engine';
 import { createSampleDeterministicInput } from './fixtures';
 
@@ -54,7 +54,7 @@ color: purple
 ---
 Design scalable systems.
 `;
-      const adaptedOpus = adaptEccAgentMarkdown(rawEccOpus, 'architect');
+      const adaptedOpus = adaptAgentMarkdown(rawEccOpus, 'architect');
       expect('model' in (adaptedOpus.frontmatter as Record<string, unknown>)).toBe(false);
       expect(adaptedOpus.content).not.toMatch(/^model:/m);
       expect(adaptedOpus.recommendedModelTier).toBe('pro');
@@ -71,7 +71,7 @@ model: haiku
 ---
 Update docs cleanly.
 `;
-      const adaptedHaiku = adaptEccAgentMarkdown(rawEccHaiku, 'doc-updater');
+      const adaptedHaiku = adaptAgentMarkdown(rawEccHaiku, 'doc-updater');
       expect(adaptedHaiku.content).not.toMatch(/^model:/m);
       expect(adaptedHaiku.recommendedModelTier).toBe('flash');
       expect(adaptedHaiku.recommendedEffort).toBe('low');
@@ -333,7 +333,7 @@ model: pro
       const manifestRaw = JSON.parse(
         fs.readFileSync(path.join(repoRoot, 'docs', 'HARNESS_MANIFEST.json'), 'utf8')
       );
-      const parsedManifest = HarnessManifestSchema.parse(manifestRaw);
+      const parsedManifest = parseHarnessManifest(manifestRaw);
       expect(
         parsedManifest.components.some((c) => c.id === 'rule:model-effort-governance')
       ).toBe(true);

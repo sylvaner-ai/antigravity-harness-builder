@@ -1,11 +1,11 @@
-import { EccComponentParsedMeta } from '../../db/schema';
+import { CatalogComponentMeta } from '../../db/schema';
 import {
   ANTIGRAVITY_LIMITS,
   ValidationIssue,
   ValidationTier,
 } from '../antigravity-adapter/schema';
 import {
-  adaptEccAgentMarkdown,
+  adaptAgentMarkdown,
   sanitizeClaudeSpecificReferences,
   serializeAntigravityRule,
   serializeAntigravitySkill,
@@ -19,7 +19,7 @@ import {
 import { computeSha256 } from '../package-exporter/exporter';
 import { TarFileEntry } from './tar-extractor';
 
-export interface IndexedEccComponentCandidate {
+export interface IndexedCatalogComponent {
   externalId: string;
   slug: string;
   kind: 'RULE' | 'SKILL' | 'SUBAGENT' | 'COMMAND_CONVERTED';
@@ -31,14 +31,14 @@ export interface IndexedEccComponentCandidate {
   contentSha256: string;
   rawContent: string;
   adaptedContent: string;
-  parsedMeta: EccComponentParsedMeta;
+  parsedMeta: CatalogComponentMeta;
   compatibilityStatus: ValidationTier | 'INCOMPATIBLE';
   compatibilityIssues: ValidationIssue[];
   searchText: string;
 }
 
 /**
- * Mapping des dossiers de règles ECC (`rules/<dir>/*.md`) vers des patterns `globs` natifs Antigravity
+ * Mapping des dossiers de règles (`rules/<dir>/*.md`) vers des patterns `globs` natifs Antigravity
  * afin de préserver le budget de 20 000 tokens des règles `always_on`.
  */
 const RULE_DIR_TO_GLOBS_MAP: Readonly<Record<string, { globs: string; languages: string[]; frameworks: string[] }>> =
@@ -176,36 +176,18 @@ function inferTagsAndStack(text: string, family?: string): {
 }
 
 /**
- * Transforme et qualifie l'ensemble des entrées extraites d'un tarball ECC
+ * Transforme et qualifie l'ensemble des entrées extraites de l'archive d'une source
  * en composants indexables dans PostgreSQL, avec vérification de compatibilité Antigravity.
  */
-export function parseAndQualifyEccRepositoryEntries(
+export function parseAndQualifyRepositoryEntries(
   entries: readonly TarFileEntry[],
   commitSha: string,
-  repoUrl = 'https://github.com/affaan-m/ECC'
-): {
-  versionTag: string;
-  license: string;
-  components: IndexedEccComponentCandidate[];
-  catalogSha256: string;
-} {
-  let versionTag = 'v2.2.3';
-  const pkgEntry = entries.find((e) => e.relativePath === 'package.json');
-  if (pkgEntry) {
-    try {
-      const parsedPkg = JSON.parse(pkgEntry.content) as { version?: string };
-      if (parsedPkg.version) {
-        versionTag = `v${parsedPkg.version.replace(/^v/, '')}`;
-      }
-    } catch {
-      // Fallback conservé
-    }
-  }
+  repoUrl: string
+): { components: IndexedCatalogComponent[] } {
+  // Licence réelle posée ensuite par catalog-builder, d'après le fichier LICENSE de la source.
+  const license = 'UNKNOWN';
 
-  const licenseEntry = entries.find((e) => e.relativePath === 'LICENSE');
-  const license = licenseEntry?.content.includes('MIT License') ? 'MIT' : 'MIT';
-
-  const components: IndexedEccComponentCandidate[] = [];
+  const components: IndexedCatalogComponent[] = [];
   const seenExternalIds = new Set<string>();
 
   // 1. Indexation des Règles (`rules/<family>/<file>.md`)
@@ -232,7 +214,7 @@ export function parseAndQualifyEccRepositoryEntries(
     const dirMapping = RULE_DIR_TO_GLOBS_MAP[family];
     const trigger: 'always_on' | 'glob' = family === 'common' ? 'always_on' : 'glob';
     const globs = dirMapping?.globs ?? `**/*`;
-    const description = `Règle ECC (${family}/${baseName}) : ${extractFirstHeadingOrSentence(
+    const description = `Règle (${family}/${baseName}) : ${extractFirstHeadingOrSentence(
       sanitized.content,
       slug
     )}`;
@@ -308,7 +290,7 @@ export function parseAndQualifyEccRepositoryEntries(
     const isReviewer = /(?:reviewer|auditor|audit|evaluator|analyzer)(?:$|-)/i.test(slug);
 
     try {
-      const adapted = adaptEccAgentMarkdown(entry.content, slug, {
+      const adapted = adaptAgentMarkdown(entry.content, slug, {
         isIndependentReviewer: isReviewer,
       });
 
@@ -368,7 +350,7 @@ export function parseAndQualifyEccRepositoryEntries(
         slug,
         kind: 'SUBAGENT',
         name: slug,
-        description: `Agent ECC non adaptable (${errMessage})`,
+        description: `Agent non adaptable (${errMessage})`,
         sourceRelativePath: entry.relativePath,
         sourceUrl: `${repoUrl}/blob/${commitSha}/${entry.relativePath}`,
         license,
@@ -390,7 +372,7 @@ export function parseAndQualifyEccRepositoryEntries(
         compatibilityIssues: [
           {
             severity: 'error',
-            code: 'ECC_AGENT_ADAPTATION_FAILED',
+            code: 'AGENT_ADAPTATION_FAILED',
             message: errMessage,
             filePath: `.agents/agents/${slug}.md`,
             validationKind: 'SYNTACTIC',
@@ -557,7 +539,7 @@ export function parseAndQualifyEccRepositoryEntries(
     const split = splitMarkdownFrontmatter(entry.content);
     const sanitized = sanitizeClaudeSpecificReferences(split.body);
     const adaptationNotes: string[] = [
-      "Conversion d'une commande slash ECC ('commands/') en Skill natif Antigravity ('.agents/skills/<name>/SKILL.md') suite à l'arrêt annoncé des workflows le 19 octobre 2026 (§4.4 CDC).",
+      "Conversion d'une commande slash ('commands/') en Skill natif Antigravity ('.agents/skills/<name>/SKILL.md') suite à l'arrêt annoncé des workflows le 19 octobre 2026 (§4.4 CDC).",
     ];
 
     for (const rep of sanitized.replacements) {
@@ -628,16 +610,5 @@ export function parseAndQualifyEccRepositoryEntries(
   }
 
   components.sort((a, b) => a.externalId.localeCompare(b.externalId));
-
-  const catalogDigestPayload = components
-    .map((c) => `${c.externalId}:${c.contentSha256}:${c.compatibilityStatus}`)
-    .join('\n');
-  const catalogSha256 = computeSha256(catalogDigestPayload);
-
-  return {
-    versionTag,
-    license,
-    components,
-    catalogSha256,
-  };
+  return { components };
 }

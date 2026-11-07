@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CATALOG_SOURCES } from '../src/modules/ecc-catalog/catalog-sources';
-import { assessPlatformFit } from '../src/modules/ecc-catalog/content-safety';
+import { DEFAULT_CATALOG_SOURCES } from '../src/modules/catalog/catalog-sources';
+import { assessPlatformFit } from '../src/modules/catalog/content-safety';
 import { HarnessBuilderService } from '../src/modules/harness-builder';
 import { ALWAYS_ON_BUDGET_BYTES } from '../src/modules/harness-builder/context-budget';
 import {
@@ -219,7 +219,7 @@ describe('Harnais complet généré depuis le catalogue réel', () => {
         }
 
         // Attribution : chaque dépôt contributeur est cité avec sa licence
-        const sources = pkg.files.find((f) => f.relativePath === 'docs/ECC_SOURCES.md')!.content;
+        const sources = pkg.files.find((f) => f.relativePath === 'docs/SOURCES.md')!.content;
         for (const id of new Set(sel.selectedComponents.map((s: any) => s.sourceId).filter((x: string) => x && x !== 'curated'))) {
           const src = DEFAULT_CATALOG_SOURCES.find((s) => s.id === id)!;
           expect(sources, `attribution ${id}`).toContain(`${src.owner}/${src.repo}`);

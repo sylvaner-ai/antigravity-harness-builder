@@ -12,12 +12,12 @@ import { HarnessBuilderService } from '../src/modules/harness-builder';
 import { renderAgentsMarkdown } from '../src/modules/package-exporter/templates';
 import { renderModelEffortGovernanceRuleBody } from '../src/modules/package-exporter/governance-template';
 import { NATIVE_SLASH_COMMANDS, renderSlashCommandBullets } from '../src/modules/package-exporter/slash-commands';
-import { getBuiltinCuratedExcellenceComponents } from '../src/modules/ecc-catalog/curated-excellence';
+import { getBuiltinCuratedExcellenceComponents } from '../src/modules/catalog/curated-excellence';
 import { SelectionEngine } from '../src/modules/selection-engine';
 import type { SelectedRuleSpec } from '../src/modules/package-exporter/schema';
 import { createSampleDeterministicInput } from './fixtures';
 
-function rule(slug: string, bytes: number, originStatus: 'ecc_adapted' | 'project_custom' = 'ecc_adapted'): SelectedRuleSpec {
+function rule(slug: string, bytes: number, originStatus: 'source_adapted' | 'project_custom' = 'source_adapted'): SelectedRuleSpec {
   return {
     slug,
     title: slug,
@@ -209,7 +209,7 @@ describe('Option C — AGENTS.md annonce les règles chargées à la demande', (
       frontmatter: { trigger, description, ...(globs ? { globs } : {}) },
       markdownBody: 'x'.repeat(500),
       selectionRationale: 'test',
-      originStatus: 'ecc_adapted',
+      originStatus: 'source_adapted',
     }) as SelectedRuleSpec;
 
   it('liste chaque règle rétrogradée avec son chemin, son sujet et la consigne de la lire avant la tâche', () => {
@@ -251,7 +251,7 @@ describe('Option C — AGENTS.md annonce les règles chargées à la demande', (
 });
 
 describe('Règles de fichiers : glob converti en model_decision', () => {
-  const globRule = (slug: string, globs: string, description: string, originStatus: 'ecc_adapted' | 'project_custom' = 'ecc_adapted'): SelectedRuleSpec =>
+  const globRule = (slug: string, globs: string, description: string, originStatus: 'source_adapted' | 'project_custom' = 'source_adapted'): SelectedRuleSpec =>
     ({
       slug,
       title: slug,
@@ -308,7 +308,7 @@ function onDecision(): SelectedRuleSpec {
     frontmatter: { trigger: 'model_decision', description: 'Sujet' },
     markdownBody: 'x',
     selectionRationale: 'test',
-    originStatus: 'ecc_adapted',
+    originStatus: 'source_adapted',
   } as SelectedRuleSpec;
 }
 

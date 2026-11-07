@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import ToastNotification from '@/components/ui/ToastNotification';
 import { RefreshCw, Plus, Search, Power, GitCommit, Trash2, ExternalLink } from 'lucide-react';
-import type { CatalogSourceAnalysis, SyncedSourceSnapshot } from '@/modules/ecc-catalog/catalog-sources';
+import type { CatalogSourceAnalysis, SyncedSourceSnapshot } from '@/modules/catalog/catalog-sources';
 
 interface SourceRow {
   id: string;

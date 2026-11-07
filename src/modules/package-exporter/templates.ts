@@ -1,7 +1,7 @@
 import { DeterministicPackageInput } from './schema';
 import { EpistemicStatus, TraceableString } from '../project-profile/schema';
 import { formatModelEffortCouple } from './governance-template';
-import { GENERATOR_REPOSITORY_URL } from '../ecc-catalog/catalog-sources';
+import { GENERATOR_REPOSITORY_URL } from '../catalog/catalog-sources';
 
 export { formatModelEffortCouple, renderModelEffortGovernanceRuleBody } from './governance-template';
 import { renderSlashCommandBullets, SLASH_COMMAND_SUGGESTION_POLICY } from './slash-commands';
@@ -40,8 +40,7 @@ function renderTraceableList(items: readonly TraceableString[]): string {
  * Inclut obligatoirement les 10 étapes ordonnées, le mode simulation, l'idempotence et les gardes de sécurité.
  */
 export function renderStartHereMarkdown(input: DeterministicPackageInput): string {
-  const { profile, selectedRules, selectedSkills, selectedSubagents, eccCommitSha, eccVersionTag } =
-    input;
+  const { profile, selectedRules, selectedSkills, selectedSubagents, catalog } = input;
 
   const rulesList = selectedRules.map((r) => `- \`.agents/rules/${r.slug}.md\` (${r.frontmatter.trigger})`).join('\n');
   const skillsList = selectedSkills.map((s) => `- \`.agents/skills/${s.slug}/SKILL.md\``).join('\n');
@@ -56,7 +55,7 @@ export function renderStartHereMarkdown(input: DeterministicPackageInput): strin
 
 **Projet cible :** ${profile.projectName}  
 **Surface Antigravity ciblée :** \`${profile.targetSurface}\`  
-**Référence ECC :** \`${eccVersionTag}\` (commit \`${eccCommitSha}\`)  
+**Catalogue de composants :** \`${catalog.versionTag}\` (détail dans \`docs/SOURCES.md\`)  
 **Identifiant de génération :** \`${input.generationId}\`
 
 ---
@@ -266,7 +265,7 @@ Les procédures réutilisables sont des skills (\`.agents/skills/\`), pas des wo
  * 3. Génère `README.md` du paquet de harnais.
  */
 export function renderReadmeMarkdown(input: DeterministicPackageInput): string {
-  const { profile, eccVersionTag, eccCommitSha } = input;
+  const { profile } = input;
   return `# Harnais de Développement Google Antigravity — ${profile.projectName}
 
 Ce paquet autonome a été généré par **Antigravity Harness Builder** pour configurer un environnement de développement agentique sur mesure pour le projet **${profile.projectName}**.
@@ -287,7 +286,7 @@ Ce paquet autonome a été généré par **Antigravity Harness Builder** pour co
 - \`docs/ORCHESTRATION.md\` : Politique de décomposition des tâches, délégation aux sous-agents, tiers de modèles et efforts conseillés.
 - \`docs/ACCEPTANCE_CRITERIA.md\` : Critères d'acceptation vérifiables par fonctionnalité.
 - \`docs/ASSUMPTIONS.md\` : Hypothèses proposées, déductions et informations manquantes à confirmer.
-- \`docs/ECC_SOURCES.md\` : Provenance exacte, commit (\`${eccVersionTag}\` / \`${eccCommitSha}\`) et licences des composants retenus (la liste des candidats écartés n'est que dans l'archive ZIP).
+- \`docs/SOURCES.md\` : Sources du catalogue (dépôt, commit, licence) et provenance exacte des composants retenus (la liste des candidats écartés n'est que dans l'archive ZIP).
 - \`docs/HARNESS_MANIFEST.json\` : Manifeste machine-readable : inventaire des fichiers et empreintes (base de la prochaine mise à niveau).
 - \`.agents/rules/\` : Règles natives Antigravity (\`always_on\`, \`glob\`, \`model_decision\`).
 - \`.agents/skills/\` : Skills natifs Antigravity (\`SKILL.md\` et ressources).
@@ -737,12 +736,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.`;
 
 /** Attribution par dépôt d'origine réellement utilisé (une mention de copyright par source, texte MIT reproduit). */
-function renderAttributions(provs: Array<{ repositoryUrl: string; author: string; license: string; commitSha: string }>): string {
+function renderAttributions(provs: Array<{ repositoryUrl: string; author: string; license: string; commitSha?: string }>): string {
   const byRepo = new Map<string, { author: string; license: string; commits: Set<string>; count: number }>();
   for (const p of provs) {
     if (p.repositoryUrl === GENERATOR_REPOSITORY_URL) continue;
     const e = byRepo.get(p.repositoryUrl) ?? { author: p.author, license: p.license, commits: new Set<string>(), count: 0 };
-    e.commits.add(p.commitSha.slice(0, 8));
+    if (p.commitSha) e.commits.add(p.commitSha.slice(0, 8));
     e.count++;
     byRepo.set(p.repositoryUrl, e);
   }
@@ -758,12 +757,11 @@ ${mitHolders.length > 0 ? `\nTexte de la licence MIT, applicable aux dépôts ci
 }
 
 /**
- * 10. Génère `docs/ECC_SOURCES.md` — Provenance, statut d'adaptation et Licence MIT d'ECC (§4.5 CDC).
+ * 10. Génère `docs/SOURCES.md` — Sources du catalogue, provenance et statut d'adaptation de chaque composant, licences (§4.5 CDC).
  */
-export function renderEccSourcesMarkdown(input: DeterministicPackageInput): string {
+export function renderSourcesMarkdown(input: DeterministicPackageInput): string {
   const {
-    eccCommitSha,
-    eccVersionTag,
+    catalog,
     selectedRules,
     selectedSkills,
     selectedSubagents,
@@ -776,7 +774,7 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
       id: r.slug,
       dest: `.agents/rules/${r.slug}.md`,
       origin: r.originStatus,
-      prov: r.eccProvenance,
+      prov: r.provenance,
       rationale: r.selectionRationale,
     })),
     ...selectedSkills.map((s) => ({
@@ -784,7 +782,7 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
       id: s.slug,
       dest: `.agents/skills/${s.slug}/SKILL.md`,
       origin: s.originStatus,
-      prov: s.eccProvenance,
+      prov: s.provenance,
       rationale: s.selectionRationale,
     })),
     ...selectedSubagents.map((a) => ({
@@ -792,7 +790,7 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
       id: a.slug,
       dest: `.agents/agents/${a.slug}.md`,
       origin: a.originStatus,
-      prov: a.eccProvenance,
+      prov: a.provenance,
       rationale: a.selectionRationale,
     })),
   ];
@@ -803,12 +801,12 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
       const sourceLink = curated
         ? `Composant curated écrit pour Antigravity Harness Builder (texte original ; inspiration : [${c.prov!.sourceUrl}](${c.prov!.sourceUrl}))`
         : c.prov
-          ? `[${c.prov.sourceRelativePath}](${c.prov.sourceUrl}) (\`${c.prov.commitSha.slice(0, 8)}\`)`
+          ? `[${c.prov.sourceRelativePath}](${c.prov.sourceUrl})${c.prov.commitSha ? ` (\`${c.prov.commitSha.slice(0, 8)}\`)` : ''}`
           : 'Généré sur mesure pour le projet';
       const notes =
         c.prov && c.prov.adaptationNotes.length > 0
           ? c.prov.adaptationNotes.join(' ; ')
-          : c.origin === 'ecc_verbatim'
+          : c.origin === 'source_verbatim'
             ? 'Utilisé tel quel'
             : 'Créé spécifiquement pour le projet cible';
       return `| ${c.type} | \`${c.dest}\` | \`${curated ? 'project_custom' : c.origin}\` | ${sourceLink} | ${c.rationale} | ${notes} |`;
@@ -822,19 +820,28 @@ export function renderEccSourcesMarkdown(input: DeterministicPackageInput): stri
           .join('\n')
       : '- *(Aucun candidat proche écarté à signaler)*';
 
-  return `# Provenance des Composants et Licences (ECC)
+  const sourcesTable =
+    catalog.sources.length > 0
+      ? `| Source | Dépôt | Commit | Licence | Composants retenus |
+| :--- | :--- | :--- | :--- | :--- |
+${catalog.sources
+  .map((src) => `| ${src.name} | [${src.repositoryUrl}](${src.repositoryUrl}) | \`${src.commitSha.slice(0, 8)}\` | ${src.license} | ${src.selectedComponents} |`)
+  .join('\n')}`
+      : '*(Sources du catalogue non enregistrées pour cette génération : la provenance figure composant par composant ci-dessous.)*';
 
-**Dépôt officiel de référence :** [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)  
-**Version / Tag synchronisé :** \`${eccVersionTag}\`  
-**Commit SHA exact :** \`${eccCommitSha}\`
+  return `# Provenance des Composants et Licences
+
+**Catalogue de composants :** \`${catalog.versionTag}\`
+
+${sourcesTable}
 
 ---
 
 ## 1. Traçabilité des Composants du Harnais (§4.5)
 
 Le tableau ci-dessous distingue explicitement :
-- \`ecc_verbatim\` : composant issu d'ECC utilisé tel quel ;
-- \`ecc_adapted\` : composant issu d'ECC adapté pour la compatibilité native Google Antigravity et le projet ;
+- \`source_verbatim\` : composant d'une source du catalogue utilisé tel quel ;
+- \`source_adapted\` : composant d'une source du catalogue adapté pour Google Antigravity et le projet ;
 - \`project_custom\` : composant généré spécifiquement pour le projet cible.
 
 | Type | Chemin dans le paquet | Statut d'origine | Source & commit | Raison de sélection | Adaptations appliquées |
