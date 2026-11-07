@@ -263,20 +263,13 @@ model: pro
       const builder = new HarnessBuilderService();
       const pkg = await builder.buildHarness(sample.profile, selection);
 
-      // 1. Prompt Markdown allégé : contient model-effort-governance.md ET docs/ORCHESTRATION.md ET AGENTS.md
-      expect(pkg.lightweightUpgradePromptMarkdown).toContain(
-        '.agents/rules/model-effort-governance.md'
-      );
-      expect(pkg.lightweightUpgradePromptMarkdown).toContain('docs/ORCHESTRATION.md');
-      expect(pkg.lightweightUpgradePromptMarkdown).toContain('AGENTS.md');
+      // Le prompt de mise à niveau contient la règle de gouvernance, l'orchestration et AGENTS.md
+      expect(pkg.upgradePromptMarkdown).toContain('.agents/rules/model-effort-governance.md');
+      expect(pkg.upgradePromptMarkdown).toContain('docs/ORCHESTRATION.md');
+      expect(pkg.upgradePromptMarkdown).toContain('AGENTS.md');
 
-      // 2. Prompt d'upgrade 5 phases : ne modifie jamais les agents existants de l'utilisateur
+      // Il ne modifie jamais les agents existants de l'utilisateur
       expect(pkg.upgradePromptMarkdown).toContain('Ne modifie jamais');
-
-      // 3. One-liner Base64 : script sûr, sans suppression de `model:` ni déplacement de dossier
-      expect(pkg.compactOneLinerPrompt).toContain('.agents/agents');
-      expect(pkg.compactOneLinerPrompt).not.toContain('^model:');
-      expect(pkg.compactOneLinerPrompt).toContain('--dry-run');
     });
   });
 

@@ -12,7 +12,6 @@ services:
       - DATABASE_URL=${DATABASE_URL:-postgresql://ahb_user:ahb_password@postgres:5432/ahb_db}
       - PRIVATE_STORAGE_DIR=${PRIVATE_STORAGE_DIR:-/data/storage}
       - NEXT_TELEMETRY_DISABLED=1
-      - SESSION_SECRET=${SESSION_SECRET:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - GEMINI_MODEL_FAST=${GEMINI_MODEL_FAST:-gemini-3.8-flash}
       - GEMINI_MODEL_PRO=${GEMINI_MODEL_PRO:-gemini-3.8-pro}

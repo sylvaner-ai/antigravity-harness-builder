@@ -70,24 +70,3 @@ describe('LoginThrottle', () => {
     expect(clientIp(new Headers())).toBe('inconnue');
   });
 });
-
-describe('secret des jetons de déploiement', () => {
-  it('refuse un SESSION_SECRET absent, trop court ou égal à la valeur d’exemple, sans constante publique', async () => {
-    const { deploymentSecret } = await import('../src/modules/auth/auth-service');
-    const saved = process.env.SESSION_SECRET;
-    try {
-      for (const bad of [undefined, 'court', 'replace_with_at_least_32_bytes_random_hex_secret']) {
-        if (bad === undefined) delete process.env.SESSION_SECRET;
-        else process.env.SESSION_SECRET = bad;
-        const secret = deploymentSecret();
-        expect(Buffer.isBuffer(secret)).toBe(true);
-        expect(String(secret)).not.toContain('ahb-deployment-salt');
-      }
-      process.env.SESSION_SECRET = 'a'.repeat(40);
-      expect(deploymentSecret()).toBe('a'.repeat(40));
-    } finally {
-      if (saved === undefined) delete process.env.SESSION_SECRET;
-      else process.env.SESSION_SECRET = saved;
-    }
-  });
-});

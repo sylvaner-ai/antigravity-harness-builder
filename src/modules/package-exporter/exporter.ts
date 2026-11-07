@@ -34,23 +34,12 @@ import {
   renderProjectSpecMarkdown,
   renderReadmeMarkdown,
   renderStartHereMarkdown,
-  isEssentialHarnessFile,
   renderDeploymentPromptMarkdown,
   renderUpgradePromptMarkdown,
-  renderBase64OneLinerPrompt,
-  renderLightweightUpgradePromptMarkdown,
 } from './templates';
-import { buildTarGzBase64 } from './tar-builder';
 import { renderModelEffortGovernanceRuleBody } from './governance-template';
 
-export {
-  isEssentialHarnessFile,
-  renderDeploymentPromptMarkdown,
-  renderUpgradePromptMarkdown,
-  renderBase64OneLinerPrompt,
-  renderLightweightUpgradePromptMarkdown,
-  buildTarGzBase64,
-};
+export { renderDeploymentPromptMarkdown, renderUpgradePromptMarkdown };
 
 /**
  * Calcule l'empreinte SHA-256 hexadécimale d'une chaîne ou d'un buffer.
@@ -67,9 +56,6 @@ export interface BuiltHarnessPackage {
   startHereContent: string;
   deploymentPromptMarkdown: string;
   upgradePromptMarkdown: string;
-  compactOneLinerPrompt: string;
-  lightweightUpgradePromptMarkdown: string;
-  base64TarGz: string;
   manifest: HarnessManifest;
   files: Array<{
     relativePath: string;
@@ -431,33 +417,11 @@ export function buildDeterministicHarnessPackage(
     operationalTestCommand,
   });
 
-  const essentialFiles = builtFiles.filter((f) => isEssentialHarnessFile(f.relativePath));
-
-  const base64TarGz = buildTarGzBase64(essentialFiles.length > 0 ? essentialFiles : builtFiles);
-
-  const compactOneLinerPrompt = renderBase64OneLinerPrompt({
-    projectName: input.profile.projectName,
-    targetSurface: input.profile.targetSurface,
-    base64Payload: base64TarGz,
-    filesCount: builtFiles.length,
-    operationalTestCommand,
-  });
-
-  const lightweightUpgradePromptMarkdown = renderLightweightUpgradePromptMarkdown({
-    projectName: input.profile.projectName,
-    targetSurface: input.profile.targetSurface,
-    files: builtFiles,
-    operationalTestCommand,
-  });
-
   return {
     packageRootName: input.packageRootName,
     startHereContent,
     deploymentPromptMarkdown,
     upgradePromptMarkdown,
-    compactOneLinerPrompt,
-    lightweightUpgradePromptMarkdown,
-    base64TarGz,
     manifest: manifestObject,
     files: builtFiles,
     zipBuffer,

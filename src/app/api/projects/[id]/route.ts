@@ -54,7 +54,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       latestProfile: profiles[0] ?? null,
       generations: gens,
       artifacts: latestArtifacts,
-      deploymentToken: auth.generateDeploymentToken(id),
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur';
