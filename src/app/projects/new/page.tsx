@@ -319,7 +319,7 @@ export default function NewProjectPage() {
               {auditParseError && auditText.trim() && (
                 <p className="mt-1.5 text-xs text-amber-700 flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>Format non reconnu : assurez-vous de coller le bloc JSON complet de l'audit.</span>
+                  <span>Audit non reconnu : {auditParseError}</span>
                 </p>
               )}
             </div>

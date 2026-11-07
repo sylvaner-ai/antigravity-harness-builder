@@ -204,27 +204,31 @@ Indique ensuite à l'utilisateur : « L'audit est terminé : importez antigravit
  * (ex: clôturé par ```json ... ``` ou texte introductif).
  */
 export function parseAuditReportText(rawText: string): AntigravityAuditReport {
-  let cleaned = rawText.trim();
+  const trimmed = rawText.trim();
 
-  // Extraction si enveloppé dans un bloc markdown ```json ... ```
-  const jsonBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (jsonBlockMatch && jsonBlockMatch[1]) {
-    cleaned = jsonBlockMatch[1].trim();
-  } else {
-    // Si pas de fence explicite, chercher le premier accolade ouvrante et la dernière fermante
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      cleaned = cleaned.substring(firstBrace, lastBrace + 1);
-    }
-  }
+  // Candidats essayés dans l'ordre. Le fichier brut passe en premier : un audit 2.1 contient des documents
+  // Markdown dont les blocs de code (```) tromperaient une recherche de bloc avant la lecture directe.
+  const candidates: string[] = [trimmed];
+  const fenced = trimmed.match(/```json\s*\n([\s\S]*\})\s*\n```/);
+  if (fenced?.[1]) candidates.push(fenced[1].trim());
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) candidates.push(trimmed.substring(firstBrace, lastBrace + 1));
 
   let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch (err: unknown) {
+  let lastError: unknown;
+  for (const candidate of candidates) {
+    try {
+      parsed = JSON.parse(candidate);
+      lastError = undefined;
+      break;
+    } catch (err: unknown) {
+      lastError = err;
+    }
+  }
+  if (lastError !== undefined || parsed === undefined) {
     throw new Error(
-      `Impossible de lire le rapport d'audit JSON : syntaxe JSON non valide (${err instanceof Error ? err.message : 'erreur de parsing'}).`
+      `Impossible de lire le rapport d'audit JSON : syntaxe JSON non valide (${lastError instanceof Error ? lastError.message : 'erreur de parsing'}).`
     );
   }
 

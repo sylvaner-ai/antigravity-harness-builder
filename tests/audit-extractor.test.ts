@@ -221,3 +221,23 @@ describe('Parcours B — fusion du profil d’audit et du cahier des charges', (
     expect(ProjectProfileSchema.safeParse(merged).success).toBe(true);
   });
 });
+
+describe('Lecture d’un audit 2.1 dont les documents joints contiennent des blocs de code', () => {
+  const audit = {
+    auditVersion: '2.1.0',
+    projectName: 'felicicar',
+    functionalDocuments: [
+      { path: 'docs/cdc.md', role: 'SPECIFICATION', content: '# CDC\n\n```bash\nnpm test\n```\n\nFin {accolade}' },
+    ],
+  };
+
+  it('lit le fichier JSON brut', () => {
+    const report = parseAuditReportText(JSON.stringify(audit, null, 2));
+    expect(report.functionalDocuments[0]?.content).toContain('```bash');
+  });
+
+  it('lit le JSON enveloppé dans un bloc ```json précédé de texte', () => {
+    const report = parseAuditReportText(`Voici l'audit :\n\n\`\`\`json\n${JSON.stringify(audit, null, 2)}\n\`\`\`\n\nTerminé.`);
+    expect(report.projectName).toBe('felicicar');
+  });
+});
