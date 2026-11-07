@@ -241,3 +241,15 @@ describe('Lecture d’un audit 2.1 dont les documents joints contiennent des blo
     expect(report.projectName).toBe('felicicar');
   });
 });
+
+describe('Erreurs de validation de l’audit lisibles', () => {
+  it('nomme le document et le champ en cause, sans chemin technique', () => {
+    const raw = JSON.stringify({
+      auditVersion: '2.1.0',
+      projectName: 'x',
+      functionalDocuments: [{ path: 'a.md', role: 'SPECIFICATION', content: 'ok' }, { path: 'b.md', role: 'INCONNU' }],
+    });
+    expect(() => parseAuditReportText(raw)).toThrowError(/document fonctionnel n°2 › role/);
+    expect(() => parseAuditReportText(raw)).not.toThrowError(/functionalDocuments\.1/);
+  });
+});

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import StepNavigation from '@/components/StepNavigation';
 import { ProjectProfile } from '../../../../modules/project-profile/schema';
+import { AUDIT_MISSING_FEATURES_ID } from '../../../../modules/project-profile/audit-extractor';
 
 export default function StepProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
@@ -15,6 +16,7 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [localExtractor, setLocalExtractor] = useState(false);
 
   // Gestion interactive de l'arbitrage des incertitudes
   const [editingUncertaintyIdx, setEditingUncertaintyIdx] = useState<number | null>(null);
@@ -94,6 +96,10 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
     setProfile({ ...profile, uncertainties: updated });
     setEditingUncertaintyIdx(null);
   };
+
+  useEffect(() => {
+    setLocalExtractor(new URLSearchParams(window.location.search).get('extracteur') === 'local');
+  }, []);
 
   useEffect(() => {
     fetch(`/api/projects/${projectId}`)
@@ -207,6 +213,19 @@ export default function StepProfilePage({ params }: { params: Promise<{ id: stri
           Vérifiez la stack technique et validez les choix d'architecture avant la composition du harnais.
         </p>
       </div>
+
+      {localExtractor && (
+        <div role="status" className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+          <strong>Extraction locale (sans IA).</strong> Aucune clé Gemini n&apos;était disponible : le profil vient d&apos;une
+          analyse par mots-clés, moins fine. Relisez-le avec attention, ou ajoutez une clé à l&apos;étape 1 puis relancez l&apos;analyse.
+        </div>
+      )}
+      {!(profile.features || []).some((f) => f.id !== AUDIT_MISSING_FEATURES_ID) && (
+        <div role="status" className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+          <strong>Aucune fonctionnalité métier.</strong> Le harnais sera construit sur la seule pile technique : il sera
+          moins adapté à votre domaine. Importez le cahier des charges à l&apos;étape 1 pour l&apos;affiner.
+        </div>
+      )}
 
       {/* 1. Objectif & Domaine */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">

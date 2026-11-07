@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, and, desc } from 'drizzle-orm';
-import { getDb, projects, projectProfiles, harnessGenerations } from '../../../db';
+import { eq, and, desc, inArray, sql } from 'drizzle-orm';
+import { getDb, projects, projectProfiles, harnessGenerations, sourceDocuments } from '../../../db';
 import { requireAuthUser } from '../../../modules/auth';
 import { parseAuditReportText } from '../../../modules/project-profile';
 import { ingestAuditBundle } from '../../../modules/documents/audit-bundle';
@@ -24,27 +24,40 @@ export async function GET(req: NextRequest) {
       .where(and(...conditions))
       .orderBy(desc(projects.updatedAt));
 
-    const listWithStatus = await Promise.all(
-      list.map(async (p) => {
-        const [prof] = await db
-          .select({ id: projectProfiles.id })
-          .from(projectProfiles)
-          .where(eq(projectProfiles.projectId, p.id))
-          .limit(1);
+    const ids = list.map((p) => p.id);
+    const profileIds = new Set<string>();
+    const lastGeneration = new Map<string, Date>();
+    const documentCount = new Map<string, number>();
+    if (ids.length > 0) {
+      const profs = await db
+        .select({ projectId: projectProfiles.projectId })
+        .from(projectProfiles)
+        .where(inArray(projectProfiles.projectId, ids));
+      for (const r of profs) profileIds.add(r.projectId);
 
-        const [gen] = await db
-          .select({ id: harnessGenerations.id })
-          .from(harnessGenerations)
-          .where(eq(harnessGenerations.projectId, p.id))
-          .limit(1);
+      const gens = await db
+        .select({ projectId: harnessGenerations.projectId, last: sql<Date>`max(${harnessGenerations.createdAt})` })
+        .from(harnessGenerations)
+        .where(inArray(harnessGenerations.projectId, ids))
+        .groupBy(harnessGenerations.projectId);
+      for (const r of gens) lastGeneration.set(r.projectId, new Date(r.last));
 
-        return {
-          ...p,
-          hasProfile: Boolean(prof),
-          hasGeneration: Boolean(gen),
-        };
-      })
-    );
+      // Documents fonctionnels importés (le rapport d'audit n'est pas compté : il se voit par le mode du projet)
+      const docs = await db
+        .select({ projectId: sourceDocuments.projectId, n: sql<number>`count(*)::int` })
+        .from(sourceDocuments)
+        .where(and(inArray(sourceDocuments.projectId, ids), sql`${sourceDocuments.role} <> 'AUDIT_REPORT'`))
+        .groupBy(sourceDocuments.projectId);
+      for (const r of docs) documentCount.set(r.projectId, r.n);
+    }
+
+    const listWithStatus = list.map((p) => ({
+      ...p,
+      hasProfile: profileIds.has(p.id),
+      hasGeneration: lastGeneration.has(p.id),
+      lastGeneratedAt: lastGeneration.get(p.id)?.toISOString() ?? null,
+      documentCount: documentCount.get(p.id) ?? 0,
+    }));
 
     return NextResponse.json({ projects: listWithStatus });
   } catch (err: unknown) {

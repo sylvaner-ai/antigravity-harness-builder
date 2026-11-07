@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         : undefined,
     });
 
-    return NextResponse.json({ profile });
+    return NextResponse.json({ profile, extractor: apiKey ? 'gemini' : 'local' });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur lors de l extraction du profil.';
     console.error('[extract-profile]', msg);

@@ -26,6 +26,9 @@ interface ProjectItem {
   updatedAt: string;
   hasProfile?: boolean;
   hasGeneration?: boolean;
+  mode: 'NEW' | 'UPGRADE';
+  lastGeneratedAt?: string | null;
+  documentCount?: number;
 }
 
 export default function ProjectsDashboardPage() {
@@ -249,8 +252,8 @@ export default function ProjectsDashboardPage() {
                   >
                     Antigravity {proj.targetSurface}
                   </span>
-                  <span className="text-[11px] text-slate-400">
-                    {new Date(proj.updatedAt).toLocaleDateString('fr-FR')}
+                  <span className="text-[11px] font-medium text-slate-500">
+                    {proj.mode === 'UPGRADE' ? 'Mise à niveau' : 'Nouveau harnais'}
                   </span>
                 </div>
 
@@ -275,7 +278,19 @@ export default function ProjectsDashboardPage() {
                       Import requis
                     </span>
                   )}
+                  <span className="text-[11px] text-slate-500">
+                    {proj.documentCount
+                      ? `${proj.documentCount} document${proj.documentCount > 1 ? 's' : ''}`
+                      : proj.mode === 'UPGRADE'
+                        ? 'Sans cahier des charges'
+                        : 'Aucun document'}
+                  </span>
                 </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  {proj.lastGeneratedAt
+                    ? `Harnais généré le ${new Date(proj.lastGeneratedAt).toLocaleDateString('fr-FR')}`
+                    : `Modifié le ${new Date(proj.updatedAt).toLocaleDateString('fr-FR')}`}
+                </p>
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-100 space-y-2.5 text-xs">
