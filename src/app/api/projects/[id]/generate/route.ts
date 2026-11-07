@@ -14,6 +14,8 @@ import { SelectionEngine, CatalogCandidateInput } from '@/modules/selection-engi
 import { getBuiltinCuratedExcellenceComponents } from '@/modules/catalog/catalog-service';
 import { HarnessBuilderService } from '@/modules/harness-builder';
 import { LocalDiskStorage } from '@/modules/documents/storage';
+import { ensureDocumentDigests } from '@/modules/documents/document-digest';
+import { ZodError } from 'zod';
 import { PresetMode } from '@/modules/selection-engine/schema';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -106,7 +108,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .select()
       .from(sourceDocuments)
       .where(eq(sourceDocuments.projectId, projectId));
-    const inputDocuments = projectDocuments.map((d) => ({
+    const storage = new LocalDiskStorage();
+    const verifiedDocuments = await ensureDocumentDigests(db, projectDocuments, storage);
+    const inputDocuments = verifiedDocuments.map((d) => ({
       documentId: d.id,
       role: d.role,
       fileName: d.originalName,
@@ -123,7 +127,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     // 5. Sauvegarde du fichier ZIP sur disque privé
-    const storage = new LocalDiskStorage();
     const storageRes = await storage.saveFile(
       projectId,
       `${builtPackage.packageRootName}.zip`,
@@ -196,6 +199,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       selection,
     });
   } catch (err: unknown) {
+    if (err instanceof ZodError) {
+      // Message lisible : champ en cause et valeur attendue, sans le détail technique de validation.
+      const details = err.issues
+        .slice(0, 3)
+        .map((i) => `${i.path.map((p) => (typeof p === 'number' ? `n°${p + 1}` : String(p))).join(' › ')} : ${i.message}`)
+        .join(' ; ');
+      return NextResponse.json({ error: `Harnais non conforme — ${details}.` }, { status: 500 });
+    }
     const msg = err instanceof Error ? err.message : 'Erreur lors de la génération du harnais.';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
