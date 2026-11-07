@@ -213,7 +213,7 @@ export class SelectionEngine {
     const selectedList: SelectedComponent[] = [];
     const rejectedList: RejectedComponent[] = [];
     const reject = (item: CatalogCandidateInput, reason: RejectedComponent['rejectionReason'], rationale: string, rawScore = 0, supersededBySlug?: string) =>
-      rejectedList.push({ slug: item.slug, name: item.name, kind: item.kind, rejectedRationale: rationale, rejectionReason: reason, rawScore, supersededBySlug });
+      rejectedList.push({ slug: item.slug, name: item.name, kind: item.kind, rejectedRationale: rationale, rejectionReason: reason, rawScore, supersededBySlug, sourceId: item.parsedMeta?.sourceId });
 
     type Candidate = { item: CatalogCandidateInput; score: ScoreBreakdown; cls: ComponentClassification; legacy: boolean; forced: boolean };
     const candidates: Candidate[] = [];

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import StepNavigation from '@/components/StepNavigation';
 import { ExcellencePack, PresetMode, SelectionResult } from '../../../../modules/selection-engine/schema';
+import type { SourceSelectionSummary } from '../../../../modules/selection-engine/source-summary';
 import { Search, X, HelpCircle, Shield, Palette, Beaker, Sparkles, Check } from 'lucide-react';
 
 // La description affichée est celle du catalogue (ou de la règle sur mesure) : aucune copie locale à maintenir.
@@ -23,6 +24,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
     'EXTREME_TDD_ANTI_BUG',
   ]);
   const [selection, setSelection] = useState<SelectionResult | null>(null);
+  const [sourceSummary, setSourceSummary] = useState<SourceSelectionSummary[]>([]);
   const [hasGeneration, setHasGeneration] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -68,6 +70,7 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la sélection');
 
       setSelection(data.selection);
+      setSourceSummary(data.sourceSummary ?? []);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur de calcul');
     } finally {
@@ -497,6 +500,48 @@ export default function StepSelectionPage({ params }: { params: Promise<{ id: st
           </div>
         );
       })()}
+
+      {/* Bilan par source du catalogue */}
+      {sourceSummary.length > 0 && (
+        <details className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4" open={sourceSummary.some((s) => s.status !== 'OK')}>
+          <summary className="text-base font-semibold text-slate-900 cursor-pointer">
+            Contribution des sources du catalogue
+          </summary>
+          {sourceSummary.some((s) => s.status !== 'OK') && (
+            <p role="status" className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
+              Une ou plusieurs sources actives manquent au catalogue en service : leurs composants ne peuvent pas être retenus.
+              Ouvrez la page <Link href="/admin/catalog" className="font-semibold underline">Catalogue</Link> et reconstruisez-le.
+            </p>
+          )}
+          <ul className="divide-y divide-slate-100 text-xs">
+            {sourceSummary.map((s) => (
+              <li key={s.sourceId} className="py-2.5 space-y-1">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-semibold text-slate-900 text-sm">{s.name}</span>
+                  {s.status === 'OK' ? (
+                    <span className="text-slate-600">
+                      {s.selected} retenu(s) sur {s.inCatalog} au catalogue
+                    </span>
+                  ) : (
+                    <span className="text-amber-800 font-medium">
+                      {s.status === 'FAILED' ? `Échec de la dernière synchronisation : ${s.error}` : 'Absente du catalogue en service'}
+                    </span>
+                  )}
+                </div>
+                {s.rejections.length > 0 && (
+                  <p className="text-slate-500">
+                    Écartés :{' '}
+                    {s.rejections
+                      .slice(0, 4)
+                      .map((r) => `${r.count} — ${r.label} (ex. ${r.example})`)
+                      .join(' · ')}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       {/* Candidats écartés avec justifications et exploration complète */}
       {(() => {

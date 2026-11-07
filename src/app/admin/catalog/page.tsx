@@ -376,6 +376,15 @@ export default function CatalogAdminPage() {
             <p className="text-xs text-slate-600">
               {active.componentCount} composants · construit le {formatDate(active.syncedAt)}
             </p>
+            {(() => {
+              const missing = sources.filter((s) => s.status === 'ACTIVE' && !active.sources.some((x) => x.id === s.id && !x.error));
+              return missing.length > 0 ? (
+                <p role="status" className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                  Source(s) active(s) absente(s) du catalogue en service : {missing.map((m) => m.name).join(', ')}. Leurs composants ne
+                  peuvent pas être retenus tant que le catalogue n&apos;est pas reconstruit avec succès.
+                </p>
+              ) : null;
+            })()}
             {active.sources.length > 0 ? (
               <ul className="text-xs text-slate-600 space-y-1">
                 {active.sources.map((src) => (
