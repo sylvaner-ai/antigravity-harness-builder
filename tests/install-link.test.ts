@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { unzipSync, strFromU8 } from 'fflate';
 import {
   closeDbPool,
-  eccSyncs,
+  catalogSyncs,
   generatedArtifacts,
   getDb,
   harnessGenerations,
@@ -75,7 +75,7 @@ describe('Liens d’installation en base', () => {
 
   afterAll(async () => {
     await db.delete(users).where(eq(users.email, email));
-    if (syncId) await db.delete(eccSyncs).where(eq(eccSyncs.id, syncId));
+    if (syncId) await db.delete(catalogSyncs).where(eq(catalogSyncs.id, syncId));
     await closeDbPool();
   });
 
@@ -86,11 +86,11 @@ describe('Liens d’installation en base', () => {
       .insert(projectProfiles)
       .values({ projectId: project!.id, profileData: {} as never, profileSha256: 'a'.repeat(64) })
       .returning();
-    const [sync] = await db.insert(eccSyncs).values({ commitSha: 'b'.repeat(40), versionTag: 'test' }).returning();
+    const [sync] = await db.insert(catalogSyncs).values({ commitSha: 'b'.repeat(40), versionTag: 'test' }).returning();
     syncId = sync!.id;
     const [generation] = await db
       .insert(harnessGenerations)
-      .values({ projectId: project!.id, projectProfileId: profile!.id, eccSyncId: sync!.id })
+      .values({ projectId: project!.id, projectProfileId: profile!.id, catalogSyncId: sync!.id })
       .returning();
     await db.insert(generatedArtifacts).values({
       generationId: generation!.id,

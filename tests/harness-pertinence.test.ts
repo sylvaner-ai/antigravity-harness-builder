@@ -55,18 +55,18 @@ describe('Fichiers installés par les prompts', () => {
   const ecc = `# Sources\n\n## 1. Traçabilité des Composants du Harnais (§4.5)\n\n| a |\n\n## 2. Principaux Candidats Écartés (Pertinence avant quantité)\n\n${'| écarté |\n'.repeat(500)}\n## 3. Licences et attributions\n\nMIT — Copyright (c) Affaan Mustafa`;
   const manifest = JSON.stringify({
     generationId: 'g1',
-    components: [{ id: 'c1', kind: 'SKILL', destinationPath: '.agents/skills/x/SKILL.md', originStatus: 'ecc_adapted', selectionRationale: 'x'.repeat(5000) }],
+    components: [{ id: 'c1', kind: 'SKILL', destinationPath: '.agents/skills/x/SKILL.md', originStatus: 'source_adapted', selectionRationale: 'x'.repeat(5000) }],
     filesInventory: [
-      { relativePath: 'docs/ECC_SOURCES.md', sha256: 'a'.repeat(64) },
+      { relativePath: 'docs/SOURCES.md', sha256: 'a'.repeat(64) },
       { relativePath: 'AGENTS.md', sha256: 'b'.repeat(64) },
     ],
   });
   const out = filesForProjectInstall([
-    { relativePath: 'docs/ECC_SOURCES.md', content: ecc },
+    { relativePath: 'docs/SOURCES.md', content: ecc },
     { relativePath: 'docs/HARNESS_MANIFEST.json', content: manifest },
     { relativePath: 'AGENTS.md', content: 'agents' },
   ]);
-  const installedEcc = out.find((f) => f.relativePath === 'docs/ECC_SOURCES.md')!.content;
+  const installedEcc = out.find((f) => f.relativePath === 'docs/SOURCES.md')!.content;
   const installedManifest = JSON.parse(out.find((f) => f.relativePath === 'docs/HARNESS_MANIFEST.json')!.content);
 
   it('allège la traçabilité mais garde les licences (attribution MIT)', () => {
@@ -79,7 +79,7 @@ describe('Fichiers installés par les prompts', () => {
   it('garde l’inventaire du manifeste, avec l’empreinte du fichier réellement installé', () => {
     expect(installedManifest.components[0].selectionRationale).toBeUndefined();
     expect(installedManifest.components[0].destinationPath).toBe('.agents/skills/x/SKILL.md');
-    const eccEntry = installedManifest.filesInventory.find((e: any) => e.relativePath === 'docs/ECC_SOURCES.md');
+    const eccEntry = installedManifest.filesInventory.find((e: any) => e.relativePath === 'docs/SOURCES.md');
     const expected = require('node:crypto').createHash('sha256').update(installedEcc).digest('hex');
     expect(eccEntry.sha256).toBe(expected);
     expect(installedManifest.filesInventory.find((e: any) => e.relativePath === 'AGENTS.md').sha256).toBe('b'.repeat(64));

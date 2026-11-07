@@ -29,7 +29,7 @@ import {
   renderArchitectureMarkdown,
   renderAssumptionsMarkdown,
   renderDesignSystemMarkdown,
-  renderEccSourcesMarkdown,
+  renderSourcesMarkdown,
   renderOrchestrationMarkdown,
   renderProjectSpecMarkdown,
   renderReadmeMarkdown,
@@ -177,8 +177,8 @@ export function buildDeterministicHarnessPackage(
     content: renderAssumptionsMarkdown(input),
   });
   candidateFiles.push({
-    relativePath: 'docs/ECC_SOURCES.md',
-    content: renderEccSourcesMarkdown(input),
+    relativePath: 'docs/SOURCES.md',
+    content: renderSourcesMarkdown(input),
   });
 
   // Règles (.agents/rules/<slug>.md)
@@ -276,9 +276,9 @@ export function buildDeterministicHarnessPackage(
         destinationPath: dest,
         originStatus: r.originStatus,
         selectionRationale: r.selectionRationale,
-        sourceCommitSha: r.eccProvenance?.commitSha,
-        sourceUrl: r.eccProvenance?.sourceUrl,
-        adaptationNotes: r.eccProvenance?.adaptationNotes ?? [],
+        sourceCommitSha: r.provenance?.commitSha,
+        sourceUrl: r.provenance?.sourceUrl,
+        adaptationNotes: r.provenance?.adaptationNotes ?? [],
         validationTier: resolveFileValidationTier(dest, allIssues).tier,
       };
     }),
@@ -290,9 +290,9 @@ export function buildDeterministicHarnessPackage(
         destinationPath: dest,
         originStatus: s.originStatus,
         selectionRationale: s.selectionRationale,
-        sourceCommitSha: s.eccProvenance?.commitSha,
-        sourceUrl: s.eccProvenance?.sourceUrl,
-        adaptationNotes: s.eccProvenance?.adaptationNotes ?? [],
+        sourceCommitSha: s.provenance?.commitSha,
+        sourceUrl: s.provenance?.sourceUrl,
+        adaptationNotes: s.provenance?.adaptationNotes ?? [],
         validationTier: resolveFileValidationTier(dest, allIssues).tier,
       };
     }),
@@ -304,9 +304,9 @@ export function buildDeterministicHarnessPackage(
         destinationPath: dest,
         originStatus: a.originStatus,
         selectionRationale: a.selectionRationale,
-        sourceCommitSha: a.eccProvenance?.commitSha,
-        sourceUrl: a.eccProvenance?.sourceUrl,
-        adaptationNotes: a.eccProvenance?.adaptationNotes ?? [],
+        sourceCommitSha: a.provenance?.commitSha,
+        sourceUrl: a.provenance?.sourceUrl,
+        adaptationNotes: a.provenance?.adaptationNotes ?? [],
         modelPolicy: {
           recommendedModelTier: a.recommendedModelTier,
           modelConfigurability: 'seulement indicatif' as const,
@@ -320,17 +320,12 @@ export function buildDeterministicHarnessPackage(
   ];
 
   const manifestObject: HarnessManifest = HarnessManifestSchema.parse({
-    manifestSchemaVersion: '1.0.0',
+    manifestSchemaVersion: '2.0.0',
     generationId: input.generationId,
     generatedAt: input.generatedAtIso,
     packageRootName: input.packageRootName,
     targetSurface: input.profile.targetSurface,
-    eccReference: {
-      repositoryUrl: 'https://github.com/affaan-m/ECC',
-      commitSha: input.eccCommitSha,
-      versionTag: input.eccVersionTag,
-      license: 'MIT',
-    },
+    catalog: input.catalog,
     inputDocuments: input.inputDocuments,
     profileDigest: {
       projectId: input.profile.projectId,

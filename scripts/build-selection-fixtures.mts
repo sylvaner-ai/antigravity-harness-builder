@@ -6,7 +6,7 @@
  * Entrées (obligatoires) :
  *   CATALOG_TARBALLS=<dossier>  contient affaan-m_ECC.tar.gz, emilkowalski_skills.tar.gz, obra_superpowers.tar.gz,
  *                               cloudflare_security-audit-skill.tar.gz, dietrichgebert_ponytail.tar.gz
- *   (archives GitHub des commits figés de src/modules/ecc-catalog/catalog-sources.ts)
+ *   (archives GitHub des commits figés de src/modules/catalog/catalog-sources.ts)
  *   CATALOG_SRCS=<dossier>      (facultatif) clones git des mêmes dépôts, pour vérifier que chaque archive correspond au commit figé
  *
  * Usage : CATALOG_TARBALLS=... npx tsx scripts/build-selection-fixtures.mts
@@ -15,9 +15,9 @@ import { execSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { extractTarGzTextFilesInMemory } from '../src/modules/ecc-catalog/tar-extractor';
-import { buildMultiSourceCatalog } from '../src/modules/ecc-catalog/catalog-builder';
-import { DEFAULT_CATALOG_SOURCES } from '../src/modules/ecc-catalog/catalog-sources';
+import { extractTarGzTextFilesInMemory } from '../src/modules/catalog/tar-extractor';
+import { buildMultiSourceCatalog } from '../src/modules/catalog/catalog-builder';
+import { DEFAULT_CATALOG_SOURCES } from '../src/modules/catalog/catalog-sources';
 import {
   CATALOG_FIXTURE_PATH,
   PRESETS,

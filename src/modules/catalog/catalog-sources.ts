@@ -204,36 +204,51 @@ export const GENERATOR_REPOSITORY_URL = 'https://github.com/sylvaner-ai/antigrav
 
 export interface ComponentProvenance {
   repositoryUrl: string;
-  commitSha: string;
+  /** Commit exact du composant ; absent pour un composant curated (texte original de ce générateur). */
+  commitSha?: string;
   author: string;
   license: string;
   curated: boolean;
 }
 
+/** Auteur lu dans une mention « Copyright (c) 2025-2026 Nom » ; chaîne vide si la mention est absente. */
+export function authorFromCopyright(notice: string | undefined): string {
+  return (notice ?? '').replace(/^\s*Copyright\s+(?:\(c\)|©)\s*[0-9][0-9\s,–-]*/i, '').trim();
+}
+
 /**
- * Provenance réelle d'un composant, déduite de son URL source (`https://github.com/<owner>/<repo>/blob/<sha>/…`).
- * Les composants « curated » sont écrits pour ce générateur : leur URL n'est qu'une source d'inspiration.
+ * Provenance réelle d'un composant, dans cet ordre : source du catalogue qui l'a fourni (instantané de la
+ * synchronisation), puis dépôt lu dans son URL (`https://github.com/<owner>/<repo>/blob/<sha>/…`), puis sources de
+ * référence. Les composants « curated » sont écrits pour ce générateur : leur URL n'est qu'une source d'inspiration.
  */
 export function resolveComponentProvenance(
   comp: { sourceUrl?: string; license?: string; sourceId?: string; sourceAuthor?: string },
-  fallback: { repositoryUrl: string; commitSha: string }
+  sources: readonly SyncedSourceSnapshot[] = []
 ): ComponentProvenance {
   if (comp.sourceId === CURATED_SOURCE_ID) {
     return {
       repositoryUrl: GENERATOR_REPOSITORY_URL,
-      commitSha: fallback.commitSha,
       author: 'Antigravity Harness Builder (composant curated)',
       license: comp.license ?? 'MIT',
       curated: true,
     };
   }
   const sha = comp.sourceUrl?.match(/\/blob\/([0-9a-f]{40})\//i)?.[1];
+  const snap = comp.sourceId ? sources.find((s) => s.id === comp.sourceId) : undefined;
+  if (snap) {
+    return {
+      repositoryUrl: `https://github.com/${snap.owner}/${snap.repo}`,
+      commitSha: sha ?? snap.commitSha,
+      author: comp.sourceAuthor || authorFromCopyright(snap.copyrightNotice) || `${snap.owner}/${snap.repo}`,
+      license: comp.license ?? snap.license,
+      curated: false,
+    };
+  }
   const repoMatch = comp.sourceUrl?.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/i);
-  // Composant indexé par le catalogue en base : l'auteur et le dépôt sont portés par le composant lui-même.
   if (comp.sourceAuthor && repoMatch) {
     return {
       repositoryUrl: `https://github.com/${repoMatch[1]}/${repoMatch[2]}`,
-      commitSha: sha ?? fallback.commitSha,
+      commitSha: sha,
       author: comp.sourceAuthor,
       license: comp.license ?? 'UNKNOWN',
       curated: false,
@@ -244,10 +259,16 @@ export function resolveComponentProvenance(
     return {
       repositoryUrl: `https://github.com/${src.owner}/${src.repo}`,
       commitSha: sha ?? src.pinnedCommit,
-      author: src.copyrightNotice.replace(/^Copyright \(c\) [0-9-]+ /, ''),
+      author: authorFromCopyright(src.copyrightNotice),
       license: comp.license ?? src.license,
       curated: false,
     };
   }
-  return { ...fallback, author: 'Inconnu', license: comp.license ?? 'UNKNOWN', curated: false };
+  return {
+    repositoryUrl: repoMatch ? `https://github.com/${repoMatch[1]}/${repoMatch[2]}` : GENERATOR_REPOSITORY_URL,
+    commitSha: sha,
+    author: 'Inconnu',
+    license: comp.license ?? 'UNKNOWN',
+    curated: false,
+  };
 }

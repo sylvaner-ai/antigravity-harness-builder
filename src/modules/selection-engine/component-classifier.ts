@@ -1,13 +1,13 @@
 import type { ProjectProfile } from '../project-profile/schema';
-import type { EccComponentParsedMeta } from '../../db/schema';
+import type { CatalogComponentMeta } from '../../db/schema';
 import type { ComponentKind, ExcellencePack } from './schema';
 import {
   CURATED_SOURCE_ID,
   CURATED_SOURCE_PRIORITY,
   UNKNOWN_SOURCE_PRIORITY,
   findSourceByUrl,
-} from '../ecc-catalog/catalog-sources';
-import { assessPlatformFit } from '../ecc-catalog/content-safety';
+} from '../catalog/catalog-sources';
+import { assessPlatformFit } from '../catalog/content-safety';
 
 /**
  * Classification fonctionnelle de chaque composant du catalogue multi-sources.
@@ -37,7 +37,7 @@ export interface ClassifiableComponent {
   kind: ComponentKind;
   sourceUrl?: string;
   adaptedContent: string;
-  parsedMeta: EccComponentParsedMeta;
+  parsedMeta: CatalogComponentMeta;
 }
 
 export interface ComponentClassification {

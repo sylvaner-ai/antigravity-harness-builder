@@ -1,14 +1,14 @@
 import { buildSyntheticTarGz } from './support/synthetic-tar';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { closeDbPool, eccSyncs, getDb } from '../src/db';
+import { closeDbPool, catalogSyncs, getDb } from '../src/db';
 import { sanitizeErrorMessage } from '../src/lib/sanitize-error';
 import {
-  EccCatalogService,
-  EccRemoteFetcher,
-  GitHubOfficialEccFetcher,
+  CatalogService,
+  CatalogFetcher,
+  GitHubCatalogFetcher,
   DEFAULT_CATALOG_SOURCES,
-} from '../src/modules/ecc-catalog/catalog-service';
+} from '../src/modules/catalog/catalog-service';
 
 describe('Masquage des secrets dans les messages d’erreur (§9 & FR-10)', () => {
   it('masque systématiquement les clés API et mots de passe DB', () => {
@@ -30,7 +30,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
 
   beforeEach(async () => {
     // Nettoyer uniquement les synchronisations ECC de test (sha '1111111111111111111111111111111111111111')
-    await db.delete(eccSyncs).where(eq(eccSyncs.commitSha, '1111111111111111111111111111111111111111'));
+    await db.delete(catalogSyncs).where(eq(catalogSyncs.commitSha, '1111111111111111111111111111111111111111'));
   });
 
   afterAll(async () => {
@@ -81,7 +81,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
 
     let shouldFailNextFetch = false;
 
-    const mockFetcher: EccRemoteFetcher = {
+    const mockFetcher: CatalogFetcher = {
       async resolveRefCommitSha() {
         if (shouldFailNextFetch) {
           throw new Error('GitHub API 403 rate limit exceeded');
@@ -96,7 +96,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
       },
     };
 
-    const service = new EccCatalogService(db, mockFetcher);
+    const service = new CatalogService(db, mockFetcher);
 
     // 1. Première synchronisation réussie
     const ecc = DEFAULT_CATALOG_SOURCES.find((s) => s.id === 'ecc-official')!;
@@ -140,7 +140,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
   it.runIf(process.env.RUN_LIVE_GITHUB_TESTS === '1')(
     'synchronise et indexe réellement le dépôt officiel affaan-m/ECC depuis GitHub en moins de 10 secondes',
     async () => {
-      const liveService = new EccCatalogService(db, new GitHubOfficialEccFetcher());
+      const liveService = new CatalogService(db, new GitHubCatalogFetcher());
       const ecc = DEFAULT_CATALOG_SOURCES.find((s) => s.id === 'ecc-official')!;
       const liveSync = await liveService.synchronizeCatalog({
         sources: [{ ...ecc, pinnedCommit: 'main', ref: 'main' }],

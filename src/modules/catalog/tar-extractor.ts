@@ -26,12 +26,12 @@ export function extractTarGzTextFilesInMemory(
     tarBytes = gunzipSync(tarGzBytes);
   } catch (err) {
     throw new Error(
-      `Échec de décompression GZIP du tarball ECC : ${err instanceof Error ? err.message : String(err)}`
+      `Échec de décompression GZIP de l'archive : ${err instanceof Error ? err.message : String(err)}`
     );
   }
 
   if (tarBytes.byteLength < 512) {
-    throw new Error('Archive TAR ECC invalide ou tronquée (taille < 512 octets).');
+    throw new Error('Archive TAR invalide ou tronquée (taille < 512 octets).');
   }
 
   const entries: TarFileEntry[] = [];
@@ -66,7 +66,7 @@ export function extractTarGzTextFilesInMemory(
     const dataStart = offset + 512;
     const dataEnd = dataStart + fileSize;
     if (dataEnd > tarBytes.byteLength) {
-      throw new Error('Archive TAR ECC tronquée avant la fin du fichier annoncé.');
+      throw new Error('Archive TAR tronquée avant la fin du fichier annoncé.');
     }
 
     const paddedBlocksSize = Math.ceil(fileSize / 512) * 512;
@@ -108,8 +108,8 @@ export function extractTarGzTextFilesInMemory(
       continue;
     }
 
-    // Ne lire que les fichiers utiles au catalogue ECC (rules/, agents/, skills/, commands/, manifests/, LICENSE, package.json)
-    if (!isRelevantEccCatalogPath(relativePath)) {
+    // Ne lire que les fichiers utiles au catalogue (rules/, agents/, skills/, commands/, manifests/, LICENSE, package.json)
+    if (!isRelevantCatalogPath(relativePath)) {
       continue;
     }
 
@@ -151,10 +151,10 @@ function parsePaxPathRecord(paxPayload: string): string | null {
 }
 
 /**
- * Filtre strict des chemins du dépôt ECC pertinents pour notre catalogue.
+ * Filtre strict des chemins d'un dépôt source pertinents pour notre catalogue.
  * Exclut inconditionnellement `.agents/` (packaging Codex — §4.4 CDC), `hooks/`, `.claude-plugin/`, etc.
  */
-export function isRelevantEccCatalogPath(relativePath: string): boolean {
+export function isRelevantCatalogPath(relativePath: string): boolean {
   if (
     relativePath.startsWith('.agents/') ||
     relativePath.startsWith('hooks/') ||

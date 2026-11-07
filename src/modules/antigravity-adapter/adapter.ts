@@ -524,11 +524,11 @@ export function serializeAntigravitySubagent(
 }
 
 /**
- * Adapte un fichier d'agent brut provenant d'ECC (format Claude Code)
+ * Adapte un fichier d'agent brut au format Claude Code (ECC et sources compatibles)
  * vers un fichier de sous-agent Google Antigravity valide (sans `model` dans le YAML)
  * et retourne séparément le couple (Modèle, Effort) recommandé pour la gouvernance centralisée.
  */
-export function adaptEccAgentMarkdown(
+export function adaptAgentMarkdown(
   rawEccMarkdown: string,
   expectedSlug: string,
   options?: { isIndependentReviewer?: boolean }
@@ -543,7 +543,7 @@ export function adaptEccAgentMarkdown(
   const split = splitMarkdownFrontmatter(rawEccMarkdown);
   if (!split.hasFrontmatter || !split.parsedFrontmatter) {
     throw new Error(
-      `Impossible d'adapter l'agent ECC '${expectedSlug}' : frontmatter YAML manquant ou invalide (${split.parseError ?? 'inconnu'}).`
+      `Impossible d'adapter l'agent '${expectedSlug}' : frontmatter YAML manquant ou invalide (${split.parseError ?? 'inconnu'}).`
     );
   }
 

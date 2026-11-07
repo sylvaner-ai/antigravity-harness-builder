@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getDb } from '@/db';
 import { adminAction } from '@/lib/admin-route';
-import { GitHubOfficialEccFetcher } from '@/modules/ecc-catalog/catalog-service';
-import { addCatalogSource } from '@/modules/ecc-catalog/source-registry';
+import { GitHubCatalogFetcher } from '@/modules/catalog/catalog-service';
+import { addCatalogSource } from '@/modules/catalog/source-registry';
 
 const NewSourceSchema = z
   .object({
@@ -19,6 +19,6 @@ const NewSourceSchema = z
 export async function POST(req: NextRequest) {
   return adminAction(req, async () => {
     const input = NewSourceSchema.parse(await req.json());
-    return { source: await addCatalogSource(getDb(), new GitHubOfficialEccFetcher(), input) };
+    return { source: await addCatalogSource(getDb(), new GitHubCatalogFetcher(), input) };
   });
 }

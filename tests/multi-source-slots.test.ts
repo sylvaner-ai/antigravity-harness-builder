@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_CATALOG_SOURCES,
   detectLicense,
-} from '../src/modules/ecc-catalog/catalog-sources';
-import { assessPlatformFit, scanContentSafety } from '../src/modules/ecc-catalog/content-safety';
-import { buildMultiSourceCatalog, SourceSnapshot } from '../src/modules/ecc-catalog/catalog-builder';
+} from '../src/modules/catalog/catalog-sources';
+import { assessPlatformFit, scanContentSafety } from '../src/modules/catalog/content-safety';
+import { buildMultiSourceCatalog, SourceSnapshot } from '../src/modules/catalog/catalog-builder';
 import { extractHeuristicProjectProfile } from '../src/modules/project-profile/heuristic-extractor';
 import { SelectionEngine, CatalogCandidateInput } from '../src/modules/selection-engine';
 

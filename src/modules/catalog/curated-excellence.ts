@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
-import { IndexedEccComponentCandidate } from './indexer';
+import { IndexedCatalogComponent } from './indexer';
 
 /**
  * Fournit les composants d'excellence pré-packagés (OWASP Zero-Trust, 5 États UI et TDD rigoureux).
  */
-export function getBuiltinCuratedExcellenceComponents(): IndexedEccComponentCandidate[] {
+export function getBuiltinCuratedExcellenceComponents(): IndexedCatalogComponent[] {
   const sha = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
 
   const secRuleContent = `---

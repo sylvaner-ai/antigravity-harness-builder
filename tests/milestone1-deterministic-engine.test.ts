@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
-  adaptEccAgentMarkdown,
+  adaptAgentMarkdown,
   sanitizeClaudeSpecificReferences,
   serializeAntigravityRule,
   serializeAntigravitySkill,
@@ -84,7 +84,7 @@ color: red
 ---
 Check \${CLAUDE_PROJECT_DIR}/src and ~/.claude/rules.
 `;
-    const adapted = adaptEccAgentMarkdown(rawReviewer, 'security-reviewer', {
+    const adapted = adaptAgentMarkdown(rawReviewer, 'security-reviewer', {
       isIndependentReviewer: true,
     });
 
@@ -269,7 +269,7 @@ describe('Jalon 1 — Moteur déterministe d’assemblage et d’export ZIP (FR-
     expect(relPaths).toContain('docs/ORCHESTRATION.md');
     expect(relPaths).toContain('docs/ACCEPTANCE_CRITERIA.md');
     expect(relPaths).toContain('docs/ASSUMPTIONS.md');
-    expect(relPaths).toContain('docs/ECC_SOURCES.md');
+    expect(relPaths).toContain('docs/SOURCES.md');
     expect(relPaths).toContain('docs/HARNESS_MANIFEST.json');
     expect(relPaths).toContain('.agents/rules/model-effort-governance.md');
     expect(relPaths).toContain('.agents/rules/common-coding-style.md');
@@ -302,8 +302,8 @@ describe('Jalon 1 — Moteur déterministe d’assemblage et d’export ZIP (FR-
     expect(assumptionsFile?.content).toContain('Passerelle de paiement internationale');
     expect(pkg1.manifest.assumptionsAndWarnings.uncertaintiesCount).toBe(1);
 
-    // 7. Vérification de la licence MIT et du commit ECC dans ECC_SOURCES.md
-    const eccSourcesFile = pkg1.files.find((f) => f.relativePath === 'docs/ECC_SOURCES.md');
+    // 7. Vérification de la licence MIT et du commit ECC dans SOURCES.md
+    const eccSourcesFile = pkg1.files.find((f) => f.relativePath === 'docs/SOURCES.md');
     expect(eccSourcesFile?.content).toContain('MIT License');
     expect(eccSourcesFile?.content).toContain('Affaan Mustafa');
     expect(eccSourcesFile?.content).toContain('25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b');

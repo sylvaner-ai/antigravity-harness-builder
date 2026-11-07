@@ -12,7 +12,7 @@ import {
 import type { ProjectProfile } from '../modules/project-profile/schema';
 import type { ValidationIssue, ValidationTier } from '../modules/antigravity-adapter/schema';
 import type { HarnessManifest } from '../modules/package-exporter/schema';
-import type { CatalogSourceAnalysis, CatalogSourceCategory, CatalogSourceRole, SyncedSourceSnapshot } from '../modules/ecc-catalog/catalog-sources';
+import type { CatalogSourceAnalysis, CatalogSourceCategory, CatalogSourceRole, SyncedSourceSnapshot } from '../modules/catalog/catalog-sources';
 
 /**
  * 1. Table `users` — Comptes et préférences (§12 User)
@@ -127,8 +127,8 @@ export const projectProfiles = pgTable(
 /**
  * 5. Table `ecc_syncs` — Historique de synchronisation du catalogue ECC (§12 EccSync & FR-04)
  */
-export const eccSyncs = pgTable(
-  'ecc_syncs',
+export const catalogSyncs = pgTable(
+  'catalog_syncs',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     commitSha: text('commit_sha').notNull(),
@@ -147,7 +147,7 @@ export const eccSyncs = pgTable(
     sources: jsonb('sources').$type<SyncedSourceSnapshot[]>().notNull().default([]),
     syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('ecc_syncs_active_idx').on(table.isActiveCatalog)]
+  (table) => [index('catalog_syncs_active_idx').on(table.isActiveCatalog)]
 );
 
 /**
@@ -177,7 +177,7 @@ export const catalogSources = pgTable('catalog_sources', {
 /**
  * Métadonnées structurées d'un composant ECC indexé.
  */
-export interface EccComponentParsedMeta {
+export interface CatalogComponentMeta {
   family?: string; // ex: 'common', 'typescript', 'python', 'security', 'backend', etc.
   tags: string[];
   languages: string[];
@@ -211,13 +211,13 @@ export interface EccComponentParsedMeta {
 /**
  * 6. Table `ecc_components` — Composants indexés depuis ECC avec provenance et compatibilité (§12 EccComponent)
  */
-export const eccComponents = pgTable(
-  'ecc_components',
+export const catalogComponents = pgTable(
+  'catalog_components',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    eccSyncId: uuid('ecc_sync_id')
+    catalogSyncId: uuid('catalog_sync_id')
       .notNull()
-      .references(() => eccSyncs.id, { onDelete: 'cascade' }),
+      .references(() => catalogSyncs.id, { onDelete: 'cascade' }),
     externalId: text('external_id').notNull(), // ex: "rule:common-coding-style", "skill:backend-patterns", "subagent:architect"
     slug: text('slug').notNull(),
     kind: text('kind')
@@ -231,7 +231,7 @@ export const eccComponents = pgTable(
     contentSha256: text('content_sha256').notNull(),
     rawContent: text('raw_content').notNull(),
     adaptedContent: text('adapted_content').notNull(),
-    parsedMeta: jsonb('parsed_meta').$type<EccComponentParsedMeta>().notNull(),
+    parsedMeta: jsonb('parsed_meta').$type<CatalogComponentMeta>().notNull(),
     compatibilityStatus: text('compatibility_status')
       .$type<ValidationTier | 'INCOMPATIBLE'>()
       .notNull(),
@@ -243,8 +243,8 @@ export const eccComponents = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('ecc_components_sync_external_idx').on(table.eccSyncId, table.externalId),
-    index('ecc_components_sync_kind_idx').on(table.eccSyncId, table.kind),
+    uniqueIndex('catalog_components_sync_external_idx').on(table.catalogSyncId, table.externalId),
+    index('catalog_components_sync_kind_idx').on(table.catalogSyncId, table.kind),
   ]
 );
 
@@ -261,9 +261,9 @@ export const harnessGenerations = pgTable(
     projectProfileId: uuid('project_profile_id')
       .notNull()
       .references(() => projectProfiles.id, { onDelete: 'restrict' }),
-    eccSyncId: uuid('ecc_sync_id')
+    catalogSyncId: uuid('catalog_sync_id')
       .notNull()
-      .references(() => eccSyncs.id, { onDelete: 'restrict' }),
+      .references(() => catalogSyncs.id, { onDelete: 'restrict' }),
     status: text('status')
       .$type<'PENDING' | 'RUNNING' | 'COMPLETED' | 'PARTIALLY_FAILED' | 'FAILED'>()
       .notNull()
@@ -303,9 +303,9 @@ export const generatedArtifacts = pgTable(
       .$type<'START_HERE' | 'AGENTS_MD' | 'DOC' | 'RULE' | 'SKILL' | 'SUBAGENT' | 'MANIFEST'>()
       .notNull(),
     originStatus: text('origin_status')
-      .$type<'ecc_verbatim' | 'ecc_adapted' | 'project_custom'>()
+      .$type<'source_verbatim' | 'source_adapted' | 'project_custom'>()
       .notNull(),
-    sourceEccComponentId: uuid('source_ecc_component_id').references(() => eccComponents.id, {
+    sourceComponentId: uuid('source_component_id').references(() => catalogComponents.id, {
       onDelete: 'set null',
     }),
     content: text('content').notNull(),

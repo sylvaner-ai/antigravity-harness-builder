@@ -1,5 +1,5 @@
 import { and, asc, eq } from 'drizzle-orm';
-import { AppDatabase, catalogSources, eccComponents, eccSyncs } from '../../db';
+import { AppDatabase, catalogSources, catalogComponents, catalogSyncs } from '../../db';
 import { buildMultiSourceCatalog } from './catalog-builder';
 import {
   CatalogSourceAnalysis,
@@ -10,7 +10,7 @@ import {
 } from './catalog-sources';
 import { CLAUDE_SPECIFIC_THRESHOLD } from './content-safety';
 import { classifyComponent } from '../selection-engine/component-classifier';
-import type { EccRemoteFetcher } from './catalog-service';
+import type { CatalogFetcher } from './catalog-service';
 import { TarFileEntry, extractTarGzTextFilesInMemory } from './tar-extractor';
 
 export type CatalogSourceRecord = typeof catalogSources.$inferSelect;
@@ -157,15 +157,15 @@ export function analyzeSourceEntries(
 /** `kind:slug` des composants du catalogue actif, hors ceux de la source analysée. */
 async function activeCatalogKeys(db: AppDatabase, excludeSourceId: string): Promise<Set<string>> {
   const [active] = await db
-    .select({ id: eccSyncs.id })
-    .from(eccSyncs)
-    .where(and(eq(eccSyncs.isActiveCatalog, true), eq(eccSyncs.status, 'VALID')))
+    .select({ id: catalogSyncs.id })
+    .from(catalogSyncs)
+    .where(and(eq(catalogSyncs.isActiveCatalog, true), eq(catalogSyncs.status, 'VALID')))
     .limit(1);
   if (!active) return new Set();
   const rows = await db
-    .select({ kind: eccComponents.kind, slug: eccComponents.slug, parsedMeta: eccComponents.parsedMeta })
-    .from(eccComponents)
-    .where(eq(eccComponents.eccSyncId, active.id));
+    .select({ kind: catalogComponents.kind, slug: catalogComponents.slug, parsedMeta: catalogComponents.parsedMeta })
+    .from(catalogComponents)
+    .where(eq(catalogComponents.catalogSyncId, active.id));
   return new Set(rows.filter((r) => r.parsedMeta.sourceId !== excludeSourceId).map((r) => `${r.kind}:${r.slug}`));
 }
 
@@ -176,7 +176,7 @@ async function getSource(db: AppDatabase, id: string): Promise<CatalogSourceReco
 }
 
 /** Télécharge la source sur son commit figé, l'analyse et enregistre le résultat. */
-export async function analyzeCatalogSource(db: AppDatabase, fetcher: EccRemoteFetcher, id: string): Promise<CatalogSourceRecord> {
+export async function analyzeCatalogSource(db: AppDatabase, fetcher: CatalogFetcher, id: string): Promise<CatalogSourceRecord> {
   const row = await getSource(db, id);
   const bytes = await fetcher.downloadRepositoryTarball(row.owner, row.repo, row.pinnedCommit);
   const analysis = analyzeSourceEntries(
@@ -208,7 +208,7 @@ export interface NewSourceInput {
 }
 
 /** Enregistre un nouveau dépôt (statut PENDING) et l'analyse aussitôt. */
-export async function addCatalogSource(db: AppDatabase, fetcher: EccRemoteFetcher, input: NewSourceInput): Promise<CatalogSourceRecord> {
+export async function addCatalogSource(db: AppDatabase, fetcher: CatalogFetcher, input: NewSourceInput): Promise<CatalogSourceRecord> {
   await ensureDefaultSources(db);
   const { owner, repo } = parseGitHubRepository(input.repository);
   const id = sourceIdFor(owner, repo);
@@ -231,7 +231,7 @@ export async function addCatalogSource(db: AppDatabase, fetcher: EccRemoteFetche
 }
 
 /** Fige la source sur un autre commit : elle repasse en attente et doit être réanalysée puis réactivée. */
-export async function repinCatalogSource(db: AppDatabase, fetcher: EccRemoteFetcher, id: string, ref: string): Promise<CatalogSourceRecord> {
+export async function repinCatalogSource(db: AppDatabase, fetcher: CatalogFetcher, id: string, ref: string): Promise<CatalogSourceRecord> {
   const row = await getSource(db, id);
   const commit = await fetcher.resolveRefCommitSha(row.owner, row.repo, ref.trim());
   if (commit === row.pinnedCommit) return row;

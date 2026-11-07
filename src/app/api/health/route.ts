@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
-import { getDb, eccSyncs } from '../../../db';
+import { getDb, catalogSyncs } from '../../../db';
 
 export async function GET() {
   const startTime = Date.now();
@@ -23,12 +23,12 @@ export async function GET() {
     try {
       const [active] = await getDb()
         .select({
-          commitSha: eccSyncs.commitSha,
-          versionTag: eccSyncs.versionTag,
-          componentCount: eccSyncs.componentCount,
-          syncedAt: eccSyncs.syncedAt,
+          commitSha: catalogSyncs.commitSha,
+          versionTag: catalogSyncs.versionTag,
+          componentCount: catalogSyncs.componentCount,
+          syncedAt: catalogSyncs.syncedAt,
         })
-        .from(eccSyncs)
+        .from(catalogSyncs)
         .where(sql`is_active_catalog = true`)
         .limit(1);
       if (active) activeCatalogInfo = active;
@@ -45,7 +45,7 @@ export async function GET() {
       responseTimeMs: Date.now() - startTime,
       checks: {
         database: dbOk ? 'connected' : 'error',
-        eccCatalog: activeCatalogInfo ? 'synced' : 'pending_or_none',
+        catalog: activeCatalogInfo ? 'synced' : 'pending_or_none',
       },
       activeCatalog: activeCatalogInfo,
       uptimeSeconds: process.uptime(),

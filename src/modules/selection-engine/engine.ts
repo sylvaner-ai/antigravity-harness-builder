@@ -1,5 +1,5 @@
 import { ProjectProfile } from '../project-profile/schema';
-import { EccComponentParsedMeta } from '../../db/schema';
+import { CatalogComponentMeta } from '../../db/schema';
 import {
   ALL_EXCELLENCE_PACKS,
   ComponentKind,
@@ -38,7 +38,7 @@ export interface CatalogCandidateInput {
   sourceUrl?: string;
   license?: string;
   adaptedContent: string;
-  parsedMeta: EccComponentParsedMeta;
+  parsedMeta: CatalogComponentMeta;
   compatibilityStatus: string;
   compatibilityIssues?: ValidationIssue[];
   searchText?: string;
@@ -373,7 +373,7 @@ export class SelectionEngine {
         name: item.name,
         kind: item.kind,
         description: item.description || '',
-        origin: 'ECC_ADAPTED',
+        origin: 'SOURCE_ADAPTED',
         sourceRelativePath: item.sourceRelativePath,
         sourceUrl: item.sourceUrl,
         license: item.license ?? 'MIT',
@@ -397,7 +397,7 @@ export class SelectionEngine {
       });
     }
 
-    // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR ECC & GOUVERNANCE AUTOMATIQUE (§7 FR-05) ---
+    // --- IDENTIFICATION DES BESOINS NON COUVERTS PAR LE CATALOGUE & GOUVERNANCE AUTOMATIQUE (§7 FR-05) ---
     const customComponents = synthesizeProjectCustomComponents({
       profile,
       selectedList,

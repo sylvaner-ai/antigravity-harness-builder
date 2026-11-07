@@ -3,9 +3,9 @@ import { CatalogCandidateInput, SelectionEngine } from '../src/modules/selection
 import { ProjectProfile } from '../src/modules/project-profile/schema';
 import { HarnessBuilderService } from '../src/modules/harness-builder';
 import { verifyGeneratedZipIntegrity } from '../src/modules/package-exporter';
-import { EccComponentParsedMeta } from '../src/db/schema';
+import { CatalogComponentMeta } from '../src/db/schema';
 
-function makeMeta(partial: Partial<EccComponentParsedMeta>): EccComponentParsedMeta {
+function makeMeta(partial: Partial<CatalogComponentMeta>): CatalogComponentMeta {
   return {
     family: 'general',
     tags: [],

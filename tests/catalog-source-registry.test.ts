@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { eq, inArray } from 'drizzle-orm';
-import { catalogSources, closeDbPool, eccSyncs, getDb } from '../src/db';
-import { EccCatalogService, EccRemoteFetcher } from '../src/modules/ecc-catalog/catalog-service';
-import { DEFAULT_CATALOG_SOURCES } from '../src/modules/ecc-catalog/catalog-sources';
+import { catalogSources, closeDbPool, catalogSyncs, getDb } from '../src/db';
+import { CatalogService, CatalogFetcher } from '../src/modules/catalog/catalog-service';
+import { DEFAULT_CATALOG_SOURCES } from '../src/modules/catalog/catalog-sources';
 import {
   addCatalogSource,
   analyzeSourceEntries,
@@ -12,7 +12,7 @@ import {
   parseGitHubRepository,
   repinCatalogSource,
   setCatalogSourceStatus,
-} from '../src/modules/ecc-catalog/source-registry';
+} from '../src/modules/catalog/source-registry';
 import { buildSyntheticTarGz } from './support/synthetic-tar';
 
 const MIT = 'MIT License\n\nCopyright (c) 2026 Jeanne Martin\n\nPermission is hereby granted, free of charge, to any person obtaining a copy';
@@ -64,7 +64,7 @@ describe('Cycle de vie d’une source en base', () => {
   const id = `${owner}-skills`;
   const commits = { HEAD: 'a'.repeat(40), v2: 'b'.repeat(40) } as Record<string, string>;
   let license = MIT;
-  const fetcher: EccRemoteFetcher = {
+  const fetcher: CatalogFetcher = {
     async resolveRefCommitSha(_o, _r, ref) {
       return commits[ref] ?? ref;
     },
@@ -80,7 +80,7 @@ describe('Cycle de vie d’une source en base', () => {
 
   afterAll(async () => {
     await db.delete(catalogSources).where(eq(catalogSources.id, id));
-    if (syncIds.length) await db.delete(eccSyncs).where(inArray(eccSyncs.id, syncIds));
+    if (syncIds.length) await db.delete(catalogSyncs).where(inArray(catalogSyncs.id, syncIds));
     await closeDbPool();
   });
 
@@ -114,7 +114,7 @@ describe('Cycle de vie d’une source en base', () => {
 
   it('la synchronisation consigne les sources réellement intégrées, avec auteur et commit', async () => {
     const [row] = await db.select().from(catalogSources).where(eq(catalogSources.id, id));
-    const service = new EccCatalogService(db, fetcher);
+    const service = new CatalogService(db, fetcher);
     const sync = await service.synchronizeCatalog({
       forceResync: true,
       sources: [{ ...DEFAULT_CATALOG_SOURCES[0]!, id, owner, repo: 'skills', pinnedCommit: row!.pinnedCommit, role: 'BASE_LIBRARY' }],
@@ -123,7 +123,7 @@ describe('Cycle de vie d’une source en base', () => {
     expect(sync.sources).toEqual([
       expect.objectContaining({ id, owner, repo: 'skills', commitSha: commits.v2, license: 'MIT', componentCount: 1 }),
     ]);
-    const comps = await service.searchComponents({ eccSyncId: sync.id });
+    const comps = await service.searchComponents({ catalogSyncId: sync.id });
     expect(comps[0]?.parsedMeta.sourceAuthor).toBe('Jeanne Martin');
   });
 });

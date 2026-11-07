@@ -20,12 +20,13 @@ import {
 } from '../package-exporter/exporter';
 import { renderModelEffortGovernanceRuleBody } from '../package-exporter/governance-template';
 import { convertGlobRulesToModelDecision, enforceAlwaysOnBudget, isReviewerSlug, normalizeDelegationDescription, restrictReviewerTools } from './context-budget';
-import { resolveComponentProvenance } from '../ecc-catalog/catalog-sources';
+import { SyncedSourceSnapshot, authorFromCopyright, resolveComponentProvenance } from '../catalog/catalog-sources';
 import {
   DeterministicPackageInput,
   InputDocumentDigest,
   SelectedRuleSpec,
   SelectedSkillSpec,
+  SourceProvenance,
   SelectedSubagentSpec,
 } from '../package-exporter/schema';
 import { sanitizeTextForPromptSafety } from '../documents/extractor';
@@ -33,8 +34,8 @@ import { sanitizeTextForPromptSafety } from '../documents/extractor';
 export interface HarnessBuilderOptions {
   generationId?: string;
   generatedAtIso?: string;
-  eccCommitSha?: string;
-  eccVersionTag?: string;
+  /** Catalogue en service : étiquette de version et sources réellement synchronisées. */
+  catalog?: { versionTag: string; sources: SyncedSourceSnapshot[] };
   inputDocuments?: InputDocumentDigest[];
 }
 
@@ -50,8 +51,19 @@ export class HarnessBuilderService {
   ): Promise<BuiltHarnessPackage> {
     const generationId = options.generationId ?? 'canonical-generation-01';
     const generatedAtIso = options.generatedAtIso ?? '2026-01-01T00:00:00.000Z';
-    const eccCommitSha = options.eccCommitSha ?? '25278e7d8050e82c5f94d9305ea6a0fceec3ea42';
-    const eccVersionTag = options.eccVersionTag ?? 'v2.2.3';
+    const catalog = options.catalog ?? { versionTag: 'catalogue-local', sources: [] };
+    const provenanceOf = (comp: SelectionResult['selectedComponents'][number], defaultPath: string, note: string): SourceProvenance => {
+      const p = resolveComponentProvenance(comp, catalog.sources);
+      return {
+        repositoryUrl: p.repositoryUrl,
+        commitSha: p.commitSha,
+        sourceRelativePath: comp.sourceRelativePath ?? defaultPath,
+        sourceUrl: comp.sourceUrl ?? (p.commitSha ? `${p.repositoryUrl}/blob/${p.commitSha}/${defaultPath}` : p.repositoryUrl),
+        license: p.license,
+        author: p.author,
+        adaptationNotes: [note],
+      };
+    };
 
     // Normalisation du nom de package en kebab-case
     const packageRootName =
@@ -101,7 +113,7 @@ export class HarnessBuilderService {
     const selectedRules: SelectedRuleSpec[] = [];
     const ruleSlugsSeen = new Set<string>();
 
-    // Règles ECC retenues
+    // Règles retenues dans le catalogue
     for (const comp of selection.selectedComponents) {
       if (comp.kind !== 'RULE' || ruleSlugsSeen.has(comp.slug)) continue;
       ruleSlugsSeen.add(comp.slug);
@@ -115,27 +127,14 @@ export class HarnessBuilderService {
         glob: (rawFront.glob as string) ?? undefined,
       });
 
-      const prov = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
-      const repoUrl = prov.repositoryUrl;
-      const author = prov.author;
-
       selectedRules.push({
         slug: comp.slug,
         title: comp.name,
         frontmatter,
         markdownBody: split.body.trim(),
         selectionRationale: comp.acceptedRationale,
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
-          repositoryUrl: repoUrl,
-          commitSha: prov.commitSha,
-          versionTag: eccVersionTag,
-          sourceRelativePath: comp.sourceRelativePath ?? `rules/${comp.slug}.md`,
-          sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/rules/${comp.slug}.md`,
-          license: comp.license ?? 'MIT',
-          author,
-          adaptationNotes: ['Adapté vers les standards Google Antigravity'],
-        },
+        originStatus: 'source_adapted',
+        provenance: provenanceOf(comp, `rules/${comp.slug}.md`, 'Adapté vers les standards Google Antigravity'),
       });
     }
 
@@ -199,7 +198,6 @@ export class HarnessBuilderService {
         license: comp.license ?? 'MIT',
       });
 
-      const skillProv = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
       selectedSkills.push({
         slug: comp.slug,
         frontmatter,
@@ -208,19 +206,8 @@ export class HarnessBuilderService {
           (r) => r.content.trim().length > 0 && /^(?:(?:references|resources|examples)\/)?[a-zA-Z0-9._-]+\.(?:md|json|yaml|yml|txt|css)$/.test(r.relativeSubPath)
         ),
         selectionRationale: comp.acceptedRationale,
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
-          repositoryUrl: skillProv.repositoryUrl,
-          commitSha: skillProv.commitSha,
-          versionTag: eccVersionTag,
-          sourceRelativePath: comp.sourceRelativePath ?? `skills/${comp.slug}/SKILL.md`,
-          sourceUrl:
-            comp.sourceUrl ??
-            `https://github.com/affaan-m/ECC/blob/${eccCommitSha}/skills/${comp.slug}/SKILL.md`,
-          license: comp.license ?? 'MIT',
-          author: skillProv.author,
-          adaptationNotes: ['Adapté vers les standards de compétences Google Antigravity'],
-        },
+        originStatus: 'source_adapted',
+        provenance: provenanceOf(comp, `skills/${comp.slug}/SKILL.md`, 'Adapté vers les standards de compétences Google Antigravity'),
       });
     }
 
@@ -270,11 +257,7 @@ export class HarnessBuilderService {
       const split = splitMarkdownFrontmatter(comp.adaptedContent);
       const rawFront = split.parsedFrontmatter ?? {};
       const isReviewer = comp.slug.includes('reviewer') || comp.slug.includes('audit');
-      const prov = resolveComponentProvenance(comp, { repositoryUrl: 'https://github.com/affaan-m/ECC', commitSha: eccCommitSha });
-      const repoUrl = prov.repositoryUrl;
-      const author = prov.author;
-
-      const eccTools =
+      const sourceTools =
         (rawFront.tools as unknown as AntigravitySubagentTool[]) ??
         (isReviewer ? ['view_file', 'grep_search', 'find_by_name'] : ['view_file', 'write_to_file', 'replace_file_content', 'run_command']);
       const frontmatter: AntigravitySubagentFrontmatter = AntigravitySubagentFrontmatterSchema.parse({
@@ -282,7 +265,7 @@ export class HarnessBuilderService {
         description: normalizeDelegationDescription(
           (rawFront.description as string) ?? `Sous-agent ${comp.name} dédié aux tâches spécialisées du projet.`
         ),
-        tools: isReviewer || isReviewerSlug(comp.slug) ? restrictReviewerTools(eccTools) : eccTools,
+        tools: isReviewer || isReviewerSlug(comp.slug) ? restrictReviewerTools(sourceTools) : sourceTools,
       });
 
       const inferredPair = inferRecommendedModelEffortPair({
@@ -314,19 +297,12 @@ export class HarnessBuilderService {
         recommendedEffort,
         qualityCostRecommendation,
         selectionRationale: comp.acceptedRationale,
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
-          repositoryUrl: repoUrl,
-          commitSha: prov.commitSha,
-          versionTag: eccVersionTag,
-          sourceRelativePath: comp.sourceRelativePath ?? `agents/${comp.slug}.md`,
-          sourceUrl: comp.sourceUrl ?? `${repoUrl}/blob/${eccCommitSha}/agents/${comp.slug}.md`,
-          license: comp.license ?? 'MIT',
-          author,
-          adaptationNotes: [
-            'Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML)',
-          ],
-        },
+        originStatus: 'source_adapted',
+        provenance: provenanceOf(
+          comp,
+          `agents/${comp.slug}.md`,
+          'Adapté vers la spécification officielle des sous-agents Antigravity (sans champ model dans le frontmatter YAML)'
+        ),
       });
     }
 
@@ -422,8 +398,20 @@ export class HarnessBuilderService {
       generationId,
       generatedAtIso,
       packageRootName,
-      eccCommitSha,
-      eccVersionTag,
+      catalog: {
+        versionTag: catalog.versionTag,
+        sources: catalog.sources
+          .filter((src) => !src.error)
+          .map((src) => ({
+            id: src.id,
+            name: src.name,
+            repositoryUrl: `https://github.com/${src.owner}/${src.repo}`,
+            commitSha: src.commitSha,
+            license: src.license,
+            author: authorFromCopyright(src.copyrightNotice) || `${src.owner}/${src.repo}`,
+            selectedComponents: selection.selectedComponents.filter((c) => c.sourceId === src.id).length,
+          })),
+      },
       excellencePacks: selection.excellencePacks ?? [],
       inputDocuments,
       profile: safeProfile,

@@ -1,5 +1,5 @@
 import { DeterministicPackageInput } from '../src/modules/package-exporter/schema';
-import { adaptEccAgentMarkdown } from '../src/modules/antigravity-adapter/adapter';
+import { adaptAgentMarkdown } from '../src/modules/antigravity-adapter/adapter';
 
 const RAW_ECC_ARCHITECT_AGENT = `---
 name: architect
@@ -27,11 +27,11 @@ You are a strict and independent code reviewer. Verify all acceptance criteria a
 `;
 
 export function createSampleDeterministicInput(): DeterministicPackageInput {
-  const adaptedArchitect = adaptEccAgentMarkdown(RAW_ECC_ARCHITECT_AGENT, 'architect', {
+  const adaptedArchitect = adaptAgentMarkdown(RAW_ECC_ARCHITECT_AGENT, 'architect', {
     isIndependentReviewer: false,
   });
 
-  const adaptedReviewer = adaptEccAgentMarkdown(RAW_ECC_REVIEWER_AGENT, 'code-reviewer', {
+  const adaptedReviewer = adaptAgentMarkdown(RAW_ECC_REVIEWER_AGENT, 'code-reviewer', {
     isIndependentReviewer: true,
   });
 
@@ -39,8 +39,20 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
     generationId: 'gen-20261029-0001',
     generatedAtIso: '2026-10-29T10:20:00.000Z',
     packageRootName: 'acme-billing-harness',
-    eccCommitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
-    eccVersionTag: 'v2.2.3',
+    catalog: {
+      versionTag: 'affaan-m/ECC@25278e7',
+      sources: [
+        {
+          id: 'ecc-official',
+          name: 'Everything Claude Code (ECC)',
+          repositoryUrl: 'https://github.com/affaan-m/ECC',
+          commitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
+          license: 'MIT',
+          author: 'Affaan Mustafa',
+          selectedComponents: 3,
+        },
+      ],
+    },
     excellencePacks: [],
     inputDocuments: [
       {
@@ -249,11 +261,10 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
         },
         markdownBody: `# Coding Style & Immutability\n\n- Privilégier des fonctions pures et des structures de données immuables.\n- Valider toutes les entrées externes avec Zod côté serveur.`,
         selectionRationale: 'Socle transversal indispensable pour garantir la fiabilité du code.',
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
+        originStatus: 'source_adapted',
+        provenance: {
           repositoryUrl: 'https://github.com/affaan-m/ECC',
           commitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
-          versionTag: 'v2.2.3',
           sourceRelativePath: 'rules/common/coding-style.md',
           sourceUrl:
             'https://github.com/affaan-m/ECC/blob/25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b/rules/common/coding-style.md',
@@ -295,11 +306,10 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
           },
         ],
         selectionRationale: 'Fournit les patterns d’architecture backend pour Next.js et PostgreSQL.',
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
+        originStatus: 'source_adapted',
+        provenance: {
           repositoryUrl: 'https://github.com/affaan-m/ECC',
           commitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
-          versionTag: 'v2.2.3',
           sourceRelativePath: 'skills/backend-patterns/SKILL.md',
           sourceUrl:
             'https://github.com/affaan-m/ECC/blob/25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b/skills/backend-patterns/SKILL.md',
@@ -321,11 +331,10 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
         qualityCostRecommendation:
           'Modèle Pro avec effort élevé recommandé pour la conception des transactions de facturation.',
         selectionRationale: 'Nécessaire pour structurer le domaine de facturation et les frontières multi-tenant.',
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
+        originStatus: 'source_adapted',
+        provenance: {
           repositoryUrl: 'https://github.com/affaan-m/ECC',
           commitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
-          versionTag: 'v2.2.3',
           sourceRelativePath: 'agents/architect.md',
           sourceUrl:
             'https://github.com/affaan-m/ECC/blob/25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b/agents/architect.md',
@@ -345,11 +354,10 @@ export function createSampleDeterministicInput(): DeterministicPackageInput {
         qualityCostRecommendation:
           'Modèle Pro en lecture seule pour auditer les calculs de TVA et l’isolation tenant avant validation.',
         selectionRationale: 'Garantit une passe de revue indépendante sans droit de modification directe (§6.2).',
-        originStatus: 'ecc_adapted',
-        eccProvenance: {
+        originStatus: 'source_adapted',
+        provenance: {
           repositoryUrl: 'https://github.com/affaan-m/ECC',
           commitSha: '25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b',
-          versionTag: 'v2.2.3',
           sourceRelativePath: 'agents/code-reviewer.md',
           sourceUrl:
             'https://github.com/affaan-m/ECC/blob/25278e7d7b6cf6e6a4e7a6c8e10f14ff22f0eb5b/agents/code-reviewer.md',

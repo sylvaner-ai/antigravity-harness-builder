@@ -1,8 +1,8 @@
 import { ValidationIssue } from '../antigravity-adapter/schema';
-import { CatalogSourceConfig, REDISTRIBUTABLE_LICENSES, detectCopyrightNotice, detectLicense } from './catalog-sources';
+import { CatalogSourceConfig, REDISTRIBUTABLE_LICENSES, authorFromCopyright, detectCopyrightNotice, detectLicense } from './catalog-sources';
 import { countClaudeSpecificReferences, scanContentSafety } from './content-safety';
 import { getBuiltinCuratedExcellenceComponents } from './curated-excellence';
-import { IndexedEccComponentCandidate, parseAndQualifyEccRepositoryEntries } from './indexer';
+import { IndexedCatalogComponent, parseAndQualifyRepositoryEntries } from './indexer';
 import { TarFileEntry } from './tar-extractor';
 
 /**
@@ -28,7 +28,7 @@ export interface SourceBuildReport {
 }
 
 export interface MultiSourceCatalog {
-  components: IndexedEccComponentCandidate[];
+  components: IndexedCatalogComponent[];
   reports: SourceBuildReport[];
   versionTag: string;
 }
@@ -75,7 +75,7 @@ export function buildMultiSourceCatalog(
   snapshots: readonly SourceSnapshot[],
   options: { includeCurated?: boolean } = {}
 ): MultiSourceCatalog {
-  const components: IndexedEccComponentCandidate[] = [];
+  const components: IndexedCatalogComponent[] = [];
   const owners = new Map<string, string>(); // `${kind}:${slug}` -> sourceId (une règle et un skill peuvent porter le même nom)
   const reports: SourceBuildReport[] = [];
   const tags: string[] = [];
@@ -93,11 +93,11 @@ export function buildMultiSourceCatalog(
   for (const snap of ordered) {
     const { source, commitSha, entries } = snap;
     const repoUrl = `https://github.com/${source.owner}/${source.repo}`;
-    const parsed = parseAndQualifyEccRepositoryEntries(entries, commitSha, repoUrl);
+    const parsed = parseAndQualifyRepositoryEntries(entries, commitSha, repoUrl);
     const licenseText = entries.find((e) => /^LICEN[CS]E(\.md|\.txt)?$/i.test(e.relativePath))?.content;
     const license = detectLicense(licenseText);
     const copyrightNotice = detectCopyrightNotice(licenseText) || source.copyrightNotice;
-    const author = copyrightNotice.replace(/^Copyright\s+(?:\(c\)|©)\s*[0-9][0-9\s,–-]*/i, '').trim() || `${source.owner}/${source.repo}`;
+    const author = authorFromCopyright(copyrightNotice) || `${source.owner}/${source.repo}`;
     const redistributable = REDISTRIBUTABLE_LICENSES.has(license);
     const moduleIndex = buildModuleIndex(entries);
     const report: SourceBuildReport = {

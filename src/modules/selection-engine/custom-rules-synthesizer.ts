@@ -106,7 +106,7 @@ export function synthesizeProjectCustomComponents(params: {
       description:
         'Directives strictes pour l application des tokens, polices et couleurs spécifiques au projet.',
       gapReason:
-        'Le catalogue ECC ne fournit que des règles CSS génériques sans les tokens ni la charte graphique de ce projet.',
+        'Le catalogue ne fournit que des règles CSS génériques sans les tokens ni la charte graphique de ce projet.',
       content: `---
 trigger: glob
 globs: "**/*.{tsx,jsx,css,scss,html,vue}"
@@ -138,7 +138,7 @@ ${(ds?.uxAndAccessibilityRules ?? []).map((p: string) => `  * ${p}`).join('\n') 
         description:
           'Règles strictes appliquant les exigences de conformité et de sécurité du projet.',
         gapReason:
-          'Exigences de sécurité spécifiques au domaine métier non couvertes par les règles standard ECC.',
+          'Exigences de sécurité spécifiques au domaine métier non couvertes par les règles standard du catalogue.',
         content: `---
 trigger: always_on
 description: Garde-fous impératifs de sécurité et conformité du projet
@@ -216,7 +216,7 @@ description: Bonnes pratiques Drizzle ORM, transactions et migrations atomiques
       description:
         'Séparation état serveur vs état UI, invalidation de cache et mutations optimistes.',
       gapReason:
-        'Absence de directives précises dans le catalogue ECC pour l architecture conjointe TanStack Query et Zustand.',
+        'Absence de directives précises dans le catalogue pour l architecture conjointe TanStack Query et Zustand.',
       content: `---
 trigger: glob
 globs: "**/*.{tsx,jsx,ts,js}"
@@ -252,7 +252,7 @@ description: Gestion d'état fluide, cache asynchrone TanStack Query et stores Z
       description:
         'Conformité Factur-X (EN 16931), intégrité PDF/A-3, numérotation séquentielle sans trou et compatibilité PDP/PPF.',
       gapReason:
-        'Exigences légales françaises de facturation électronique non couvertes par le catalogue générique ECC.',
+        'Exigences légales françaises de facturation électronique non couvertes par le catalogue générique.',
       content: `---
 trigger: glob
 globs: "**/billing/**/*.{ts,js}, **/invoices/**/*.{ts,js}, **/facturx/**/*.{ts,js}, src/**/billing/**"
@@ -291,7 +291,7 @@ description: Conformité Factur-X (EN 16931), intégrité PDF/A-3 et transmissio
       description:
         'Standard SEPA actuel ISO 20022 pain.008.001.08, contrôle modulo 97 arithmétique et réconciliation des rejets pain.002.',
       gapReason:
-        'Spécifications bancaires européennes SEPA et réconciliation des impayés non prises en charge par ECC.',
+        'Spécifications bancaires européennes SEPA et réconciliation des impayés non prises en charge par le catalogue.',
       content: `---
 trigger: glob
 globs: "**/sepa/**/*.{ts,js}, **/banking/**/*.{ts,js}, **/payments/**/*.{ts,js}, src/**/sepa/**"
@@ -330,7 +330,7 @@ description: Prélèvements SEPA ISO 20022 (pain.008.001.08), contrôle checksum
       description:
         'Vérification cryptographique HMAC des webhooks Documenso et machine à états stricte pour les contrats.',
       gapReason:
-        'Gestion sécurisée du cycle de vie des signatures électroniques contractuelles non couverte par ECC.',
+        'Gestion sécurisée du cycle de vie des signatures électroniques contractuelles non couverte par le catalogue.',
       content: `---
 trigger: glob
 globs: "**/documenso/**/*.{ts,js}, **/contracts/**/*.{ts,js}, **/webhooks/**/*.{ts,js}"

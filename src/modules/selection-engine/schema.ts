@@ -24,7 +24,7 @@ export const ALL_EXCELLENCE_PACKS: ExcellencePack[] = [
   'EXTREME_TDD_ANTI_BUG',
 ];
 
-export const ComponentOriginSchema = z.enum(['ECC_ADAPTED', 'PROJECT_CUSTOM']);
+export const ComponentOriginSchema = z.enum(['SOURCE_ADAPTED', 'PROJECT_CUSTOM']);
 export type ComponentOrigin = z.infer<typeof ComponentOriginSchema>;
 
 export const ComponentKindSchema = z.enum(['RULE', 'SKILL', 'SUBAGENT', 'COMMAND_CONVERTED']);
@@ -106,7 +106,7 @@ export const RejectedComponentSchema = z.object({
 export type RejectedComponent = z.infer<typeof RejectedComponentSchema>;
 
 /**
- * Spécification d'un composant sur mesure généré pour combler un besoin non couvert par ECC.
+ * Spécification d'un composant sur mesure généré pour combler un besoin non couvert par le catalogue.
  */
 export const CustomComponentSpecSchema = z.object({
   slug: z.string().min(1),
