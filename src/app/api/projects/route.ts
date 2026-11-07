@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, desc } from 'drizzle-orm';
-import { getDb, projects, projectProfiles, harnessGenerations, sourceDocuments } from '../../../db';
+import { getDb, projects, projectProfiles, harnessGenerations } from '../../../db';
 import { requireAuthUser } from '../../../modules/auth';
-import { parseAuditReportText, ProjectProfileService } from '../../../modules/project-profile';
-import { computeSha256 } from '../../../modules/package-exporter/exporter';
-import { MockLLMAdapter } from '../../../modules/llm-gateway/mock-adapter';
+import { parseAuditReportText } from '../../../modules/project-profile';
+import { ingestAuditBundle } from '../../../modules/documents/audit-bundle';
 
 export async function GET(req: NextRequest) {
   try {
@@ -64,12 +63,11 @@ export async function POST(req: NextRequest) {
 
     // Flux 1 : Mode Mise à Niveau avec texte/JSON d'audit direct
     if (mode === 'UPGRADE' && (body.auditText || body.auditData)) {
-      let auditReport;
-      if (body.auditData && typeof body.auditData === 'object') {
-        auditReport = body.auditData;
-      } else {
-        auditReport = parseAuditReportText(body.auditText);
-      }
+      // Validation par le schéma dans les deux cas (texte collé ou objet JSON)
+      const auditReport =
+        body.auditData && typeof body.auditData === 'object'
+          ? parseAuditReportText(JSON.stringify(body.auditData))
+          : parseAuditReportText(String(body.auditText));
 
       const name = auditReport.projectName?.trim() || body.name?.trim() || 'Projet Audité';
       const description =
@@ -96,41 +94,21 @@ export async function POST(req: NextRequest) {
         throw new Error('Impossible de créer le projet.');
       }
 
-      const rawAuditString = JSON.stringify(auditReport, null, 2);
-      const auditSha256 = computeSha256(rawAuditString);
-
-      const [doc] = await db
-        .insert(sourceDocuments)
-        .values({
-          projectId: created.id,
-          role: 'AUDIT_REPORT',
-          originalName: 'antigravity-audit.json',
-          safeStoragePath: `audits/${created.id}/antigravity-audit.json`,
-          mimeType: 'application/json',
-          sizeBytes: Buffer.byteLength(rawAuditString, 'utf-8'),
-          sha256Hash: auditSha256,
-          extractionStatus: 'COMPLETED',
-          extractedText: rawAuditString,
-          extractionMeta: {
-            method: 'antigravity-audit-scan',
-          },
-        })
-        .returning();
-
-      const profileService = new ProjectProfileService(db, new MockLLMAdapter());
-      const profile = await profileService.ingestAuditReport({
+      const ingestion = await ingestAuditBundle({
+        db,
         projectId: created.id,
         projectName: name,
         targetSurface,
         auditReport,
-        documentId: doc?.id ?? 'audit-doc',
       });
 
       return NextResponse.json(
         {
           project: created,
-          profile,
-          document: doc,
+          profile: ingestion.profile,
+          importedDocuments: ingestion.importedDocuments,
+          documentsWithoutContent: ingestion.documentsWithoutContent,
+          hasSpecification: ingestion.hasSpecification,
         },
         { status: 201 }
       );

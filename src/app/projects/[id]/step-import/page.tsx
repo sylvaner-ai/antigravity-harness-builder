@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { nextStepAfterAuditIngestion } from '@/lib/after-audit-ingestion';
 import StepNavigation from '@/components/StepNavigation';
 import { Copy, Check, Upload, ArrowRight, RefreshCw } from 'lucide-react';
 import { AUDIT_EXTRACTION_PROMPT } from '@/modules/project-profile/audit-extractor';
@@ -103,7 +104,7 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l ingestion de l audit');
 
-      router.push(`/projects/${projectId}/step-profile`);
+      router.push(await nextStepAfterAuditIngestion(projectId, data));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la lecture du fichier');
     } finally {
@@ -128,7 +129,7 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors de l ingestion de l audit');
 
-      router.push(`/projects/${projectId}/step-profile`);
+      router.push(await nextStepAfterAuditIngestion(projectId, data));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur d ingestion');
     } finally {

@@ -21,6 +21,22 @@ export const ExistingHarnessFileSchema = z.object({
 });
 export type ExistingHarnessFile = z.infer<typeof ExistingHarnessFileSchema>;
 
+/** Taille maximale du contenu d'un document fonctionnel joint à l'audit (caractères). */
+export const MAX_EMBEDDED_DOCUMENT_CHARS = 2_000_000;
+
+/**
+ * Document fonctionnel du dépôt. Depuis l'audit 2.1, son contenu texte est joint (`content`) pour que
+ * l'export unique suffise : l'application l'importe comme cahier des charges ou design system.
+ */
+export const FunctionalDocumentSchema = z.object({
+  path: z.string().min(1),
+  title: z.string().optional(),
+  role: z.enum(['SPECIFICATION', 'DESIGN_SYSTEM', 'SUPPLEMENTARY']).optional(),
+  sizeBytes: z.number().int().nonnegative().optional(),
+  content: z.string().max(MAX_EMBEDDED_DOCUMENT_CHARS).optional(),
+});
+export type FunctionalDocument = z.infer<typeof FunctionalDocumentSchema>;
+
 /**
  * Schéma Zod du rapport d'audit normalisé généré par l'agent Antigravity
  * dans le workspace d'un projet cible à moderniser.
@@ -94,10 +110,7 @@ export const AntigravityAuditReportSchema = z.object({
     })
     .optional(),
   /** Audit 2.0 : documents fonctionnels du dépôt (cahier des charges, spécifications), à importer à part. */
-  functionalDocuments: z
-    .array(z.object({ path: z.string().min(1), title: z.string().optional(), sizeBytes: z.number().int().nonnegative().optional() }))
-    .optional()
-    .default([]),
+  functionalDocuments: z.array(FunctionalDocumentSchema).optional().default([]),
   existingDirectivesToPreserve: z.array(z.string()).optional().default([]),
 });
 
@@ -108,7 +121,7 @@ export type AntigravityAuditReport = z.infer<typeof AntigravityAuditReportSchema
  */
 export const AUDIT_EXTRACTION_PROMPT = `Agis en tant qu'auditeur technique spécialisé Google Antigravity. Ton objectif est de décrire précisément ce projet et son harnais Antigravity actuel, afin qu'Antigravity Harness Builder prépare une mise à niveau du harnais sans rien perdre.
 
-Tu travailles en lecture seule : ne modifie, ne crée et ne supprime aucun fichier, à l'exception du fichier de résultat antigravity-audit.json. Les seules commandes autorisées sont des lectures (ls, cat, find, sha256sum ou shasum -a 256).
+Tu travailles en lecture seule : ne modifie, ne crée et ne supprime aucun fichier, à l'exception du fichier de résultat antigravity-audit.json. Les seules commandes autorisées sont des lectures (ls, cat, find, sha256sum ou shasum -a 256) et la commande node -e ou python3 -c qui écrit ce fichier de résultat.
 
 ### Directives d'exécution :
 1. Examine les manifestes de dépendances (package.json, pyproject.toml, Cargo.toml, go.mod, docker-compose.yml, etc.).
@@ -122,7 +135,12 @@ Tu travailles en lecture seule : ne modifie, ne crée et ne supprime aucun fichi
    - chaque fichier de .agents/workflows/ s'il existe (kind « workflow », dossier déprécié).
    Pour chacun : chemin relatif, empreinte SHA-256 du contenu exact (sha256sum <fichier>), et la description de son en-tête YAML s'il en a une (200 caractères au plus). N'invente jamais une empreinte : si tu ne peux pas la calculer, omets le champ.
 5. Si docs/HARNESS_MANIFEST.json existe (harnais produit par Antigravity Harness Builder), recopie dans previousGeneration son generationId, son generatedAt et, pour chaque entrée de filesInventory, le couple relativePath (dans path) et sha256, sans les modifier.
-6. Relève dans functionalDocuments les documents fonctionnels du dépôt (cahier des charges, spécifications, expression de besoin), avec leur chemin et leur taille. Ne recopie pas leur contenu.
+6. Joins dans functionalDocuments les documents fonctionnels du dépôt, pour que ce fichier unique suffise à l'import :
+   - le cahier des charges ou les spécifications (role « SPECIFICATION ») ;
+   - le design system, par exemple DESIGN.md (role « DESIGN_SYSTEM ») ;
+   - tout autre document de cadrage utile (role « SUPPLEMENTARY »).
+   Pour chacun : chemin, role, taille et contenu texte intégral (champ content), sans le résumer ni le modifier. Seuls les formats texte (.md, .txt) sont joints ; pour un PDF ou un DOCX, indique seulement le chemin et la taille.
+   Pour insérer ces contenus sans erreur d'échappement, écris antigravity-audit.json avec une commande node -e ou python3 -c qui lit les documents et sérialise l'objet (JSON.stringify ou json.dump), plutôt que de recopier les textes à la main.
 7. Lis le README.md pour résumer l'objectif métier du projet en 2 phrases.
 8. Relève dans existingDirectivesToPreserve les consignes rédigées par l'équipe qui doivent survivre à la mise à niveau (une phrase par consigne).
 9. Ne lis et ne divulgue JAMAIS le contenu des fichiers de secrets (.env, .env.local, clés privées, jetons API).
@@ -132,7 +150,7 @@ Enregistre le résultat dans antigravity-audit.json à la racine de l'espace de 
 
 \`\`\`json
 {
-  "auditVersion": "2.0.0",
+  "auditVersion": "2.1.0",
   "scannedAt": "<ISO_TIMESTAMP>",
   "projectName": "<Nom extrait du package.json ou du dossier>",
   "projectDescription": "<Résumé en 2 phrases>",
@@ -171,12 +189,15 @@ Enregistre le résultat dans antigravity-audit.json à la racine de l'espace de 
     "generatedAt": "<…>",
     "files": [{ "path": ".agents/rules/common-security.md", "sha256": "<…>" }]
   },
-  "functionalDocuments": [{ "path": "docs/cahier-des-charges.md", "sizeBytes": 54288 }],
+  "functionalDocuments": [
+    { "path": "docs/cahier-des-charges.md", "role": "SPECIFICATION", "sizeBytes": 54288, "content": "<texte intégral>" },
+    { "path": "DESIGN.md", "role": "DESIGN_SYSTEM", "sizeBytes": 12000, "content": "<texte intégral>" }
+  ],
   "existingDirectivesToPreserve": []
 }
 \`\`\`
 Omets previousGeneration si docs/HARNESS_MANIFEST.json n'existe pas.
-Indique ensuite à l'utilisateur : « L'audit est terminé et prêt à être importé dans Antigravity Harness Builder. » Rappelle-lui d'importer aussi le cahier des charges si functionalDocuments en contient un.`;
+Indique ensuite à l'utilisateur : « L'audit est terminé : importez antigravity-audit.json dans Antigravity Harness Builder. » Précise quels documents fonctionnels ont été joints, et lesquels n'ont pas pu l'être (format non texte).`;
 
 /**
  * Extrait le JSON d'audit même si l'utilisateur le colle avec du Markdown
