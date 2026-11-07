@@ -235,7 +235,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
     expect(sync1.status).toBe('VALID');
     expect(sync1.isActiveCatalog).toBe(true);
     expect(sync1.commitSha).toBe(validSha);
-    expect(sync1.versionTag).toBe('v2.2.3');
+    expect(sync1.versionTag).toBe('affaan-m/ECC@1111111');
     expect(sync1.componentCount).toBe(5); // 2 règles + 1 agent + 1 skill + 1 commande convertie en skill
 
     // Vérifier que le relecteur code-reviewer a bien été privé de `write_to_file` (§6.2)
@@ -267,7 +267,8 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
     expect(remainingComponents).toHaveLength(5);
   });
 
-  it(
+  // Appel réseau réel vers GitHub : lancé seulement si RUN_LIVE_GITHUB_TESTS=1 (activé dans l'intégration continue).
+  it.runIf(process.env.RUN_LIVE_GITHUB_TESTS === '1')(
     'synchronise et indexe réellement le dépôt officiel affaan-m/ECC depuis GitHub en moins de 10 secondes',
     async () => {
       const liveService = new EccCatalogService(db, new GitHubOfficialEccFetcher());

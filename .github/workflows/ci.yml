@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ahb_user
+          POSTGRES_PASSWORD: ahb_ci_password
+          POSTGRES_DB: ahb_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U ahb_user -d ahb_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ahb_user:ahb_ci_password@localhost:5433/ahb_db
+      RUN_LIVE_GITHUB_TESTS: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Vérification des types
+        run: npx tsc --noEmit
+      - name: Migrations
+        run: npm run db:migrate
+      - name: Tests
+        run: npx vitest run
+      - name: Build
+        run: npm run build
