@@ -287,3 +287,22 @@ export const generatedArtifacts = pgTable(
   },
   (table) => [index('generated_artifacts_generation_id_idx').on(table.generationId)]
 );
+
+/**
+ * 9. Table `install_links` — Liens temporaires de téléchargement du paquet d'installation.
+ * Le prompt collé dans Antigravity ne contient que ce lien : l'agent récupère lui-même les fichiers.
+ * Seule l'empreinte SHA-256 du jeton est stockée.
+ */
+export const installLinks = pgTable(
+  'install_links',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    generationId: uuid('generation_id')
+      .notNull()
+      .references(() => harnessGenerations.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('install_links_expires_at_idx').on(table.expiresAt)]
+);

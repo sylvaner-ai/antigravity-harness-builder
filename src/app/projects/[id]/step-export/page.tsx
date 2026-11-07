@@ -133,6 +133,8 @@ export default function StepExportPage({ params }: { params: Promise<{ id: strin
         </h2>
         <p className="text-sm text-slate-600 leading-relaxed">
           Copiez ce prompt et collez-le dans une nouvelle conversation Antigravity ouverte sur le dossier du projet.
+          Il est léger : il contient un lien de téléchargement valable 24 heures, et l&apos;agent récupère lui-même les
+          fichiers puis vérifie leurs empreintes. Recopiez le prompt après ce délai.
           {isUpgradeMode
             ? " L'agent sauvegarde chaque fichier qu'il modifie dans .agents/.harness-backup/, présente le plan et attend votre confirmation avant d'écrire."
             : " L'agent installe les règles, skills, sous-agents et AGENTS.md, sans supprimer aucun fichier applicatif."}
