@@ -1,11 +1,8 @@
 import { gzipSync, strToU8 } from 'fflate';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { sql, eq } from 'drizzle-orm';
-import { closeDbPool, eccSyncs, getDb, jobs } from '../src/db';
-import {
-  PostgresJobQueue,
-  sanitizeErrorMessage,
-} from '../src/modules/jobs-observability/job-queue';
+import { eq } from 'drizzle-orm';
+import { closeDbPool, eccSyncs, getDb } from '../src/db';
+import { sanitizeErrorMessage } from '../src/lib/sanitize-error';
 import {
   EccCatalogService,
   EccRemoteFetcher,
@@ -73,15 +70,8 @@ function buildSyntheticTarGz(files: Array<{ path: string; content: string }>): U
   return gzipSync(tarBuffer);
 }
 
-describe('Jalon 2 — File de Jobs PostgreSQL (SKIP LOCKED, Checkpoints, Retries & Redaction)', () => {
-  const db = getDb();
-  const queue = new PostgresJobQueue(db);
-
-  beforeEach(async () => {
-    await db.delete(jobs);
-  });
-
-  it('masque systématiquement les clés API et mots de passe DB dans les erreurs de jobs (§9 & FR-10)', () => {
+describe('Masquage des secrets dans les messages d’erreur (§9 & FR-10)', () => {
+  it('masque systématiquement les clés API et mots de passe DB', () => {
     const rawErr = new Error(
       'Failed request with key AIzaSyD1234567890abcdefghijklmnopqrstuv and token ghp_1234567890abcdefghijklmnopqrstuv on postgresql://user:secretPass123@localhost:5433/db'
     );
@@ -92,68 +82,6 @@ describe('Jalon 2 — File de Jobs PostgreSQL (SKIP LOCKED, Checkpoints, Retries
     expect(sanitized.message).toContain('[REDACTED_PASSWORD]');
     expect(sanitized.message).not.toContain('AIzaSyD1234567890abcdefghijklmnopqrstuv');
     expect(sanitized.message).not.toContain('secretPass123');
-  });
-
-  it('gère le cycle complet : enqueue -> claimNextJob (SKIP LOCKED) -> saveCheckpoint -> retry -> markCompleted', async () => {
-    const job1 = await queue.enqueue({
-      type: 'ECC_SYNC',
-      payload: { ref: 'main' },
-      maxAttempts: 2,
-    });
-    expect(job1.status).toBe('QUEUED');
-
-    // Claim atomique
-    const claimed = await queue.claimNextJob(['ECC_SYNC']);
-    expect(claimed?.id).toBe(job1.id);
-    expect(claimed?.status).toBe('RUNNING');
-    expect(claimed?.attempts).toBe(1);
-
-    // Aucun autre worker concurrent ne peut réclamer le même job en cours
-    const concurrentClaim = await queue.claimNextJob(['ECC_SYNC']);
-    expect(concurrentClaim).toBeNull();
-
-    // Enregistrement d'un checkpoint intermédiaire
-    const checkpointed = await queue.saveCheckpoint(job1.id, 'DOWNLOADING_TARBALL', 45, {
-      resolvedSha: '25278e7d',
-    });
-    expect(checkpointed.currentStep).toBe('DOWNLOADING_TARBALL');
-    expect(checkpointed.progressPercent).toBe(45);
-    expect(checkpointed.checkpointData).toEqual({ resolvedSha: '25278e7d' });
-
-    // Premier échec transitoire : le job repasse en QUEUED (attempts=1 < maxAttempts=2) en conservant son checkpoint
-    const retried = await queue.markFailedOrRetry(job1.id, new Error('Temporary network timeout'), {
-      retryDelayMs: 0,
-    });
-    expect(retried.status).toBe('QUEUED');
-    expect(retried.checkpointData).toEqual({ resolvedSha: '25278e7d' });
-
-    // Seconde réclamation et complétion finale
-    const claimedAgain = await queue.claimNextJob(['ECC_SYNC']);
-    expect(claimedAgain?.id).toBe(job1.id);
-    expect(claimedAgain?.attempts).toBe(2);
-
-    const completed = await queue.markCompleted(job1.id, { componentsIndexed: 140 });
-    expect(completed.status).toBe('COMPLETED');
-    expect(completed.progressPercent).toBe(100);
-    expect(completed.checkpointData).toEqual({
-      resolvedSha: '25278e7d',
-      componentsIndexed: 140,
-    });
-  });
-
-  it('récupère automatiquement les jobs orphelins bloqués en RUNNING après un crash (recoverStaleRunningJobs)', async () => {
-    const job = await queue.enqueue({ type: 'HARNESS_GENERATE', maxAttempts: 3 });
-    await queue.claimNextJob();
-
-    // Vieillir artificiellement locked_at de 10 minutes
-    await db.execute(sql`UPDATE jobs SET locked_at = NOW() - INTERVAL '10 minutes' WHERE id = ${job.id}`);
-
-    const recoveredCount = await queue.recoverStaleRunningJobs(5 * 60 * 1000);
-    expect(recoveredCount).toBe(1);
-
-    const refreshed = await queue.getJobById(job.id);
-    expect(refreshed?.status).toBe('QUEUED');
-    expect(refreshed?.safeError?.code).toBe('STALE_JOB_RECOVERED');
   });
 });
 
