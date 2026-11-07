@@ -5,7 +5,7 @@ import {
   eccSyncs,
   getDb,
 } from '../../db';
-import { sanitizeErrorMessage } from '../jobs-observability/job-queue';
+import { sanitizeErrorMessage } from '../../lib/sanitize-error';
 import { extractTarGzTextFilesInMemory } from './tar-extractor';
 
 export type EccSyncRecord = typeof eccSyncs.$inferSelect;

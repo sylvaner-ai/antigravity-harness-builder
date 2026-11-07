@@ -11,7 +11,7 @@ Usage interne. Cahier des charges de référence : [`cahier_des_charges_antigrav
 3. Sélection des composants dans le catalogue : ECC, emilkowalski/skills, obra/superpowers, cloudflare/security-audit-skill, dietrichgebert/ponytail et composants « curated » du générateur.
 4. Génération et export du paquet (`START_HERE.md`, `.agents/`, `AGENTS.md`, `docs/`), avec provenance et licences.
 
-Documentation utile : [`docs/CATALOGUE_MULTI_SOURCES.md`](./docs/CATALOGUE_MULTI_SOURCES.md), [`docs/GOUVERNANCE_CONTEXTE.md`](./docs/GOUVERNANCE_CONTEXTE.md), [`docs/AUTO_TEST_ANTIGRAVITY.md`](./docs/AUTO_TEST_ANTIGRAVITY.md), [`docs/BANC_ESSAI_ANTIGRAVITY.md`](./docs/BANC_ESSAI_ANTIGRAVITY.md), [`docs/OPERATIONS_AND_BACKUP.md`](./docs/OPERATIONS_AND_BACKUP.md).
+Documentation utile : [`docs/CATALOGUE_MULTI_SOURCES.md`](./docs/CATALOGUE_MULTI_SOURCES.md), [`docs/GOUVERNANCE_CONTEXTE.md`](./docs/GOUVERNANCE_CONTEXTE.md), [`docs/BANC_ESSAI_ANTIGRAVITY.md`](./docs/BANC_ESSAI_ANTIGRAVITY.md), [`docs/OPERATIONS_AND_BACKUP.md`](./docs/OPERATIONS_AND_BACKUP.md).
 
 ## Stack
 

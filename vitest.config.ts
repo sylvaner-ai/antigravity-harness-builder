@@ -6,9 +6,6 @@ export default defineConfig({
     environment: 'node',
     globals: false,
     include: ['tests/**/*.test.ts'],
-    coverage: {
-      reporter: ['text', 'json-summary'],
-    },
   },
   resolve: {
     alias: {
