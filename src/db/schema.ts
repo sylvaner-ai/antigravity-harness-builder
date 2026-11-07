@@ -12,6 +12,7 @@ import {
 import type { ProjectProfile } from '../modules/project-profile/schema';
 import type { ValidationIssue, ValidationTier } from '../modules/antigravity-adapter/schema';
 import type { HarnessManifest } from '../modules/package-exporter/schema';
+import type { CatalogSourceAnalysis, CatalogSourceCategory, CatalogSourceRole, SyncedSourceSnapshot } from '../modules/ecc-catalog/catalog-sources';
 
 /**
  * 1. Table `users` — Comptes et préférences (§12 User)
@@ -142,10 +143,36 @@ export const eccSyncs = pgTable(
     errorDetails: jsonb('error_details')
       .$type<{ code?: string; message?: string } | null>()
       .default(null),
+    /** Sources réellement synchronisées (commit, licence, auteur) : base du manifeste multi-sources. */
+    sources: jsonb('sources').$type<SyncedSourceSnapshot[]>().notNull().default([]),
     syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [index('ecc_syncs_active_idx').on(table.isActiveCatalog)]
 );
+
+/**
+ * 5b. Table `catalog_sources` — Dépôts GitHub du catalogue, gérés depuis l'administration.
+ * Une source n'entre dans la synchronisation qu'une fois analysée puis activée (statut ACTIVE).
+ */
+export const catalogSources = pgTable('catalog_sources', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  owner: text('owner').notNull(),
+  repo: text('repo').notNull(),
+  pinnedCommit: text('pinned_commit').notNull(),
+  /** Licence constatée lors de la dernière analyse (SPDX ou UNKNOWN). */
+  license: text('license').notNull().default('UNKNOWN'),
+  role: text('role').$type<CatalogSourceRole>().notNull().default('SPECIALIST'),
+  priority: integer('priority').notNull().default(70),
+  category: text('category').$type<CatalogSourceCategory>().notNull().default('QUALITY'),
+  tags: jsonb('tags').$type<string[]>().notNull().default([]),
+  copyrightNotice: text('copyright_notice').notNull().default(''),
+  nativeInstall: text('native_install'),
+  status: text('status').$type<'PENDING' | 'ACTIVE' | 'DISABLED'>().notNull().default('PENDING'),
+  analysis: jsonb('analysis').$type<CatalogSourceAnalysis | null>().default(null),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
 
 /**
  * Métadonnées structurées d'un composant ECC indexé.
@@ -169,6 +196,8 @@ export interface EccComponentParsedMeta {
   adaptationNotes: string[];
   /** Source du catalogue multi-sources (id de catalog-sources.ts, ou 'curated'). */
   sourceId?: string;
+  /** Auteur de la source (mention de copyright de sa licence), pour l'attribution. */
+  sourceAuthor?: string;
   /** Priorité de la source au moment de l'indexation. */
   sourcePriority?: number;
   /** Module ECC d'appartenance (manifests/install-modules.json), quand la source est ECC. */

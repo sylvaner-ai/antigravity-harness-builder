@@ -107,7 +107,7 @@ flowchart LR
 ### 4.6 Module Catalogue Multi-Sources et Administration
 - **Synchronisation GitHub réelle :** Synchronisation résiliente de la bibliothèque officielle `affaan-m/ECC` en moins de 10 secondes avec gestion de cache et fallback local.
 - **Support multi-dépôts étendu :** Intégration de dépôts externes complémentaires (notamment `emilkowalski/skills`) et packs d'excellence locaux pour le Design System et l'accessibilité.
-- **Interface d'administration refactorisée :** Écran `/admin/ecc-sync` modernisé sous l'appellation "Catalogue" avec bouton d'action "Synchroniser les sources".
+- **Interface d'administration refactorisée :** Écran `/admin/catalog` : gestion des sources (ajout d'un dépôt GitHub, commit figé, analyse, activation) et reconstruction du catalogue.
 
 ---
 

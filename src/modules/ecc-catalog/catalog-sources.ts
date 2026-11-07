@@ -1,9 +1,10 @@
 /**
- * Registre des bibliothèques de référence du catalogue multi-sources.
+ * Sources du catalogue multi-sources.
  *
- * Chaque source est figée sur un commit précis : une génération est reproductible et une mise à jour amont
- * ne change jamais silencieusement le harnais produit. Pour monter de version, modifier `pinnedCommit`
- * (ou la variable d'environnement CATALOG_REF_<ID>) puis relancer la synchronisation.
+ * Les sources sont enregistrées en base (table `catalog_sources`) et gérées depuis l'administration : ajout d'un
+ * dépôt GitHub, commit figé, analyse puis activation. Chaque source est figée sur un commit précis : une génération
+ * est reproductible et une mise à jour amont ne change jamais silencieusement le harnais produit.
+ * `DEFAULT_CATALOG_SOURCES` ne sert qu'à amorcer une base vide.
  */
 
 export type CatalogSourceRole =
@@ -15,6 +16,8 @@ export type CatalogSourceRole =
   | 'METHODOLOGY'
   /** Composants écrits pour ce générateur, ciblant directement Antigravity. */
   | 'CURATED';
+
+export type CatalogSourceCategory = 'CORE' | 'DESIGN' | 'SECURITY' | 'QUALITY';
 
 export interface CatalogSourceConfig {
   id: string;
@@ -29,7 +32,7 @@ export interface CatalogSourceConfig {
   role: CatalogSourceRole;
   /** Plus la valeur est haute, plus la source l'emporte quand deux composants remplissent la même fonction. */
   priority: number;
-  category: 'CORE' | 'DESIGN' | 'SECURITY' | 'QUALITY';
+  category: CatalogSourceCategory;
   tags: string[];
   /** Mention de copyright du fichier LICENSE (à reproduire, licence MIT). */
   copyrightNotice: string;
@@ -123,15 +126,45 @@ export const DEFAULT_CATALOG_SOURCES: CatalogSourceConfig[] = [
   },
 ];
 
-/** Référence effective d'une source : variable d'environnement CATALOG_REF_<ID> si présente, sinon le commit figé. */
-export function resolveSourceRef(source: CatalogSourceConfig, env: Record<string, string | undefined> = process.env): string {
-  const key = `CATALOG_REF_${source.id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
-  const override = env[key]?.trim();
-  return override || source.pinnedCommit;
+/** Résultat de l'analyse d'une source avant son activation. */
+export interface CatalogSourceAnalysis {
+  analyzedAt: string;
+  commitSha: string;
+  license: string;
+  redistributable: boolean;
+  copyrightNotice: string;
+  counts: Record<'RULE' | 'SKILL' | 'SUBAGENT' | 'COMMAND_CONVERTED', number>;
+  /** Composants compatibles, ni bloqués ni en doublon : ceux qui pourront entrer dans un harnais. */
+  usable: number;
+  /** Parmi les utilisables, ceux qui ont une fonction connue du moteur et peuvent être retenus sans choix manuel. */
+  autoSelectable: number;
+  blockedUnsafe: string[];
+  safetyWarnings: number;
+  /** Composants dont le nom est déjà fourni par une autre source active (`kind:slug`). */
+  duplicates: string[];
+  /** Composants écrits surtout pour les mécanismes de Claude Code (peu transposables dans Antigravity). */
+  claudeSpecific: number;
+  verdict: 'READY' | 'BLOCKED';
+  reasons: string[];
 }
 
-export function findSourceById(id: string): CatalogSourceConfig | undefined {
-  return DEFAULT_CATALOG_SOURCES.find((s) => s.id === id);
+/** Source telle que synchronisée dans un catalogue : base de l'attribution et du manifeste. */
+export interface SyncedSourceSnapshot {
+  id: string;
+  name: string;
+  owner: string;
+  repo: string;
+  commitSha: string;
+  license: string;
+  copyrightNotice: string;
+  priority: number;
+  componentCount: number;
+  error?: string;
+}
+
+/** Mention de copyright lue dans le fichier LICENSE (première ligne « Copyright … »). */
+export function detectCopyrightNotice(licenseText: string | undefined): string {
+  return licenseText?.match(/^\s*(Copyright\s+(?:\(c\)|©)[^\n]+)/im)?.[1]?.trim() ?? '';
 }
 
 /** Retrouve la source d'un composant à partir de son URL GitHub (`https://github.com/<owner>/<repo>/…`). */
@@ -182,7 +215,7 @@ export interface ComponentProvenance {
  * Les composants « curated » sont écrits pour ce générateur : leur URL n'est qu'une source d'inspiration.
  */
 export function resolveComponentProvenance(
-  comp: { sourceUrl?: string; license?: string; sourceId?: string },
+  comp: { sourceUrl?: string; license?: string; sourceId?: string; sourceAuthor?: string },
   fallback: { repositoryUrl: string; commitSha: string }
 ): ComponentProvenance {
   if (comp.sourceId === CURATED_SOURCE_ID) {
@@ -194,8 +227,19 @@ export function resolveComponentProvenance(
       curated: true,
     };
   }
-  const src = findSourceByUrl(comp.sourceUrl);
   const sha = comp.sourceUrl?.match(/\/blob\/([0-9a-f]{40})\//i)?.[1];
+  const repoMatch = comp.sourceUrl?.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/i);
+  // Composant indexé par le catalogue en base : l'auteur et le dépôt sont portés par le composant lui-même.
+  if (comp.sourceAuthor && repoMatch) {
+    return {
+      repositoryUrl: `https://github.com/${repoMatch[1]}/${repoMatch[2]}`,
+      commitSha: sha ?? fallback.commitSha,
+      author: comp.sourceAuthor,
+      license: comp.license ?? 'UNKNOWN',
+      curated: false,
+    };
+  }
+  const src = findSourceByUrl(comp.sourceUrl);
   if (src) {
     return {
       repositoryUrl: `https://github.com/${src.owner}/${src.repo}`,

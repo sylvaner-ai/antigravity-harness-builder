@@ -1,4 +1,4 @@
-import { gzipSync, strToU8 } from 'fflate';
+import { buildSyntheticTarGz } from './support/synthetic-tar';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { closeDbPool, eccSyncs, getDb } from '../src/db';
@@ -7,68 +7,8 @@ import {
   EccCatalogService,
   EccRemoteFetcher,
   GitHubOfficialEccFetcher,
+  DEFAULT_CATALOG_SOURCES,
 } from '../src/modules/ecc-catalog/catalog-service';
-
-/**
- * Utilitaire de test construisant une archive `.tar.gz` POSIX USTAR valide en mémoire.
- */
-function buildSyntheticTarGz(files: Array<{ path: string; content: string }>): Uint8Array {
-  const blocks: Uint8Array[] = [];
-
-  for (const file of files) {
-    const contentBytes = strToU8(file.content);
-    const header = new Uint8Array(512);
-
-    // Name (0..100)
-    const nameBytes = strToU8(file.path.slice(0, 99));
-    header.set(nameBytes, 0);
-
-    // Mode (100..108)
-    header.set(strToU8('0000644\0'), 100);
-    // Size en octal sur 11 chiffres + NUL (124..136)
-    const sizeOctal = contentBytes.byteLength.toString(8).padStart(11, '0') + '\0';
-    header.set(strToU8(sizeOctal), 124);
-    // Mtime (136..148)
-    header.set(strToU8('14725276000\0'), 136);
-    // Typeflag '0' (fichier régulier) à l'offset 156
-    header[156] = '0'.charCodeAt(0);
-    // Magic USTAR (257..263)
-    header.set(strToU8('ustar\0'), 257);
-    header.set(strToU8('00'), 263);
-
-    // Calcul du checksum (148..156) : remplissage initial avec des espaces
-    for (let i = 148; i < 156; i += 1) {
-      header[i] = 32;
-    }
-    let checksum = 0;
-    for (let i = 0; i < 512; i += 1) {
-      checksum += header[i] ?? 0;
-    }
-    const chkOctal = checksum.toString(8).padStart(6, '0') + '\0 ';
-    header.set(strToU8(chkOctal), 148);
-
-    blocks.push(header);
-    blocks.push(contentBytes);
-
-    const remainder = contentBytes.byteLength % 512;
-    if (remainder !== 0) {
-      blocks.push(new Uint8Array(512 - remainder));
-    }
-  }
-
-  // Deux blocs de 512 octets à zéro pour marquer la fin de l'archive TAR
-  blocks.push(new Uint8Array(1024));
-
-  const totalLength = blocks.reduce((acc, b) => acc + b.byteLength, 0);
-  const tarBuffer = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const b of blocks) {
-    tarBuffer.set(b, offset);
-    offset += b.byteLength;
-  }
-
-  return gzipSync(tarBuffer);
-}
 
 describe('Masquage des secrets dans les messages d’erreur (§9 & FR-10)', () => {
   it('masque systématiquement les clés API et mots de passe DB', () => {
@@ -159,7 +99,8 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
     const service = new EccCatalogService(db, mockFetcher);
 
     // 1. Première synchronisation réussie
-    const sync1 = await service.synchronizeCatalog();
+    const ecc = DEFAULT_CATALOG_SOURCES.find((s) => s.id === 'ecc-official')!;
+    const sync1 = await service.synchronizeCatalog({ sources: [ecc] });
     expect(sync1.status).toBe('VALID');
     expect(sync1.isActiveCatalog).toBe(true);
     expect(sync1.commitSha).toBe(validSha);
@@ -183,7 +124,7 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
     // 2. Seconde synchronisation en échec (simulation panne GitHub)
     shouldFailNextFetch = true;
     await expect(
-      service.synchronizeCatalog({ forceResync: true })
+      service.synchronizeCatalog({ sources: [ecc], forceResync: true })
     ).rejects.toThrow(/GitHub API 403 rate limit exceeded/);
 
     // Le catalogue actif précédent DOIT être intact et toujours actif !
@@ -200,10 +141,9 @@ describe('Jalon 2 — Catalogue ECC versionné, Résilience & Synchronisation r�
     'synchronise et indexe réellement le dépôt officiel affaan-m/ECC depuis GitHub en moins de 10 secondes',
     async () => {
       const liveService = new EccCatalogService(db, new GitHubOfficialEccFetcher());
+      const ecc = DEFAULT_CATALOG_SOURCES.find((s) => s.id === 'ecc-official')!;
       const liveSync = await liveService.synchronizeCatalog({
-        owner: 'affaan-m',
-        repo: 'ECC',
-        ref: 'main',
+        sources: [{ ...ecc, pinnedCommit: 'main', ref: 'main' }],
         forceResync: true,
       });
 

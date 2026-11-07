@@ -382,6 +382,7 @@ export class SelectionEngine {
         family: item.parsedMeta.family,
         slot: cls.slot,
         sourceId: cls.sourceId,
+        sourceAuthor: item.parsedMeta.sourceAuthor,
         methodology: cls.methodology,
         dependencies: item.parsedMeta.dependencies ?? [],
         adaptedContent: item.adaptedContent,

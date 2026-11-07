@@ -65,6 +65,8 @@ export const SelectedComponentSchema = z.object({
   slot: z.string().optional(),
   /** Source du catalogue (catalog-sources.ts) ou 'curated'. */
   sourceId: z.string().optional(),
+  /** Auteur de la source, pour l'attribution dans le harnais. */
+  sourceAuthor: z.string().optional(),
   /** Méthodologie d'appartenance, le cas échéant. */
   methodology: z.enum(['superpowers', 'ponytail']).optional(),
   dependencies: z.array(z.string()).default([]),

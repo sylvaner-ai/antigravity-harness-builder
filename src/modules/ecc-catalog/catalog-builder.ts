@@ -1,5 +1,5 @@
 import { ValidationIssue } from '../antigravity-adapter/schema';
-import { CatalogSourceConfig, REDISTRIBUTABLE_LICENSES, detectLicense } from './catalog-sources';
+import { CatalogSourceConfig, REDISTRIBUTABLE_LICENSES, detectCopyrightNotice, detectLicense } from './catalog-sources';
 import { countClaudeSpecificReferences, scanContentSafety } from './content-safety';
 import { getBuiltinCuratedExcellenceComponents } from './curated-excellence';
 import { IndexedEccComponentCandidate, parseAndQualifyEccRepositoryEntries } from './indexer';
@@ -20,6 +20,7 @@ export interface SourceBuildReport {
   sourceId: string;
   commitSha: string;
   license: string;
+  copyrightNotice: string;
   licenseMatchesRegistry: boolean;
   indexed: number;
   blockedUnsafe: string[];
@@ -93,13 +94,17 @@ export function buildMultiSourceCatalog(
     const { source, commitSha, entries } = snap;
     const repoUrl = `https://github.com/${source.owner}/${source.repo}`;
     const parsed = parseAndQualifyEccRepositoryEntries(entries, commitSha, repoUrl);
-    const license = detectLicense(entries.find((e) => /^LICEN[CS]E(\.md|\.txt)?$/i.test(e.relativePath))?.content);
+    const licenseText = entries.find((e) => /^LICEN[CS]E(\.md|\.txt)?$/i.test(e.relativePath))?.content;
+    const license = detectLicense(licenseText);
+    const copyrightNotice = detectCopyrightNotice(licenseText) || source.copyrightNotice;
+    const author = copyrightNotice.replace(/^Copyright\s+(?:\(c\)|©)\s*[0-9][0-9\s,–-]*/i, '').trim() || `${source.owner}/${source.repo}`;
     const redistributable = REDISTRIBUTABLE_LICENSES.has(license);
     const moduleIndex = buildModuleIndex(entries);
     const report: SourceBuildReport = {
       sourceId: source.id,
       commitSha,
       license,
+      copyrightNotice,
       licenseMatchesRegistry: license === source.license,
       indexed: 0,
       blockedUnsafe: [],
@@ -116,6 +121,7 @@ export function buildMultiSourceCatalog(
       comp.license = license;
       comp.parsedMeta.sourceId = source.id;
       comp.parsedMeta.sourcePriority = source.priority;
+      comp.parsedMeta.sourceAuthor = author;
       comp.parsedMeta.claudeReferences = countClaudeSpecificReferences(comp.rawContent);
       const module = findModule(moduleIndex, comp.sourceRelativePath);
       if (module) comp.parsedMeta.eccModule = module;
