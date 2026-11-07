@@ -216,6 +216,9 @@ export function parseAuditReportText(rawText: string): AntigravityAuditReport {
   return result.data;
 }
 
+export const AUDIT_MISSING_FEATURES_ID = 'feat-missing-from-audit';
+export const AUDIT_MISSING_FEATURES_UNCERTAINTY_ID = 'unc-audit-without-features';
+
 export interface AuditExtractionOptions {
   projectId: string;
   projectName: string;
@@ -342,7 +345,20 @@ export function extractProfileFromAuditReport(options: AuditExtractionOptions): 
   ];
 
   // Incertitudes et éléments d'attention (notamment dossiers dépréciés)
-  const uncertainties: ProjectProfile['uncertainties'] = [];
+  const uncertainties: ProjectProfile['uncertainties'] = [
+    {
+      id: AUDIT_MISSING_FEATURES_UNCERTAINTY_ID,
+      category: 'missing_information',
+      topic: 'Fonctionnalités métier du projet',
+      statement:
+        "Le profil vient du seul rapport d'audit : il ne contient aucune fonctionnalité métier. Les règles et skills seront choisis sur la seule pile technique.",
+      impact: 'high',
+      proposedFallback: 'Importer le cahier des charges du projet puis relancer l’extraction du profil.',
+      requiresHumanDecision: true,
+      sourceRefs: [docRef],
+      isResolved: false,
+    },
+  ];
 
   if (auditReport.existingAiHarness?.hasDeprecatedWorkflows) {
     uncertainties.push({
@@ -386,21 +402,18 @@ export function extractProfileFromAuditReport(options: AuditExtractionOptions): 
       },
     ],
 
+    // L'audit ne décrit que la technique et le harnais existant : les fonctionnalités viennent du cahier
+    // des charges (fusion par mergeAuditIntoProfile). Sans lui, le manque est déclaré, jamais comblé.
     features: [
       {
-        id: 'feat-modernization',
-        title: 'Modernisation du harnais Antigravity',
-        description: 'Mettre à niveau le harnais pour intégrer les règles, skills et sous-agents natifs Antigravity.',
+        id: AUDIT_MISSING_FEATURES_ID,
+        title: 'Fonctionnalités métier non fournies',
+        description:
+          "L'audit décrit la pile technique et le harnais existant, pas les fonctionnalités du projet. Importez le cahier des charges pour les obtenir.",
         priority: 'P0',
-        businessRules: [
-          'Préserver l\'intégralité des directives métier existantes de l\'équipe.',
-          'Conserver les commandes de test et build réelles du projet.',
-        ],
-        acceptanceCriteria: [
-          'Le script de mise à niveau s\'exécute sans régression de build.',
-          'Les fichiers remplacés ou retirés sont sauvegardés dans .agents/.harness-backup/ et aucun fichier modifié par l\'équipe n\'est écrasé.',
-        ],
-        epistemicStatus: 'explicit',
+        businessRules: [],
+        acceptanceCriteria: ['Le cahier des charges est importé et son profil fusionné avec l’audit.'],
+        epistemicStatus: 'missing_or_contradictory',
         confidence: 'high',
         sourceRefs: [docRef],
       },
@@ -450,5 +463,56 @@ export function extractProfileFromAuditReport(options: AuditExtractionOptions): 
       qualityLevel: 'Projet existant en production — priorité absolue à la non-régression et aux tests automatisés.',
       costPreferences: 'Optimisé : modèles compacts et rapides pour les tâches d\'audit et de mise à jour.',
     },
+  };
+}
+
+/** Fusionne deux listes d'éléments identifiés, la première l'emportant à identifiant égal. */
+function mergeById<T extends { id: string }>(first: readonly T[], second: readonly T[]): T[] {
+  const seen = new Set(first.map((x) => x.id));
+  return [...first, ...second.filter((x) => !seen.has(x.id))];
+}
+
+/**
+ * Parcours B avec cahier des charges : le cahier fournit le métier (domaine, rôles, fonctionnalités, design system),
+ * l'audit fournit la réalité du code (pile technique, commandes, structure, consignes de l'équipe à préserver).
+ * Une technologie citée par le cahier mais absente du code est signalée, pas ajoutée.
+ */
+export function mergeAuditIntoProfile(specProfile: ProjectProfile, auditProfile: ProjectProfile): ProjectProfile {
+  const auditTech = auditProfile.techStack;
+  const norm = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const inCode = new Set(
+    [...auditTech.languages, ...auditTech.frameworks, ...auditTech.databases, ...auditTech.testingTools].map(norm)
+  );
+  const specOnly = [
+    ...specProfile.techStack.languages,
+    ...specProfile.techStack.frameworks,
+    ...specProfile.techStack.databases,
+  ].filter((t) => !inCode.has(norm(t)));
+
+  const uncertainties = mergeById(
+    specProfile.uncertainties,
+    auditProfile.uncertainties.filter((u) => u.id !== AUDIT_MISSING_FEATURES_UNCERTAINTY_ID)
+  );
+  if (specOnly.length > 0) {
+    uncertainties.push({
+      id: 'unc-spec-stack-not-in-code',
+      category: 'contradiction',
+      topic: 'Pile technique : cahier des charges et code existant',
+      statement: `Le cahier des charges cite ${specOnly.join(', ')}, absent(s) du code audité. Le harnais suit le code existant.`,
+      impact: 'medium',
+      proposedFallback: 'Confirmer si une migration technique est prévue ; sinon corriger le cahier des charges.',
+      requiresHumanDecision: true,
+      sourceRefs: [],
+      isResolved: false,
+    });
+  }
+
+  return {
+    ...specProfile,
+    techStack: auditTech,
+    architectureConstraints: mergeById(auditProfile.architectureConstraints, specProfile.architectureConstraints),
+    qualityAndTestingStrategy: mergeById(auditProfile.qualityAndTestingStrategy, specProfile.qualityAndTestingStrategy),
+    securityAndCompliance: mergeById(specProfile.securityAndCompliance, auditProfile.securityAndCompliance),
+    uncertainties,
   };
 }
