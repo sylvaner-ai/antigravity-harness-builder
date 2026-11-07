@@ -18,6 +18,7 @@ import {
   parseAuditReportText,
   AntigravityAuditReport,
 } from '@/modules/project-profile/audit-extractor';
+import { nextStepAfterAuditIngestion } from '@/lib/after-audit-ingestion';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function NewProjectPage() {
 
   // Champs mode "Mise à niveau"
   const [auditText, setAuditText] = useState('');
+  const [extracting, setExtracting] = useState(false);
   const [parsedAudit, setParsedAudit] = useState<AntigravityAuditReport | null>(null);
   const [auditParseError, setAuditParseError] = useState<string | null>(null);
 
@@ -128,8 +130,8 @@ export default function NewProjectPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du projet');
 
-        // Redirection directe vers le profil configuré
-        router.push(`/projects/${data.project.id}/step-profile`);
+        // Cahier des charges joint à l'audit : extraction et fusion du profil, puis profil
+        router.push(await nextStepAfterAuditIngestion(data.project.id, data, () => setExtracting(true)));
       } else {
         if (!name.trim()) {
           throw new Error('Le nom du projet est obligatoire.');
@@ -380,15 +382,32 @@ export default function NewProjectPage() {
                         : ''}
                     </p>
                   </div>
-                  {(parsedAudit.functionalDocuments ?? []).length > 0 && (
-                    <div className="sm:col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
-                      <span className="font-semibold block">Documents fonctionnels repérés dans le dépôt :</span>
-                      <span>
-                        {parsedAudit.functionalDocuments.map((d) => d.path).join(', ')}. Importez le cahier des
-                        charges à l&apos;étape suivante pour que le harnais connaisse les fonctionnalités du projet.
-                      </span>
-                    </div>
-                  )}
+                  <div className="sm:col-span-2">
+                    <span className="font-semibold text-slate-500 block">Documents fonctionnels joints :</span>
+                    {(parsedAudit.functionalDocuments ?? []).some((d) => d.content) ? (
+                      <ul className="mt-0.5 space-y-0.5 text-slate-700">
+                        {parsedAudit.functionalDocuments
+                          .filter((d) => d.content)
+                          .map((d) => (
+                            <li key={d.path}>
+                              <code className="font-mono">{d.path}</code>
+                              {d.role === 'SPECIFICATION' ? ' — cahier des charges' : d.role === 'DESIGN_SYSTEM' ? ' — design system' : ''}
+                            </li>
+                          ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-0.5 p-2 bg-amber-50 border border-amber-200 rounded text-amber-900">
+                        Aucun : le harnais ne connaîtra que la pile technique. Ajoutez le cahier des charges au dépôt
+                        et relancez l&apos;audit, ou importez-le à l&apos;étape « Import ».
+                      </p>
+                    )}
+                    {(parsedAudit.functionalDocuments ?? []).some((d) => !d.content) && (
+                      <p className="mt-1 text-amber-800">
+                        Non joints (format non texte), à importer à la main :{' '}
+                        {parsedAudit.functionalDocuments.filter((d) => !d.content).map((d) => d.path).join(', ')}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -540,7 +559,9 @@ export default function NewProjectPage() {
             className="inline-flex items-center space-x-1.5 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 text-white rounded-lg text-xs font-semibold shadow-xs transition-all"
           >
             <span>
-              {loading
+              {extracting
+                ? 'Extraction du cahier des charges…'
+                : loading
                 ? 'Création...'
                 : projectMode === 'UPGRADE'
                   ? 'Analyser l\'audit & Créer'

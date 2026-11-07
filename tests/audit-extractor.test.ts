@@ -163,7 +163,7 @@ describe('Audit 2.0 — inventaire du harnais existant', () => {
   });
 
   it('le prompt demande les empreintes, le manifeste précédent et les documents fonctionnels', () => {
-    expect(AUDIT_EXTRACTION_PROMPT).toContain('"auditVersion": "2.0.0"');
+    expect(AUDIT_EXTRACTION_PROMPT).toContain('"auditVersion": "2.1.0"');
     expect(AUDIT_EXTRACTION_PROMPT).toContain('sha256sum');
     expect(AUDIT_EXTRACTION_PROMPT).toContain('docs/HARNESS_MANIFEST.json');
     expect(AUDIT_EXTRACTION_PROMPT).toContain('functionalDocuments');

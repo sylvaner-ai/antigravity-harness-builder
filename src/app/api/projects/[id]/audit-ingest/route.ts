@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { getDb, projects, sourceDocuments } from '@/db';
+import { getDb, projects } from '@/db';
 import { AuthService, requireAuthUser } from '@/modules/auth';
-import {
-  parseAuditReportText,
-  AntigravityAuditReportSchema,
-  ProjectProfileService,
-} from '@/modules/project-profile';
-import { computeSha256 } from '@/modules/package-exporter/exporter';
-import { MockLLMAdapter } from '@/modules/llm-gateway/mock-adapter';
+import { parseAuditReportText, AntigravityAuditReportSchema } from '@/modules/project-profile';
+import { ingestAuditBundle } from '@/modules/documents/audit-bundle';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,38 +44,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       );
     }
 
-    const rawAuditString = JSON.stringify(auditReport, null, 2);
-    const auditSha256 = computeSha256(rawAuditString);
-
-    // 1. Sauvegarder le rapport d'audit comme document source
-    const [doc] = await db
-      .insert(sourceDocuments)
-      .values({
-        projectId,
-        role: 'AUDIT_REPORT',
-        originalName: 'antigravity-audit.json',
-        safeStoragePath: `audits/${projectId}/antigravity-audit.json`,
-        mimeType: 'application/json',
-        sizeBytes: Buffer.byteLength(rawAuditString, 'utf-8'),
-        sha256Hash: auditSha256,
-        extractionStatus: 'COMPLETED',
-        extractedText: rawAuditString,
-        extractionMeta: {
-          method: 'antigravity-audit-scan',
-        },
-      })
-      .returning();
-
-    const documentId = doc?.id ?? 'audit-doc';
-
-    // 2. Extraire et persister directement le profil de projet
-    const profileService = new ProjectProfileService(db, new MockLLMAdapter());
-    const profile = await profileService.ingestAuditReport({
+    const ingestion = await ingestAuditBundle({
+      db,
       projectId,
       projectName: auditReport.projectName || project.name,
       targetSurface: project.targetSurface,
       auditReport,
-      documentId,
     });
 
     // 3. Mettre à jour le projet si le nom ou description ont été extraits
@@ -93,8 +62,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     return NextResponse.json({
       success: true,
-      document: doc,
-      profile,
+      profile: ingestion.profile,
+      importedDocuments: ingestion.importedDocuments,
+      documentsWithoutContent: ingestion.documentsWithoutContent,
+      hasSpecification: ingestion.hasSpecification,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur lors de l ingestion de l audit.';
