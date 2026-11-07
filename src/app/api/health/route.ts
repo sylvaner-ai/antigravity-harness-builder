@@ -13,19 +13,28 @@ export async function GET() {
     await db.execute(sql`SELECT 1`);
     dbOk = true;
 
-    // Récupération de l'état du catalogue ECC actif
-    const activeSyncs = await db.select().from(eccSyncs).where(sql`is_active_catalog = true`).limit(1);
-    const active = activeSyncs[0];
-    if (active) {
-      activeCatalogInfo = {
-        commitSha: active.commitSha,
-        versionTag: active.versionTag,
-        componentCount: active.componentCount,
-        syncedAt: active.syncedAt,
-      };
-    }
-  } catch (err: unknown) {
+  } catch {
     dbOk = false;
+  }
+
+  // Information seulement : l'état du catalogue ne rend jamais l'application « malade ».
+  // Colonnes explicites, pour ne pas dépendre d'une colonne ajoutée par une migration récente.
+  if (dbOk) {
+    try {
+      const [active] = await getDb()
+        .select({
+          commitSha: eccSyncs.commitSha,
+          versionTag: eccSyncs.versionTag,
+          componentCount: eccSyncs.componentCount,
+          syncedAt: eccSyncs.syncedAt,
+        })
+        .from(eccSyncs)
+        .where(sql`is_active_catalog = true`)
+        .limit(1);
+      if (active) activeCatalogInfo = active;
+    } catch {
+      activeCatalogInfo = null;
+    }
   }
 
   const status = dbOk ? 200 : 503;
