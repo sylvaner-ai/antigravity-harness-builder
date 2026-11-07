@@ -4,7 +4,7 @@ import { LLMGatewayPort } from '../llm-gateway';
 import { ProjectProfile, ProjectProfileSchema } from './schema';
 import { AntigravitySurface } from '../antigravity-adapter/schema';
 import { computeSha256 } from '../package-exporter/exporter';
-import { AuditExtractionOptions, extractProfileFromAuditReport } from './audit-extractor';
+import { AuditExtractionOptions, extractProfileFromAuditReport, mergeAuditIntoProfile } from './audit-extractor';
 
 export interface ProfileExtractionInput {
   projectId: string;
@@ -14,6 +14,8 @@ export interface ProfileExtractionInput {
   designSystemDocumentText: string;
   supplementaryNotes?: Record<string, string>;
   images?: Array<{ mimeType: string; data: Uint8Array }>;
+  /** Parcours B : profil issu du rapport d'audit, fusionné avec celui du cahier des charges. */
+  auditProfile?: ProjectProfile;
 }
 
 export class ProjectProfileService {
@@ -160,7 +162,9 @@ Produis le profil complet en JSON conforme au schéma.`;
       images: input.images,
     });
 
-    const profileData = llmRes.data;
+    const profileData = input.auditProfile
+      ? ProjectProfileSchema.parse(mergeAuditIntoProfile(llmRes.data, input.auditProfile))
+      : llmRes.data;
     const profileSha256 = computeSha256(JSON.stringify(profileData));
 
     // Calcul de la version incrémentale pour garantir que la nouvelle extraction devient la version active

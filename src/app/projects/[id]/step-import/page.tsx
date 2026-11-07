@@ -343,8 +343,15 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
       {/* Cartes d'upload classiques / complémentaires */}
       <div>
         <h3 className="text-sm font-semibold text-slate-800 mb-3">
-          {isUpgradeMode ? 'Documents & Spécifications Complémentaires (Optionnel)' : 'Documents Fondateurs du Projet'}
+          {isUpgradeMode ? 'Cahier des charges (recommandé)' : 'Documents Fondateurs du Projet'}
         </h3>
+        {isUpgradeMode && (
+          <p className="text-xs text-slate-600 mb-3 -mt-1">
+            Sans cahier des charges, le harnais ne connaît que la pile technique. Avec lui, l&apos;extraction fusionne
+            les fonctionnalités du cahier et la réalité du code relevée par l&apos;audit (pile, commandes, consignes de
+            l&apos;équipe).
+          </p>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Document 1 : Spécification */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -353,7 +360,7 @@ export default function StepImportPage({ params }: { params: Promise<{ id: strin
                 <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                   isUpgradeMode ? 'text-slate-600 bg-slate-100' : 'text-indigo-600 bg-indigo-50'
                 }`}>
-                  {isUpgradeMode ? 'Optionnel' : 'Obligatoire'}
+                  {isUpgradeMode ? 'Recommandé' : 'Obligatoire'}
                 </span>
                 {specDoc && (
                   <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">

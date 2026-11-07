@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   parseAuditReportText,
   extractProfileFromAuditReport,
+  mergeAuditIntoProfile,
+  AUDIT_MISSING_FEATURES_UNCERTAINTY_ID,
   AUDIT_EXTRACTION_PROMPT,
 } from '../src/modules/project-profile/audit-extractor';
 import { ProjectProfileSchema } from '../src/modules/project-profile/schema';
@@ -166,5 +168,56 @@ describe('Audit 2.0 — inventaire du harnais existant', () => {
     expect(AUDIT_EXTRACTION_PROMPT).toContain('docs/HARNESS_MANIFEST.json');
     expect(AUDIT_EXTRACTION_PROMPT).toContain('functionalDocuments');
     expect(AUDIT_EXTRACTION_PROMPT).toContain("N'invente jamais une empreinte");
+  });
+});
+
+describe('Parcours B — fusion du profil d’audit et du cahier des charges', () => {
+  const audit = parseAuditReportText(
+    JSON.stringify({
+      projectName: 'felicicar',
+      techStack: { languages: ['TypeScript'], frameworks: ['Next.js', 'Prisma'], databases: ['PostgreSQL'], testingTools: ['Vitest'] },
+      operationalCommands: { test: 'npm test' },
+      existingDirectivesToPreserve: ['Toujours écrire les montants en centimes.'],
+    })
+  );
+  const auditProfile = extractProfileFromAuditReport({ projectId: 'p1', projectName: 'felicicar', auditReport: audit });
+
+  it('un profil d’audit seul déclare l’absence de fonctionnalités au lieu d’en inventer une', () => {
+    expect(auditProfile.features).toHaveLength(1);
+    expect(auditProfile.features[0]?.epistemicStatus).toBe('missing_or_contradictory');
+    expect(JSON.stringify(auditProfile)).not.toContain('Modernisation du harnais');
+    expect(auditProfile.uncertainties.some((u) => u.id === AUDIT_MISSING_FEATURES_UNCERTAINTY_ID)).toBe(true);
+    expect(ProjectProfileSchema.safeParse(auditProfile).success).toBe(true);
+  });
+
+  it('garde le métier du cahier, la technique de l’audit, et signale une technologie absente du code', () => {
+    const specProfile = {
+      ...auditProfile,
+      projectDescription: 'Location de véhicules B2B',
+      features: [
+        {
+          id: 'feat-contrats',
+          title: 'Contrats de location',
+          description: 'Signature électronique des contrats',
+          priority: 'P0' as const,
+          businessRules: [],
+          acceptanceCriteria: ['Le contrat est signé'],
+          epistemicStatus: 'explicit' as const,
+          sourceRefs: [],
+        },
+      ],
+      techStack: { ...auditProfile.techStack, frameworks: ['Next.js', 'Drizzle'] },
+      uncertainties: [],
+      architectureConstraints: [],
+      qualityAndTestingStrategy: [],
+    };
+    const merged = mergeAuditIntoProfile(specProfile, auditProfile);
+    expect(merged.features.map((f) => f.id)).toEqual(['feat-contrats']);
+    expect(merged.techStack.frameworks).toEqual(['Next.js', 'Prisma']);
+    expect(merged.architectureConstraints.some((a) => a.value.includes('centimes'))).toBe(true);
+    expect(merged.qualityAndTestingStrategy.some((q) => q.value.includes('npm test'))).toBe(true);
+    expect(merged.uncertainties.some((u) => u.id === AUDIT_MISSING_FEATURES_UNCERTAINTY_ID)).toBe(false);
+    expect(merged.uncertainties.find((u) => u.id === 'unc-spec-stack-not-in-code')?.statement).toContain('Drizzle');
+    expect(ProjectProfileSchema.safeParse(merged).success).toBe(true);
   });
 });
