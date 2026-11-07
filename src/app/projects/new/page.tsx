@@ -369,6 +369,26 @@ export default function NewProjectPage() {
                       ))}
                     </div>
                   </div>
+                  <div className="sm:col-span-2">
+                    <span className="font-semibold text-slate-500 block">Harnais existant :</span>
+                    <p className="text-slate-700 mt-0.5">
+                      {(parsedAudit.existingAiHarness?.files ?? []).length > 0
+                        ? `${parsedAudit.existingAiHarness?.files.length} fichier(s) inventorié(s) avec empreinte`
+                        : "Aucun inventaire détaillé (audit au format 1.0 : relancez le prompt d'audit actuel pour un plan de mise à niveau précis)"}
+                      {parsedAudit.previousGeneration
+                        ? ` — harnais AHB précédent détecté (${parsedAudit.previousGeneration.files.length} fichier(s) gérés)`
+                        : ''}
+                    </p>
+                  </div>
+                  {(parsedAudit.functionalDocuments ?? []).length > 0 && (
+                    <div className="sm:col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+                      <span className="font-semibold block">Documents fonctionnels repérés dans le dépôt :</span>
+                      <span>
+                        {parsedAudit.functionalDocuments.map((d) => d.path).join(', ')}. Importez le cahier des
+                        charges à l&apos;étape suivante pour que le harnais connaisse les fonctionnalités du projet.
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
