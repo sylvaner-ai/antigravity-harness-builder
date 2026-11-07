@@ -41,4 +41,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 USER nextjs
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Les migrations passent avant le démarrage du serveur : le schéma est à jour avant le contrôle de santé.
+# Elles sont additives, donc sans risque pour l'ancien conteneur encore en service pendant la bascule.
+CMD ["sh", "-c", "node dist/migrate.cjs && exec node server.js"]
