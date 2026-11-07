@@ -3,6 +3,8 @@
  * Extrait de templates.ts pour maintenir la cohésion et respecter le plafond de 800 lignes.
  */
 
+import { UpgradePlanEntry, renderUpgradePlanMarkdown } from './upgrade-plan';
+
 /**
  * Assainit et valide la commande de smoke test issue de l'audit
  * pour empêcher toute injection de commandes shell hostiles (;, &&, ||, `, $(), etc.)
@@ -106,8 +108,13 @@ export function renderUpgradePromptMarkdown(params: {
   targetSurface?: string;
   files: Array<{ relativePath: string; content: string }>;
   operationalTestCommand?: string;
+  /** Plan calculé à partir d'un audit 2.0 ; sans lui, l'agent établit lui-même le plan (protocole général). */
+  plan?: readonly UpgradePlanEntry[];
 }): string {
-  const { projectName, targetSurface = 'IDE', files, operationalTestCommand } = params;
+  const { projectName, targetSurface = 'IDE', operationalTestCommand, plan } = params;
+  // Les fichiers déjà identiques n'ont pas besoin d'être recopiés dans le prompt.
+  const unchanged = new Set((plan ?? []).filter((e) => e.action === 'UNCHANGED').map((e) => e.path));
+  const files = params.files.filter((f) => !unchanged.has(f.relativePath));
 
   // Calcul du fence dynamique le plus long nécessaire
   let maxBackticks = 3;
@@ -170,7 +177,7 @@ Avant toute modification ou création :
 3. Vérifie l'état Git (\`git status --porcelain\`). Si des changements non commités existent, signale-les avant de continuer.
 
 ### Phase 2 — Mode Simulation préalable (Dry-Run d'Impact)
-Inspecte l'arborescence actuelle et présente un tableau récapitulatif des actions prévues :
+${plan ? "Présente à l'utilisateur le **plan calculé** (section « Plan de mise à niveau » ci-dessous) après avoir vérifié les empreintes indiquées, puis demande sa confirmation avant toute écriture. Les catégories ci-dessous ne servent que pour un fichier absent du plan." : "Inspecte l'arborescence actuelle et présente un tableau récapitulatif des actions prévues :"}
 - **\`[KEEP / PRESERVE]\`** : Fichiers et règles personnalisées rédigées par l'équipe qui ne font pas partie du catalogue géré — **Ne jamais écraser**.
 - **\`[CREATE]\`** : Nouveaux composants inexistants dans le projet — **À créer**.
 - **\`[SMART MERGE]\`** : Fichier \`AGENTS.md\` existant — **Fusionner uniquement dans les balises délimitées**.
@@ -213,7 +220,7 @@ ${smokeTestInstructions}
 
 ---
 
-## Sommaire des ${files.length} fichiers gérés à intégrer :
+${plan ? renderUpgradePlanMarkdown(plan) + '\n---\n\n' : ''}## Sommaire des ${files.length} fichiers gérés à intégrer :
 ${filesSummary}
 
 ---

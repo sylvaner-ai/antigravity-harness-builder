@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, desc } from 'drizzle-orm';
-import { getDb, harnessGenerations, generatedArtifacts, projects } from '@/db';
+import { and, eq, desc } from 'drizzle-orm';
+import { getDb, harnessGenerations, generatedArtifacts, projects, sourceDocuments } from '@/db';
+import { AntigravityAuditReport, parseAuditReportText } from '@/modules/project-profile/audit-extractor';
+import { computeUpgradePlan } from '@/modules/package-exporter/upgrade-plan';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { LocalDiskStorage } from '@/modules/documents/storage';
 import {
@@ -44,10 +46,33 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           content: a.content,
         }));
 
+      // Plan calculé à partir du dernier audit importé (audit 2.0) et de la commande de test du projet
+      const [auditDoc] = await db
+        .select()
+        .from(sourceDocuments)
+        .where(and(eq(sourceDocuments.projectId, projectId), eq(sourceDocuments.role, 'AUDIT_REPORT')))
+        .orderBy(desc(sourceDocuments.createdAt))
+        .limit(1);
+      let audit: AntigravityAuditReport | undefined;
+      try {
+        audit = auditDoc?.extractedText ? parseAuditReportText(auditDoc.extractedText) : undefined;
+      } catch {
+        audit = undefined; // audit illisible : protocole général sans plan
+      }
+      const plan = audit
+        ? computeUpgradePlan({
+            newFiles: files,
+            existingFiles: audit.existingAiHarness?.files ?? [],
+            previousFiles: audit.previousGeneration?.files,
+          })
+        : undefined;
+
       const upgradePrompt = renderUpgradePromptMarkdown({
         projectName: project.name,
         targetSurface: project.targetSurface || 'IDE',
         files,
+        operationalTestCommand: audit?.operationalCommands?.test,
+        plan,
       });
 
       const disposition = url.searchParams.get('disposition') === 'inline' ? 'inline' : 'attachment';
