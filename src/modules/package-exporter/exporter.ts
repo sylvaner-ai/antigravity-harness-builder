@@ -37,6 +37,7 @@ import {
   renderDeploymentPromptMarkdown,
   renderUpgradePromptMarkdown,
 } from './templates';
+import { filesForProjectInstall } from './install-files';
 import { renderModelEffortGovernanceRuleBody } from './governance-template';
 
 export { renderDeploymentPromptMarkdown, renderUpgradePromptMarkdown };
@@ -400,10 +401,11 @@ export function buildDeterministicHarnessPackage(
   const zipBuffer = zipSync(zipEntries);
   const zipSha256 = computeSha256(zipBuffer);
 
+  const installFiles = filesForProjectInstall(builtFiles);
   const deploymentPromptMarkdown = renderDeploymentPromptMarkdown({
     projectName: input.profile.projectName,
     targetSurface: input.profile.targetSurface,
-    files: builtFiles,
+    files: installFiles,
   });
 
   const testCmdItem = input.profile.qualityAndTestingStrategy?.find((q) => q.id === 'quality-commands')?.value;
@@ -413,7 +415,7 @@ export function buildDeterministicHarnessPackage(
   const upgradePromptMarkdown = renderUpgradePromptMarkdown({
     projectName: input.profile.projectName,
     targetSurface: input.profile.targetSurface,
-    files: builtFiles,
+    files: installFiles,
     operationalTestCommand,
   });
 

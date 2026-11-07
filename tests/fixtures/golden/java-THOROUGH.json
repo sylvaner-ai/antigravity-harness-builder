@@ -1,10 +1,10 @@
 {
- "total": 68,
+ "total": 67,
  "bySource": {
   "cloudflare-security-audit": 1,
   "curated": 3,
   "dietrichgebert-ponytail": 4,
-  "ecc-official": 47,
+  "ecc-official": 46,
   "obra-superpowers": 13
  },
  "selected": [
@@ -420,12 +420,6 @@
    "slug": "security-auditor",
    "slot": "agent:security",
    "sourceId": "curated"
-  },
-  {
-   "kind": "SUBAGENT",
-   "slug": "silent-failure-hunter",
-   "slot": "agent:silent-failures",
-   "sourceId": "ecc-official"
   },
   {
    "kind": "SUBAGENT",

@@ -1,11 +1,11 @@
 {
- "total": 102,
+ "total": 84,
  "bySource": {
   "cloudflare-security-audit": 1,
   "curated": 5,
   "dietrichgebert-ponytail": 4,
-  "ecc-official": 65,
-  "emil-kowalski-skills": 14,
+  "ecc-official": 54,
+  "emil-kowalski-skills": 7,
   "obra-superpowers": 13
  },
  "selected": [
@@ -179,33 +179,15 @@
   },
   {
    "kind": "SKILL",
-   "slug": "animation-vocabulary",
-   "slot": "skill:ui:animation:vocabulary",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
    "slug": "api-design",
    "slot": "skill:backend:api-design",
    "sourceId": "ecc-official"
   },
   {
    "kind": "SKILL",
-   "slug": "apple-design",
-   "slot": "skill:ui:apple-design",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
    "slug": "architecture-decision-records",
    "slot": "skill:architecture:adr",
    "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "ask-sonner",
-   "slot": "skill:stack:react:toasts",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -228,26 +210,8 @@
   },
   {
    "kind": "SKILL",
-   "slug": "browser-qa",
-   "slot": "skill:ui:browser-qa",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "change-impact",
-   "slot": "skill:quality:change-impact",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "click-path-audit",
    "slot": "skill:ui:click-path-audit",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "code-tour",
-   "slot": "skill:docs:code-tour",
    "sourceId": "ecc-official"
   },
   {
@@ -301,22 +265,10 @@
   },
   {
    "kind": "SKILL",
-   "slug": "error-handling",
-   "slot": "skill:quality:error-handling",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "executing-plans",
    "slot": "skill:workflow:plan-execution",
    "sourceId": "obra-superpowers",
    "methodology": "superpowers"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "find-animation-opportunities",
-   "slot": "skill:ui:animation:opportunities",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -339,12 +291,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "git-workflow",
-   "slot": "skill:workflow:git",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "hexagonal-architecture",
    "slot": "skill:architecture:hexagonal",
    "sourceId": "ecc-official"
@@ -359,18 +305,6 @@
    "kind": "SKILL",
    "slug": "mobile-native",
    "slot": "skill:ui:mobile-web",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "nextjs-turbopack",
-   "slot": "skill:stack:nextjs:turbopack",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "pick-ui-library",
-   "slot": "skill:ui:library-choice",
    "sourceId": "emil-kowalski-skills"
   },
   {
@@ -421,12 +355,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "prototype",
-   "slot": "skill:ui:prototype",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
    "slug": "react-patterns",
    "slot": "skill:stack:react:patterns",
    "sourceId": "ecc-official"
@@ -449,12 +377,6 @@
    "slot": "skill:workflow:review-reception",
    "sourceId": "obra-superpowers",
    "methodology": "superpowers"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "remove-animations",
-   "slot": "skill:ui:animation:removal",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -556,20 +478,8 @@
   },
   {
    "kind": "SUBAGENT",
-   "slug": "code-simplifier",
-   "slot": "agent:simplifier",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "database-reviewer",
    "slot": "agent:database",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
-   "slug": "doc-updater",
-   "slot": "agent:docs",
    "sourceId": "ecc-official"
   },
   {
@@ -604,32 +514,14 @@
   },
   {
    "kind": "SUBAGENT",
-   "slug": "refactor-cleaner",
-   "slot": "agent:refactor",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "security-auditor",
    "slot": "agent:security",
    "sourceId": "curated"
   },
   {
    "kind": "SUBAGENT",
-   "slug": "silent-failure-hunter",
-   "slot": "agent:silent-failures",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "tdd-guide",
    "slot": "agent:tdd",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
-   "slug": "type-design-analyzer",
-   "slot": "agent:type-design",
    "sourceId": "ecc-official"
   },
   {
