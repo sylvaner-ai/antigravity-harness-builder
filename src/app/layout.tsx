@@ -39,7 +39,7 @@ export default function RootLayout({
               <a href="/projects/new" className="text-slate-600 hover:text-slate-900 transition-colors">
                 Nouveau Harnais
               </a>
-              <a href="/admin/ecc-sync" className="text-slate-600 hover:text-slate-900 transition-colors">
+              <a href="/admin/catalog" className="text-slate-600 hover:text-slate-900 transition-colors">
                 Catalogue
               </a>
               <UserNav />

@@ -11,13 +11,10 @@ import { extractTarGzTextFilesInMemory } from './tar-extractor';
 export type EccSyncRecord = typeof eccSyncs.$inferSelect;
 export type EccComponentRecord = typeof eccComponents.$inferSelect;
 
-import {
-  CatalogSourceConfig,
-  DEFAULT_CATALOG_SOURCES,
-  resolveSourceRef,
-} from './catalog-sources';
+import { CatalogSourceConfig, DEFAULT_CATALOG_SOURCES, SyncedSourceSnapshot } from './catalog-sources';
 import { buildMultiSourceCatalog, SourceSnapshot } from './catalog-builder';
 import { computeSha256 } from '../package-exporter/exporter';
+import { activeSourceConfigs } from './source-registry';
 export { DEFAULT_CATALOG_SOURCES };
 export type { CatalogSourceConfig };
 
@@ -141,76 +138,63 @@ export class EccCatalogService {
   }
 
   /**
-   * Synchronise le catalogue ECC depuis la source officielle (ou une référence/commit donné).
+   * Synchronise le catalogue depuis les sources actives (table `catalog_sources`), chacune sur son commit figé.
    *
    * Garanties de résilience (FR-04 & §11.2) :
-   * 1. Si le commit demandé est déjà le catalogue actif valide, le retourne immédiatement (cache SHA).
-   * 2. Toute erreur réseau, tarball corrompu ou catalogue vide est enregistrée avec le statut `FAILED`
-   *    et **ne remplace jamais** le dernier catalogue actif valide.
+   * 1. Si le catalogue obtenu est identique au catalogue actif valide, celui-ci est retourné (sauf `forceResync`).
+   * 2. L'échec d'une bibliothèque de base (rôle BASE_LIBRARY), un catalogue vide ou une erreur réseau sont
+   *    enregistrés avec le statut `FAILED` et **ne remplacent jamais** le dernier catalogue actif valide.
+   *    L'échec d'une source complémentaire est consigné dans `sources` sans bloquer la synchronisation.
    * 3. La bascule de `isActiveCatalog = true` s'effectue dans une transaction PostgreSQL atomique
    *    uniquement après validation et insertion complète des composants.
    */
   async synchronizeCatalog(options?: {
-    owner?: string;
-    repo?: string;
-    ref?: string;
     forceResync?: boolean;
-    includeEmilKowalskiSkills?: boolean;
-    includeSuperpowersSkills?: boolean;
-    includeCloudflareSecuritySkills?: boolean;
-    includePonytailSkills?: boolean;
+    /** Sources à synchroniser ; par défaut, les sources actives en base. */
+    sources?: CatalogSourceConfig[];
     includeCuratedExcellence?: boolean;
   }): Promise<EccSyncRecord> {
-    const eccSource = DEFAULT_CATALOG_SOURCES.find((src) => src.id === 'ecc-official')!;
-    const owner = options?.owner ?? process.env.ECC_REPO_OWNER ?? eccSource.owner;
-    const repo = options?.repo ?? process.env.ECC_REPO_NAME ?? eccSource.repo;
-    // Commit figé par défaut : une génération est reproductible ; ECC_DEFAULT_REF ou `ref` permettent de monter de version.
-    const ref = options?.ref ?? process.env.ECC_DEFAULT_REF ?? resolveSourceRef(eccSource);
-
-    const includeFlags: Record<string, boolean | undefined> = {
-      'emil-kowalski-skills': options?.includeEmilKowalskiSkills,
-      'obra-superpowers': options?.includeSuperpowersSkills,
-      'cloudflare-security-audit': options?.includeCloudflareSecuritySkills,
-      'dietrichgebert-ponytail': options?.includePonytailSkills,
-    };
-
-    let resolvedSha = ref;
+    let resolvedSha = 'unknown';
 
     try {
-      resolvedSha = await this.fetcher.resolveRefCommitSha(owner, repo, ref);
+      const sources = options?.sources ?? (await activeSourceConfigs(this.db));
+      if (sources.length === 0) throw new Error('Aucune source active : activez au moins une source du catalogue.');
 
-      const tarGzBytes = await this.fetcher.downloadRepositoryTarball(owner, repo, resolvedSha);
-      const entries = extractTarGzTextFilesInMemory(tarGzBytes);
-
-      if (entries.length === 0) {
-        throw new Error(
-          'Catalogue ECC vide ou structure du dépôt incompatible : aucun fichier pertinent trouvé dans le tarball.'
-        );
-      }
-
-      const snapshots: SourceSnapshot[] = [
-        { source: { ...eccSource, owner, repo, pinnedCommit: resolvedSha, ref: resolvedSha }, commitSha: resolvedSha, entries },
-      ];
-
-      // Sources complémentaires : chacune sur son commit figé ; un échec n'invalide pas le catalogue.
-      for (const source of DEFAULT_CATALOG_SOURCES) {
-        if (source.id === eccSource.id || !source.enabled || !includeFlags[source.id]) continue;
+      const snapshots: SourceSnapshot[] = [];
+      const synced: SyncedSourceSnapshot[] = [];
+      for (const source of sources) {
         try {
-          const sha = await this.fetcher.resolveRefCommitSha(source.owner, source.repo, resolveSourceRef(source));
+          const sha = await this.fetcher.resolveRefCommitSha(source.owner, source.repo, source.pinnedCommit);
           const bytes = await this.fetcher.downloadRepositoryTarball(source.owner, source.repo, sha);
-          snapshots.push({ source, commitSha: sha, entries: extractTarGzTextFilesInMemory(bytes) });
+          snapshots.push({ source: { ...source, pinnedCommit: sha, ref: sha }, commitSha: sha, entries: extractTarGzTextFilesInMemory(bytes) });
+          if (resolvedSha === 'unknown' && source.role === 'BASE_LIBRARY') resolvedSha = sha;
         } catch (err) {
-          console.warn(`Note : synchronisation complémentaire de ${source.owner}/${source.repo} ignorée :`, err);
+          if (source.role === 'BASE_LIBRARY') throw err;
+          synced.push({
+            id: source.id, name: source.name, owner: source.owner, repo: source.repo, commitSha: source.pinnedCommit,
+            license: source.license, copyrightNotice: source.copyrightNotice, priority: source.priority, componentCount: 0,
+            error: sanitizeErrorMessage(err).message,
+          });
         }
       }
 
       const built = buildMultiSourceCatalog(snapshots, { includeCurated: options?.includeCuratedExcellence === true });
       const allComponents = built.components;
       const versionTag = built.versionTag;
+      if (resolvedSha === 'unknown') resolvedSha = snapshots[0]?.commitSha ?? 'unknown';
 
-      if (!allComponents.some((c) => c.parsedMeta.sourceId === eccSource.id)) {
-        throw new Error('Aucun composant valide (règle, skill ou sous-agent) extrait du tarball ECC.');
+      if (!allComponents.some((c) => c.parsedMeta.sourceId && c.parsedMeta.sourceId !== 'curated')) {
+        throw new Error('Aucun composant valide (règle, skill ou sous-agent) extrait des sources actives.');
       }
+
+      for (const r of built.reports) {
+        const snap = snapshots.find((s) => s.source.id === r.sourceId)!;
+        synced.push({
+          id: r.sourceId, name: snap.source.name, owner: snap.source.owner, repo: snap.source.repo, commitSha: r.commitSha,
+          license: r.license, copyrightNotice: r.copyrightNotice, priority: snap.source.priority, componentCount: r.indexed,
+        });
+      }
+      synced.sort((a, b) => b.priority - a.priority);
 
       if (!options?.forceResync) {
         const currentActive = await this.getActiveCatalogSync();
@@ -238,6 +222,7 @@ export class EccCatalogService {
             componentCount: allComponents.length,
             catalogSha256,
             errorDetails: null,
+            sources: synced,
           })
           .returning();
 
@@ -304,7 +289,7 @@ export class EccCatalogService {
         },
       });
 
-      throw new Error(`Synchronisation ECC échouée : ${safeErr.message}`);
+      throw new Error(`Synchronisation du catalogue échouée : ${safeErr.message}`);
     }
   }
 

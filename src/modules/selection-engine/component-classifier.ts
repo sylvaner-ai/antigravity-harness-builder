@@ -5,7 +5,6 @@ import {
   CURATED_SOURCE_ID,
   CURATED_SOURCE_PRIORITY,
   UNKNOWN_SOURCE_PRIORITY,
-  findSourceById,
   findSourceByUrl,
 } from '../ecc-catalog/catalog-sources';
 import { assessPlatformFit } from '../ecc-catalog/content-safety';
@@ -398,8 +397,8 @@ const CURATED: Record<string, Entry> = {
 function resolveSource(c: ClassifiableComponent): { id: string; priority: number; registered: boolean } {
   const metaId = c.parsedMeta.sourceId;
   if (metaId === CURATED_SOURCE_ID) return { id: CURATED_SOURCE_ID, priority: CURATED_SOURCE_PRIORITY, registered: true };
-  const src = metaId ? findSourceById(metaId) : undefined;
-  if (src) return { id: src.id, priority: c.parsedMeta.sourcePriority ?? src.priority, registered: true };
+  // Indexé par le constructeur multi-sources : identifiant et priorité de la source sont portés par le composant.
+  if (metaId && c.parsedMeta.sourcePriority !== undefined) return { id: metaId, priority: c.parsedMeta.sourcePriority, registered: true };
   const byUrl = findSourceByUrl(c.sourceUrl);
   return { id: byUrl?.id ?? metaId ?? 'unknown', priority: c.parsedMeta.sourcePriority ?? UNKNOWN_SOURCE_PRIORITY, registered: false };
 }

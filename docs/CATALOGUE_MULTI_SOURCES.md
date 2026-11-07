@@ -2,7 +2,7 @@
 
 ## Sources et priorités
 
-Le registre `src/modules/ecc-catalog/catalog-sources.ts` déclare chaque bibliothèque, figée sur un commit précis.
+Les sources sont enregistrées en base (table `catalog_sources`) et gérées depuis la page **Catalogue** (`/admin/catalog`). Chacune est figée sur un commit précis. Une base vide est amorcée avec les sources de référence ci-dessous (`DEFAULT_CATALOG_SOURCES`).
 
 | Source | Rôle | Priorité |
 | :--- | :--- | :--- |
@@ -13,7 +13,16 @@ Le registre `src/modules/ecc-catalog/catalog-sources.ts` déclare chaque bibliot
 | dietrichgebert/ponytail | METHODOLOGY | 80 |
 | affaan-m/ECC | BASE_LIBRARY | 50 |
 
-Monter de version : modifier `pinnedCommit` (et `ref`), ou définir `CATALOG_REF_<ID>` (ex. `CATALOG_REF_OBRA_SUPERPOWERS`), puis relancer la synchronisation. Vérifier ensuite le banc de sélection.
+Cycle de vie d'une source :
+
+1. **Ajout** d'un dépôt GitHub : le commit est résolu et figé, la source est « en attente » et analysée aussitôt.
+2. **Analyse** : licence (refus si non permissive), composants détectables, composants retenables automatiquement (fonction connue du moteur), noms déjà fournis par une autre source, contenus bloqués pour sûreté, composants propres à Claude Code.
+3. **Activation**, possible seulement si l'analyse sur le commit figé est favorable.
+4. **Reconstruction du catalogue** : les sources actives sont téléchargées et indexées ; le catalogue en service ne change qu'en cas de succès. L'échec d'une source complémentaire est consigné sans bloquer la reconstruction ; celui d'une bibliothèque de base l'annule.
+
+Monter de version : « Changer de commit » sur la source, qui repasse en attente et est réanalysée ; la réactiver puis reconstruire le catalogue. Vérifier ensuite le banc de sélection.
+
+Les composants d'une nouvelle source n'ont une fonction (slot) que si leur nom correspond aux conventions connues du moteur ; les autres restent sélectionnables à la main.
 
 ## Construction du catalogue
 

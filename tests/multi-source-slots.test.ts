@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_CATALOG_SOURCES,
   detectLicense,
-  resolveSourceRef,
-  findSourceById,
 } from '../src/modules/ecc-catalog/catalog-sources';
 import { assessPlatformFit, scanContentSafety } from '../src/modules/ecc-catalog/content-safety';
 import { buildMultiSourceCatalog, SourceSnapshot } from '../src/modules/ecc-catalog/catalog-builder';
 import { extractHeuristicProjectProfile } from '../src/modules/project-profile/heuristic-extractor';
 import { SelectionEngine, CatalogCandidateInput } from '../src/modules/selection-engine';
+
+const findSourceById = (id: string) => DEFAULT_CATALOG_SOURCES.find((s) => s.id === id);
 
 const MIT = 'MIT License\n\nCopyright (c) 2026\n\nPermission is hereby granted, free of charge, to any person obtaining a copy';
 
@@ -92,11 +92,7 @@ describe('Registre des sources', () => {
     expect(p('obra-superpowers')).toBeGreaterThan(p('ecc-official'));
   });
 
-  it('permet de monter de version par variable d’environnement', () => {
-    const ecc = findSourceById('ecc-official')!;
-    expect(resolveSourceRef(ecc, {})).toBe(ecc.pinnedCommit);
-    expect(resolveSourceRef(ecc, { CATALOG_REF_ECC_OFFICIAL: 'v3.0.0' })).toBe('v3.0.0');
-  });
+
 
   it('détecte la licence sans supposer MIT', () => {
     expect(detectLicense(MIT)).toBe('MIT');
