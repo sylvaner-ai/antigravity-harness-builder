@@ -1,11 +1,11 @@
 {
- "total": 98,
+ "total": 81,
  "bySource": {
   "cloudflare-security-audit": 1,
   "curated": 5,
   "dietrichgebert-ponytail": 4,
-  "ecc-official": 64,
-  "emil-kowalski-skills": 11,
+  "ecc-official": 52,
+  "emil-kowalski-skills": 6,
   "obra-superpowers": 13
  },
  "selected": [
@@ -149,12 +149,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "agent-architecture-audit",
-   "slot": "skill:domain:agentic:architecture-audit",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "agent-security-hardening",
    "slot": "skill:domain:agentic:security",
    "sourceId": "ecc-official"
@@ -175,12 +169,6 @@
    "kind": "SKILL",
    "slug": "animation-performance",
    "slot": "skill:ui:animation:performance",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "animation-vocabulary",
-   "slot": "skill:ui:animation:vocabulary",
    "sourceId": "emil-kowalski-skills"
   },
   {
@@ -222,12 +210,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "change-impact",
-   "slot": "skill:quality:change-impact",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "click-path-audit",
    "slot": "skill:ui:click-path-audit",
    "sourceId": "ecc-official"
@@ -236,18 +218,6 @@
    "kind": "SKILL",
    "slug": "code-tour",
    "slot": "skill:docs:code-tour",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "coding-standards",
-   "slot": "skill:quality:coding-standards",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "contract-first",
-   "slot": "skill:backend:contract-first",
    "sourceId": "ecc-official"
   },
   {
@@ -301,12 +271,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "eval-harness",
-   "slot": "skill:domain:agentic:evals",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "executing-plans",
    "slot": "skill:workflow:plan-execution",
    "sourceId": "obra-superpowers",
@@ -317,12 +281,6 @@
    "slug": "fastapi-patterns",
    "slot": "skill:stack:fastapi:patterns",
    "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "find-animation-opportunities",
-   "slot": "skill:ui:animation:opportunities",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -342,24 +300,6 @@
    "slug": "hexagonal-architecture",
    "slot": "skill:architecture:hexagonal",
    "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "improve-animations",
-   "slot": "skill:ui:animation:audit",
-   "sourceId": "emil-kowalski-skills"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "iterative-retrieval",
-   "slot": "skill:domain:agentic:retrieval",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "mobile-native",
-   "slot": "skill:ui:mobile-web",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -403,12 +343,6 @@
   },
   {
    "kind": "SKILL",
-   "slug": "prompt-caching-strategy",
-   "slot": "skill:domain:agentic:prompt-caching",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
    "slug": "python-patterns",
    "slot": "skill:stack:python:patterns",
    "sourceId": "ecc-official"
@@ -431,12 +365,6 @@
    "slug": "regex-vs-llm-structured-text",
    "slot": "skill:domain:agentic:structured-extraction",
    "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SKILL",
-   "slug": "remove-animations",
-   "slot": "skill:ui:animation:removal",
-   "sourceId": "emil-kowalski-skills"
   },
   {
    "kind": "SKILL",
@@ -538,20 +466,8 @@
   },
   {
    "kind": "SUBAGENT",
-   "slug": "code-simplifier",
-   "slot": "agent:simplifier",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "database-reviewer",
    "slot": "agent:database",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
-   "slug": "doc-updater",
-   "slot": "agent:docs",
    "sourceId": "ecc-official"
   },
   {
@@ -568,12 +484,6 @@
   },
   {
    "kind": "SUBAGENT",
-   "slug": "planner",
-   "slot": "agent:planner",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "pr-test-analyzer",
    "slot": "agent:test-analysis",
    "sourceId": "ecc-official"
@@ -586,21 +496,9 @@
   },
   {
    "kind": "SUBAGENT",
-   "slug": "refactor-cleaner",
-   "slot": "agent:refactor",
-   "sourceId": "ecc-official"
-  },
-  {
-   "kind": "SUBAGENT",
    "slug": "security-auditor",
    "slot": "agent:security",
    "sourceId": "curated"
-  },
-  {
-   "kind": "SUBAGENT",
-   "slug": "silent-failure-hunter",
-   "slot": "agent:silent-failures",
-   "sourceId": "ecc-official"
   },
   {
    "kind": "SUBAGENT",

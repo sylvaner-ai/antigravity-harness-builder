@@ -287,8 +287,8 @@ Ce paquet autonome a été généré par **Antigravity Harness Builder** pour co
 - \`docs/ORCHESTRATION.md\` : Politique de décomposition des tâches, délégation aux sous-agents, tiers de modèles et efforts conseillés.
 - \`docs/ACCEPTANCE_CRITERIA.md\` : Critères d'acceptation vérifiables par fonctionnalité.
 - \`docs/ASSUMPTIONS.md\` : Hypothèses proposées, déductions et informations manquantes à confirmer.
-- \`docs/ECC_SOURCES.md\` : Provenance exacte, commit (\`${eccVersionTag}\` / \`${eccCommitSha}\`) et licence MIT des composants Everything Claude Code (ECC).
-- \`docs/HARNESS_MANIFEST.json\` : Manifeste machine-readable et rapport de validation.
+- \`docs/ECC_SOURCES.md\` : Provenance exacte, commit (\`${eccVersionTag}\` / \`${eccCommitSha}\`) et licences des composants retenus (la liste des candidats écartés n'est que dans l'archive ZIP).
+- \`docs/HARNESS_MANIFEST.json\` : Manifeste machine-readable : inventaire des fichiers et empreintes (base de la prochaine mise à niveau).
 - \`.agents/rules/\` : Règles natives Antigravity (\`always_on\`, \`glob\`, \`model_decision\`).
 - \`.agents/skills/\` : Skills natifs Antigravity (\`SKILL.md\` et ressources).
 - \`.agents/agents/\` : Sous-agents spécialisés à privilèges minimaux.

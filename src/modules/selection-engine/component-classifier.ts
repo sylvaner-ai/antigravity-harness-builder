@@ -196,7 +196,8 @@ const req = {
 };
 
 const DOMAINS = {
-  health: req.domain('santé', /\bsanté\b|médical|\bpatients?\b|\bhds\b|\bhipaa\b|\bhealth(?:care)?\b|\bdossier médical\b/),
+  // « health » seul est exclu : il désigne surtout un point de contrôle technique (/api/health, healthcheck).
+  health: req.domain('santé', /\bsanté\b|médical|\bpatients?\b|\bhds\b|\bhipaa\b|\bhealthcare\b|\bdossier médical\b/),
   crypto: req.domain('blockchain / crypto', /\bblockchain\b|\bcrypto(?:monnaie)?s?\b|\bweb3\b|\bdefi\b|\bsolidity\b|\bethereum\b|\bevm\b|\bsolana\b/),
   agentic: req.domain('agents IA / LLM', /\bllm\b|\bagents? (?:ia|ai|conversationnels?)\b|\bagentique\b|\bagentic\b|\brag\b|\bchatbot\b|\bassistant (?:ia|virtuel)\b/),
   ml: req.domain('machine learning', /machine learning|apprentissage automatique|\bpytorch\b|\btensorflow\b|entraînement (?:de|du) modèle/),

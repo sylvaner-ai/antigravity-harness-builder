@@ -150,6 +150,14 @@ const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const containsWord = (text: string, word: string) =>
   new RegExp(`(?:^|[^a-z0-9à-ÿ])${escapeRegExp(word.toLowerCase())}(?:$|[^a-z0-9à-ÿ])`).test(text);
 
+
+/** Plafonds par preset pour le catalogue classé (sous-agents et skills). */
+const CLASSIFIED_CAPS: Record<PresetMode, Partial<Record<ComponentKind, number>>> = {
+  MINIMAL: { SUBAGENT: 4, SKILL: 10 },
+  BALANCED: { SUBAGENT: 8, SKILL: 20 },
+  THOROUGH: { SUBAGENT: 12, SKILL: 30 },
+};
+
 export class SelectionEngine {
   /**
    * Sélection explicable par slots fonctionnels :
@@ -255,7 +263,7 @@ export class SelectionEngine {
         }
       }
 
-      const score = this.calculateCandidateScore(item, projectLangs, projectFrameworks, projectDomainText, forced, excellencePacks, profile);
+      const score = this.calculateCandidateScore(item, projectLangs, projectFrameworks, projectDomainText, forced, excellencePacks, profile, cls.slot);
       candidates.push({ item, score, cls, legacy, forced });
     }
 
@@ -325,6 +333,24 @@ export class SelectionEngine {
     // Quotas historiques pour les catalogues ad hoc uniquement
     const legacyCounts = { RULE: 0, SUBAGENT: 0, SKILL: 0, COMMAND_CONVERTED: 0 } as Record<ComponentKind, number>;
     const legacyMax: Partial<Record<ComponentKind, number>> = { RULE: thresholds.maxRules, SUBAGENT: thresholds.maxSubagents, SKILL: thresholds.maxSkills };
+    // Plafonds du catalogue classé (pertinence avant quantité). Classement : palier (core, puis standard,
+    // puis extended), puis score ; les presets restent emboîtés. Ni les règles (budget de contexte), ni les
+    // méthodologies (retenues d'un bloc), ni les choix de l'utilisateur ne sont plafonnés.
+    const classifiedMax: Partial<Record<ComponentKind, number>> = CLASSIFIED_CAPS[preset];
+    const TIER_RANK: Record<SlotTier, number> = { core: 0, standard: 1, extended: 2 };
+    const cappedOut = new Set<string>();
+    const classifiedCounts = { RULE: 0, SUBAGENT: 0, SKILL: 0, COMMAND_CONVERTED: 0 } as Record<ComponentKind, number>;
+    for (const { c } of winners
+      .filter(({ c }) => !c.legacy && !c.forced && !c.cls.methodology && classifiedMax[c.item.kind] !== undefined)
+      .sort(
+        (a, b) =>
+          TIER_RANK[a.c.cls.tier] - TIER_RANK[b.c.cls.tier] ||
+          b.c.score.totalScore - a.c.score.totalScore ||
+          a.c.item.slug.localeCompare(b.c.item.slug)
+      )) {
+      if (classifiedCounts[c.item.kind] >= classifiedMax[c.item.kind]!) cappedOut.add(`${c.item.kind}:${c.item.slug}`);
+      else classifiedCounts[c.item.kind]++;
+    }
 
     for (const { c, supersedes } of winners) {
       const { item, score, cls, forced } = c;
@@ -336,6 +362,10 @@ export class SelectionEngine {
           continue;
         }
         legacyCounts[item.kind]++;
+      } else if (cappedOut.has(`${item.kind}:${item.slug}`)) {
+        const label = item.kind === 'SUBAGENT' ? 'sous-agents' : 'skills';
+        reject(item, 'SCORE_BELOW_PRESET_THRESHOLD', `Plafond de ${classifiedMax[item.kind]} ${label} atteint pour le preset ${preset} : les composants mieux notés ont été retenus.`, score.totalScore);
+        continue;
       }
 
       selectedList.push({
@@ -538,7 +568,8 @@ export class SelectionEngine {
     domainText: string,
     isForced: boolean,
     excellencePacks: ExcellencePack[] = [],
-    profile?: ProjectProfile
+    profile?: ProjectProfile,
+    domainSlot?: string
   ): ScoreBreakdown {
     if (isForced) {
       return {
@@ -663,8 +694,11 @@ export class SelectionEngine {
     const itemSlug = item.slug.toLowerCase();
     const itemTags = (item.parsedMeta.tags ?? []).map((t) => t.toLowerCase());
 
+    // Un composant propre à un secteur (santé, crypto…) ne gagne aucun bonus de pack : seul le domaine du projet le justifie.
+    const isDomainSpecific = /(?:^|:)domain:/.test(domainSlot ?? '');
+
     // 1. Pack Sécurité Renforcée (OWASP, Zero-Trust, Injections, Auth)
-    if (excellencePacks.includes('SECURITY_HARDENED')) {
+    if (excellencePacks.includes('SECURITY_HARDENED') && !isDomainSpecific) {
       const isSecurityComp =
         itemFamily === 'security' ||
         itemSlug.includes('security') ||
@@ -686,7 +720,7 @@ export class SelectionEngine {
     }
 
     // 2. Pack Design & Craft UI/UX (5 états UI, Emil Kowalski, A11y, Design System)
-    if (excellencePacks.includes('DESIGN_CRAFT_POLISH')) {
+    if (excellencePacks.includes('DESIGN_CRAFT_POLISH') && !isDomainSpecific) {
       const isDesignComp =
         itemFamily === 'design-engineering' ||
         itemSlug.includes('ui-craft') ||

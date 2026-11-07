@@ -3,6 +3,7 @@ import { and, eq, desc } from 'drizzle-orm';
 import { getDb, harnessGenerations, generatedArtifacts, projects, sourceDocuments } from '@/db';
 import { AntigravityAuditReport, parseAuditReportText } from '@/modules/project-profile/audit-extractor';
 import { computeUpgradePlan } from '@/modules/package-exporter/upgrade-plan';
+import { filesForProjectInstall } from '@/modules/package-exporter/install-files';
 import { AuthService, requireAuthUser } from '@/modules/auth';
 import { LocalDiskStorage } from '@/modules/documents/storage';
 import {
@@ -39,12 +40,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         .from(generatedArtifacts)
         .where(eq(generatedArtifacts.generationId, generation.id));
 
-      const files = artifacts
-        .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
-        .map((a: typeof generatedArtifacts.$inferSelect) => ({
-          relativePath: a.relativePath,
-          content: a.content,
-        }));
+      const files = filesForProjectInstall(
+        artifacts
+          .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
+          .map((a: typeof generatedArtifacts.$inferSelect) => ({
+            relativePath: a.relativePath,
+            content: a.content,
+          }))
+      );
 
       // Plan calculé à partir du dernier audit importé (audit 2.0) et de la commande de test du projet
       const [auditDoc] = await db
@@ -92,12 +95,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         .from(generatedArtifacts)
         .where(eq(generatedArtifacts.generationId, generation.id));
 
-      const files = artifacts
-        .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
-        .map((a: typeof generatedArtifacts.$inferSelect) => ({
-          relativePath: a.relativePath,
-          content: a.content,
-        }));
+      const files = filesForProjectInstall(
+        artifacts
+          .filter((a: typeof generatedArtifacts.$inferSelect) => a.relativePath && a.content)
+          .map((a: typeof generatedArtifacts.$inferSelect) => ({
+            relativePath: a.relativePath,
+            content: a.content,
+          }))
+      );
 
       const deploymentPrompt = renderDeploymentPromptMarkdown({
         projectName: project.name,
