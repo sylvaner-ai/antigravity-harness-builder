@@ -120,3 +120,51 @@ Vous pouvez copier ce résultat.
     expect(deprecatedUncertainty?.statement).toContain('.agents/workflows/');
   });
 });
+
+describe('Audit 2.0 — inventaire du harnais existant', () => {
+  const h = (c: string) => c.repeat(64);
+
+  it('accepte un audit 2.0 complet et normalise les empreintes en minuscules', () => {
+    const report = parseAuditReportText(
+      JSON.stringify({
+        auditVersion: '2.0.0',
+        projectName: 'felicicar',
+        existingAiHarness: {
+          files: [
+            { path: 'AGENTS.md', kind: 'instructions', sha256: h('A') },
+            { path: '.agents/rules/code-style.md', kind: 'rule', trigger: 'always_on', sha256: h('b'), description: 'Style' },
+          ],
+        },
+        previousGeneration: { generationId: 'g1', files: [{ path: '.agents/rules/common-security.md', sha256: h('c') }] },
+        functionalDocuments: [{ path: 'docs/cdc.md', sizeBytes: 1200 }],
+      })
+    );
+    expect(report.existingAiHarness?.files).toHaveLength(2);
+    expect(report.existingAiHarness?.files[0]?.sha256).toBe(h('a'));
+    expect(report.previousGeneration?.files[0]?.path).toBe('.agents/rules/common-security.md');
+    expect(report.functionalDocuments[0]?.path).toBe('docs/cdc.md');
+  });
+
+  it('reste compatible avec un audit 1.0 sans inventaire', () => {
+    const report = parseAuditReportText(JSON.stringify({ auditVersion: '1.0.0', projectName: 'ancien' }));
+    expect(report.previousGeneration).toBeUndefined();
+    expect(report.functionalDocuments).toEqual([]);
+  });
+
+  it('refuse une empreinte inventée ou un chemin qui sort du projet', () => {
+    expect(() =>
+      parseAuditReportText(JSON.stringify({ existingAiHarness: { files: [{ path: 'AGENTS.md', sha256: 'abc' }] } }))
+    ).toThrow(/SHA-256/);
+    expect(() =>
+      parseAuditReportText(JSON.stringify({ existingAiHarness: { files: [{ path: '../secret.md' }] } }))
+    ).toThrow(/Chemin relatif/);
+  });
+
+  it('le prompt demande les empreintes, le manifeste précédent et les documents fonctionnels', () => {
+    expect(AUDIT_EXTRACTION_PROMPT).toContain('"auditVersion": "2.0.0"');
+    expect(AUDIT_EXTRACTION_PROMPT).toContain('sha256sum');
+    expect(AUDIT_EXTRACTION_PROMPT).toContain('docs/HARNESS_MANIFEST.json');
+    expect(AUDIT_EXTRACTION_PROMPT).toContain('functionalDocuments');
+    expect(AUDIT_EXTRACTION_PROMPT).toContain("N'invente jamais une empreinte");
+  });
+});

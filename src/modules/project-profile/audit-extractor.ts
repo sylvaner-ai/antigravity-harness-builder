@@ -2,6 +2,25 @@ import { z } from 'zod';
 import { ProjectProfile } from './schema';
 import { AntigravitySurface } from '../antigravity-adapter/schema';
 
+/** Empreinte SHA-256 en hexadécimal ; mise en minuscules pour comparer avec le manifeste. */
+const Sha256Schema = z
+  .string()
+  .regex(/^[0-9a-fA-F]{64}$/, 'Empreinte SHA-256 attendue (64 caractères hexadécimaux).')
+  .transform((v) => v.toLowerCase());
+
+/** Fichier du harnais existant relevé par l'audit 2.0 (chemin relatif à la racine du projet). */
+export const ExistingHarnessFileSchema = z.object({
+  path: z
+    .string()
+    .min(1)
+    .refine((p) => !p.startsWith('/') && !p.split('/').includes('..'), 'Chemin relatif attendu, sans « .. ».'),
+  kind: z.enum(['rule', 'skill', 'subagent', 'workflow', 'instructions', 'other']).optional(),
+  sha256: Sha256Schema.optional(),
+  description: z.string().max(500).optional(),
+  trigger: z.string().optional(),
+});
+export type ExistingHarnessFile = z.infer<typeof ExistingHarnessFileSchema>;
+
 /**
  * Schéma Zod du rapport d'audit normalisé généré par l'agent Antigravity
  * dans le workspace d'un projet cible à moderniser.
@@ -61,8 +80,24 @@ export const AntigravityAuditReportSchema = z.object({
       subagents: z.array(z.string()).optional().default([]),
       hasDeprecatedWorkflows: z.boolean().optional(),
       hasMcpConfig: z.boolean().optional(),
+      /** Audit 2.0 : chaque fichier du harnais existant avec son empreinte (base du plan de mise à niveau). */
+      files: z.array(ExistingHarnessFileSchema).optional().default([]),
     })
     .optional(),
+  /** Audit 2.0 : inventaire du manifeste laissé par une génération précédente d'Antigravity Harness Builder. */
+  previousGeneration: z
+    .object({
+      manifestPath: z.string().optional(),
+      generationId: z.string().optional(),
+      generatedAt: z.string().optional(),
+      files: z.array(z.object({ path: z.string().min(1), sha256: Sha256Schema })).default([]),
+    })
+    .optional(),
+  /** Audit 2.0 : documents fonctionnels du dépôt (cahier des charges, spécifications), à importer à part. */
+  functionalDocuments: z
+    .array(z.object({ path: z.string().min(1), title: z.string().optional(), sizeBytes: z.number().int().nonnegative().optional() }))
+    .optional()
+    .default([]),
   existingDirectivesToPreserve: z.array(z.string()).optional().default([]),
 });
 
@@ -71,31 +106,36 @@ export type AntigravityAuditReport = z.infer<typeof AntigravityAuditReportSchema
 /**
  * Prompt d'audit autonome à copier-coller dans l'agent Antigravity du projet existant.
  */
-export const AUDIT_EXTRACTION_PROMPT = `Agis en tant qu'auditeur technique spécialisé Google Antigravity. Ton objectif est d'analyser l'architecture, la stack technique, les scripts de qualité et la configuration IA existante de ce projet afin de préparer sa modernisation dans Antigravity Harness Builder.
+export const AUDIT_EXTRACTION_PROMPT = `Agis en tant qu'auditeur technique spécialisé Google Antigravity. Ton objectif est de décrire précisément ce projet et son harnais Antigravity actuel, afin qu'Antigravity Harness Builder prépare une mise à niveau du harnais sans rien perdre.
 
-Tu ne dois modifier aucun fichier. Effectue uniquement des analyses en lecture seule.
+Tu travailles en lecture seule : ne modifie, ne crée et ne supprime aucun fichier, à l'exception du fichier de résultat antigravity-audit.json. Les seules commandes autorisées sont des lectures (ls, cat, find, sha256sum ou shasum -a 256).
 
 ### Directives d'exécution :
 1. Examine les manifestes de dépendances (package.json, pyproject.toml, Cargo.toml, go.mod, docker-compose.yml, etc.).
-2. Identifie les scripts exacts du projet : build, test, lint, typecheck, dev.
-3. Cartographie l'arborescence du projet (profondeur 2 à 3 niveaux max, en ignorant strictement node_modules, .git, .next, dist, build, coverage, .venv).
-4. Inspecte la configuration IA existante :
-   - Fichiers d'instructions : AGENTS.md, CLAUDE.md, GEMINI.md, .cursorrules.
-   - Dossier .agents/ : liste les règles dans .agents/rules/, les compétences dans .agents/skills/, les agents dans .agents/agents/.
-   - Signale si le dossier déprécié .agents/workflows/ est présent.
-   - Vérifie la présence de fichiers MCP (mcp.json).
-5. Lis le README.md (ou les sections introductives) pour résumer l'objectif métier et l'architecture du projet.
-6. Ne lis et ne divulgue JAMAIS le contenu des fichiers de secrets (.env, .env.local, clés privées, jetons API).
+2. Identifie les commandes exactes du projet : build, test, lint, typecheck, dev.
+3. Cartographie l'arborescence (2 à 3 niveaux, en ignorant node_modules, .git, .next, dist, build, coverage, .venv).
+4. Inventorie le harnais existant, fichier par fichier, dans existingAiHarness.files :
+   - AGENTS.md, CLAUDE.md, GEMINI.md, .cursorrules (kind « instructions ») ;
+   - chaque fichier de .agents/rules/ (kind « rule », avec la valeur de trigger de son en-tête YAML) ;
+   - chaque SKILL.md de .agents/skills/ (kind « skill ») ;
+   - chaque fichier de .agents/agents/ (kind « subagent ») ;
+   - chaque fichier de .agents/workflows/ s'il existe (kind « workflow », dossier déprécié).
+   Pour chacun : chemin relatif, empreinte SHA-256 du contenu exact (sha256sum <fichier>), et la description de son en-tête YAML s'il en a une (200 caractères au plus). N'invente jamais une empreinte : si tu ne peux pas la calculer, omets le champ.
+5. Si docs/HARNESS_MANIFEST.json existe (harnais produit par Antigravity Harness Builder), recopie dans previousGeneration son generationId, son generatedAt et, pour chaque entrée de filesInventory, le couple relativePath (dans path) et sha256, sans les modifier.
+6. Relève dans functionalDocuments les documents fonctionnels du dépôt (cahier des charges, spécifications, expression de besoin), avec leur chemin et leur taille. Ne recopie pas leur contenu.
+7. Lis le README.md pour résumer l'objectif métier du projet en 2 phrases.
+8. Relève dans existingDirectivesToPreserve les consignes rédigées par l'équipe qui doivent survivre à la mise à niveau (une phrase par consigne).
+9. Ne lis et ne divulgue JAMAIS le contenu des fichiers de secrets (.env, .env.local, clés privées, jetons API).
 
 ### Format de restitution obligatoire :
-Génère et sauvegarde un fichier antigravity-audit.json à la racine de l'espace de travail (ou affiche-le dans un unique bloc de code JSON) respectant scrupuleusement la structure suivante :
+Enregistre le résultat dans antigravity-audit.json à la racine de l'espace de travail (ou affiche-le dans un unique bloc de code JSON), en respectant cette structure :
 
 \`\`\`json
 {
-  "auditVersion": "1.0.0",
+  "auditVersion": "2.0.0",
   "scannedAt": "<ISO_TIMESTAMP>",
   "projectName": "<Nom extrait du package.json ou du dossier>",
-  "projectDescription": "<Résumé succinct en 2 phrases>",
+  "projectDescription": "<Résumé en 2 phrases>",
   "targetSurfaceRecommendation": "IDE",
   "techStack": {
     "languages": ["TypeScript"],
@@ -118,18 +158,25 @@ Génère et sauvegarde un fichier antigravity-audit.json à la racine de l'espac
   "existingAiHarness": {
     "hasRootInstructions": true,
     "rootInstructionFiles": ["AGENTS.md"],
-    "rules": [
-      { "slug": "code-style", "path": ".agents/rules/code-style.md", "customUserContent": true }
-    ],
-    "skills": [],
-    "subagents": [],
     "hasDeprecatedWorkflows": false,
-    "hasMcpConfig": false
+    "hasMcpConfig": false,
+    "files": [
+      { "path": "AGENTS.md", "kind": "instructions", "sha256": "<64 caractères hexadécimaux>" },
+      { "path": ".agents/rules/code-style.md", "kind": "rule", "trigger": "always_on", "sha256": "<…>", "description": "<…>" }
+    ]
   },
+  "previousGeneration": {
+    "manifestPath": "docs/HARNESS_MANIFEST.json",
+    "generationId": "<…>",
+    "generatedAt": "<…>",
+    "files": [{ "path": ".agents/rules/common-security.md", "sha256": "<…>" }]
+  },
+  "functionalDocuments": [{ "path": "docs/cahier-des-charges.md", "sizeBytes": 54288 }],
   "existingDirectivesToPreserve": []
 }
 \`\`\`
-Indique ensuite à l'utilisateur : « L'audit est terminé et prêt à être téléversé ou copié dans Antigravity Harness Builder. »`;
+Omets previousGeneration si docs/HARNESS_MANIFEST.json n'existe pas.
+Indique ensuite à l'utilisateur : « L'audit est terminé et prêt à être importé dans Antigravity Harness Builder. » Rappelle-lui d'importer aussi le cahier des charges si functionalDocuments en contient un.`;
 
 /**
  * Extrait le JSON d'audit même si l'utilisateur le colle avec du Markdown
