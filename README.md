@@ -20,7 +20,7 @@ Next.js 16, React 19, TypeScript strict, Tailwind CSS, PostgreSQL + Drizzle, Zod
 ## Démarrage en développement
 
 ```bash
-cp .env.example .env        # renseigner SESSION_SECRET, GEMINI_API_KEY, etc.
+cp .env.example .env        # renseigner GEMINI_API_KEY, etc.
 npm ci
 npm run db:migrate          # PostgreSQL requis (DATABASE_URL)
 npm run dev

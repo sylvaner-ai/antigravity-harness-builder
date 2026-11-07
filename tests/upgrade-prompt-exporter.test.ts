@@ -1,12 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderUpgradePromptMarkdown,
-  renderBase64OneLinerPrompt,
-  renderLightweightUpgradePromptMarkdown,
   sanitizeOperationalTestCommand,
 } from '../src/modules/package-exporter/templates';
-import { buildTarGzBase64 } from '../src/modules/package-exporter/tar-builder';
-import { AuthService } from '../src/modules/auth/auth-service';
 
 describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
   const dummyFiles = [
@@ -86,60 +82,6 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
     expect(prompt).toContain('Voici un exemple ```bash npm test ``` imbriqué.');
   });
 
-  it('génère une archive tar.gz Base64 valide et déterministe', () => {
-    const b64 = buildTarGzBase64(dummyFiles);
-    expect(b64).toBeTruthy();
-    expect(typeof b64).toBe('string');
-    // Doit être un base64 valide
-    expect(() => Buffer.from(b64, 'base64')).not.toThrow();
-    // Moins de 25 Ko pour ces fichiers
-    expect(b64.length).toBeLessThan(25 * 1024);
-  });
-
-  it('génère un one-liner Base64 autonome incluant la sauvegarde et les deprecations', () => {
-    const b64 = buildTarGzBase64(dummyFiles);
-    const oneLiner = renderBase64OneLinerPrompt({
-      projectName: 'AcmePortal',
-      base64Payload: b64,
-      filesCount: dummyFiles.length,
-      operationalTestCommand: 'npm test',
-    });
-
-    // Instructions pour l'agent Antigravity
-    expect(oneLiner).toContain('AcmePortal');
-    expect(oneLiner).toContain('base64 -d');
-    expect(oneLiner).toContain('tar -xzf');
-
-    // Sauvegarde préalable
-    expect(oneLiner).toContain('.agents/.harness-backup/');
-    expect(oneLiner).toContain('--dry-run');
-    // Aucune suppression de model: ni déplacement de dossier
-    expect(oneLiner).not.toContain('^model:');
-    expect(oneLiner).not.toContain('mv .agents/workflows');
-
-    // Dépréciations
-    expect(oneLiner).toContain('.agents/workflows');
-    expect(oneLiner).toContain('npm test');
-  });
-
-  it('filtre les fichiers théoriques lourds pour le prompt texte allégé', () => {
-    const lightPrompt = renderLightweightUpgradePromptMarkdown({
-      projectName: 'AcmePortal',
-      files: dummyFiles,
-      operationalTestCommand: 'npm test',
-    });
-
-    // Fichiers vitaux présents
-    expect(lightPrompt).toContain('AGENTS.md');
-    expect(lightPrompt).toContain('.agents/rules/nextjs-rules.md');
-    expect(lightPrompt).toContain('.agents/skills/modern-web/SKILL.md');
-
-    // Fichier lourd théorique filtré
-    expect(lightPrompt).not.toContain('docs/ECC_SOURCES.md');
-    // Taille du prompt reste très raisonnable
-    expect(lightPrompt.length).toBeLessThan(10 * 1024);
-  });
-
   it('neutralise strictement les injections de commandes shell dans operationalTestCommand', () => {
     // Commandes valides
     expect(sanitizeOperationalTestCommand('npm test')).toBe('npm test');
@@ -156,25 +98,4 @@ describe('Upgrade Prompt Exporter & Non-destructive Safety', () => {
     expect(sanitizeOperationalTestCommand('rm -rf /')).toBeUndefined();
   });
 
-  it('génère et valide des jetons signés temporaires pour deploy.sh avec vérification HMAC et expiration', () => {
-    const auth = new AuthService();
-    const projectId = 'proj-uuid-1234';
-
-    // 1. Jeton valide
-    const token = auth.generateDeploymentToken(projectId, 24);
-    expect(token).toBeTruthy();
-    expect(auth.verifyDeploymentToken(projectId, token)).toBe(true);
-
-    // 2. Jeton falsifié ou projet différent
-    expect(auth.verifyDeploymentToken('autre-projet-5678', token)).toBe(false);
-    expect(auth.verifyDeploymentToken(projectId, token + 'fake')).toBe(false);
-
-    // 3. Jeton expiré
-    const expiredToken = `${Date.now() - 10000}.dummy_sig`;
-    expect(auth.verifyDeploymentToken(projectId, expiredToken)).toBe(false);
-
-    // 4. Jeton vide ou malformé
-    expect(auth.verifyDeploymentToken(projectId, '')).toBe(false);
-    expect(auth.verifyDeploymentToken(projectId, 'malformed_without_dot')).toBe(false);
-  });
 });

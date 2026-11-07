@@ -855,14 +855,11 @@ ${renderAttributions(allComponents.map((c) => c.prov).filter((p): p is NonNullab
 `;
 }
 
-// 11, 12, 13, 14 : Ré-exportation des générateurs de déploiement et mise à niveau déterministes
+// Ré-exportation des générateurs de déploiement et mise à niveau déterministes
 export {
-  isEssentialHarnessFile,
   sanitizeOperationalTestCommand,
   renderDeploymentPromptMarkdown,
   renderUpgradePromptMarkdown,
-  renderBase64OneLinerPrompt,
-  renderLightweightUpgradePromptMarkdown,
 } from './upgrade-templates';
 
 

@@ -3,8 +3,6 @@
  * Extrait de templates.ts pour maintenir la cohésion et respecter le plafond de 800 lignes.
  */
 
-import { renderSafeInstallScript } from './deploy-script';
-
 /**
  * Assainit et valide la commande de smoke test issue de l'audit
  * pour empêcher toute injection de commandes shell hostiles (;, &&, ||, `, $(), etc.)
@@ -26,23 +24,6 @@ export function sanitizeOperationalTestCommand(cmd?: string): string | undefined
   }
 
   return trimmed;
-}
-
-/**
- * Identifie les fichiers essentiels d'exécution d'un harnais (incluant la règle
- * `.agents/rules/model-effort-governance.md` et `docs/ORCHESTRATION.md`) pour les modes d'export compacts.
- */
-export function isEssentialHarnessFile(relativePath: string): boolean {
-  return (
-    relativePath === 'AGENTS.md' ||
-    relativePath === 'README.md' ||
-    relativePath === 'START_HERE.md' ||
-    relativePath.startsWith('.agents/rules/') ||
-    relativePath.startsWith('.agents/skills/') ||
-    relativePath.startsWith('.agents/agents/') ||
-    relativePath === 'docs/ORCHESTRATION.md' ||
-    relativePath === 'docs/HARNESS_MANIFEST.json'
-  );
 }
 
 /**
@@ -241,57 +222,4 @@ ${filesSummary}
 
 ${fileEntriesMarkdown}
 `;
-}
-
-/**
- * 13. Génère un prompt ultra-compact basé sur une archive Base64 auto-extractible.
- * Pèse seulement quelques kilo-octets et peut être collé sans AUCUN risque de "Media upload failed"
- * dans n'importe quel chat web ou IDE d'Antigravity.
- */
-export function renderBase64OneLinerPrompt(params: {
-  projectName: string;
-  targetSurface?: string;
-  base64Payload: string;
-  filesCount: number;
-  operationalTestCommand?: string;
-}): string {
-  const { projectName, targetSurface = 'IDE', base64Payload, filesCount, operationalTestCommand } = params;
-
-  const installScript = renderSafeInstallScript({
-    projectName,
-    base64Payload,
-    smokeTestCommand: sanitizeOperationalTestCommand(operationalTestCommand),
-  });
-
-  return `# 🚀 Déploiement Direct du Harnais Antigravity — ${projectName}
-
-> **Instructions pour l'agent Google Antigravity (${targetSurface})** :
-> Installe le harnais de développement (${filesCount} composants : règles, compétences, sous-agents et directives) en exécutant le script bash ci-dessous dans le terminal de ce workspace, **tel quel**.
-> Le script n'écrase jamais un fichier modifié ou non géré, ne modifie aucun de vos agents, sauvegarde ce qu'il remplace dans \`.agents/.harness-backup/\` et vérifie l'installation.
-> Pour voir le plan sans rien écrire, ajoute \`--dry-run\` (\`bash deploy.sh --dry-run\` après avoir enregistré le script dans un fichier \`deploy.sh\`).
-> Après exécution, rends compte à l'utilisateur des conflits signalés (fichiers proposés dans \`.agents/.harness-proposed/\`) sans les résoudre sans son accord.
-
-\`\`\`bash
-${installScript}\`\`\`
-`;
-}
-
-/**
- * 14. Génère un prompt Markdown épuré (< 30 Ko) ne contenant que les fichiers essentiels d'exécution
- * (AGENTS.md, .agents/rules, .agents/skills, .agents/agents) sans les dizaines de Ko de documentation théorique
- * (docs/ECC_SOURCES.md, etc.) pour garantir que le texte soit accepté en texte brut dans le chat web.
- */
-export function renderLightweightUpgradePromptMarkdown(params: {
-  projectName: string;
-  targetSurface?: string;
-  files: Array<{ relativePath: string; content: string }>;
-  operationalTestCommand?: string;
-}): string {
-  // Filtrer pour ne conserver que les composants d'action réels (AGENTS.md, .agents/*, docs/ORCHESTRATION.md, docs/HARNESS_MANIFEST.json)
-  const essentialFiles = params.files.filter((f) => isEssentialHarnessFile(f.relativePath));
-
-  return renderUpgradePromptMarkdown({
-    ...params,
-    files: essentialFiles.length > 0 ? essentialFiles : params.files,
-  });
 }
