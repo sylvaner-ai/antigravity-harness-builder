@@ -12,15 +12,19 @@ import {
 
 describe('Masquage des secrets dans les messages d’erreur (§9 & FR-10)', () => {
   it('masque systématiquement les clés API et mots de passe DB', () => {
+    // Valeurs factices assemblées à l'exécution : aucune chaîne au format d'un vrai secret dans le dépôt.
+    const fakeGeminiKey = ['AIza', 'Sy', 'CLE_FACTICE_DE_TEST_', '0'.repeat(14)].join('');
+    const fakeGithubToken = ['ghp', '_', 'JETONFACTICE', '0'.repeat(24)].join('');
     const rawErr = new Error(
-      'Failed request with key AIzaSyD1234567890abcdefghijklmnopqrstuv and token ghp_1234567890abcdefghijklmnopqrstuv on postgresql://user:secretPass123@localhost:5433/db'
+      `Failed request with key ${fakeGeminiKey} and token ${fakeGithubToken} on postgresql://user:secretPass123@localhost:5433/db`
     );
     const sanitized = sanitizeErrorMessage(rawErr);
 
     expect(sanitized.message).toContain('[REDACTED_GEMINI_KEY]');
     expect(sanitized.message).toContain('[REDACTED_GITHUB_TOKEN]');
     expect(sanitized.message).toContain('[REDACTED_PASSWORD]');
-    expect(sanitized.message).not.toContain('AIzaSyD1234567890abcdefghijklmnopqrstuv');
+    expect(sanitized.message).not.toContain(fakeGeminiKey);
+    expect(sanitized.message).not.toContain(fakeGithubToken);
     expect(sanitized.message).not.toContain('secretPass123');
   });
 });
