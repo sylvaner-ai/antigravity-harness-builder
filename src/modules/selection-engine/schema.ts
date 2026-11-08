@@ -102,6 +102,8 @@ export const RejectedComponentSchema = z.object({
   ]),
   rawScore: z.number().default(0),
   supersededBySlug: z.string().optional(),
+  /** Source du catalogue qui proposait ce composant. */
+  sourceId: z.string().optional(),
 });
 export type RejectedComponent = z.infer<typeof RejectedComponentSchema>;
 

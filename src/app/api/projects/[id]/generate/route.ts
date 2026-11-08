@@ -15,6 +15,8 @@ import { getBuiltinCuratedExcellenceComponents } from '@/modules/catalog/catalog
 import { HarnessBuilderService } from '@/modules/harness-builder';
 import { LocalDiskStorage } from '@/modules/documents/storage';
 import { ensureDocumentDigests } from '@/modules/documents/document-digest';
+import { listCatalogSources } from '@/modules/catalog/source-registry';
+import { summarizeSelectionBySource } from '@/modules/selection-engine/source-summary';
 import { ZodError } from 'zod';
 import { PresetMode } from '@/modules/selection-engine/schema';
 
@@ -100,6 +102,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       userIncludes,
       userExcludes,
       excellencePacks,
+    });
+
+    // 3b. Bilan par source : contribution de chaque source et motifs d'écart (explicabilité)
+    const sourceSummary = summarizeSelectionBySource({
+      selection,
+      catalog: catalogCandidates,
+      syncedSources: activeSync.sources,
+      activeSources: (await listCatalogSources(db)).filter((s) => s.status === 'ACTIVE'),
     });
 
     // 4. Construction déterministe du harnais
@@ -197,6 +207,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         sha256: f.sha256,
       })),
       selection,
+      sourceSummary,
     });
   } catch (err: unknown) {
     if (err instanceof ZodError) {

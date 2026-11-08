@@ -58,3 +58,13 @@ Chaque reconstruction du catalogue enregistre les sources réellement intégrée
 - `docs/SOURCES.md` (ancien `ECC_SOURCES.md`) : tableau des sources, puis provenance de chaque composant (`source_verbatim`, `source_adapted`, `project_custom`) et attributions de licence.
 
 Un manifeste 1.0.0 (référence ECC unique) reste lisible : `parseHarnessManifest` le convertit au format 2.0.0. Lors d'une mise à niveau, l'ancien `docs/ECC_SOURCES.md` figure dans l'inventaire de la génération précédente : le plan le retire au profit de `docs/SOURCES.md`.
+
+## Pourquoi une source n'apporte aucun composant
+
+L'étape **Composition** affiche la contribution de chaque source : composants au catalogue, composants retenus, motifs d'écart (avec un exemple). Causes possibles :
+
+1. **Source absente du catalogue en service** : elle est active dans le registre mais la dernière reconstruction ne l'a pas intégrée (catalogue antérieur à son activation, ou échec de téléchargement). C'était le cas en production jusqu'au 7 novembre 2026 : le catalogue (`affaan-m/ECC@b38be6a`) ne contenait qu'ECC, l'ancienne synchronisation ignorant en silence l'échec des sources complémentaires. Depuis, les échecs sont consignés et signalés sur les pages Catalogue et Composition.
+2. **Méthodologie non activée** : Ponytail n'est pas activé en preset MINIMAL.
+3. **Palier hors preset**, **pile technique différente**, **fonction déjà couverte** par un composant de priorité supérieure, ou **aucune fonction connue du moteur** (sélection manuelle possible).
+
+Sur le catalogue figé des tests, Superpowers (13 skills) et Cloudflare (1 skill) sont retenus dans tous les presets, Ponytail (4 skills) en BALANCED et THOROUGH.
