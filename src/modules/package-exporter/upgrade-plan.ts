@@ -28,7 +28,9 @@ export type UpgradeAction =
   /** Posé par la génération précédente, intact, absent du nouveau harnais : à retirer après sauvegarde. */
   | 'REMOVE'
   /** Fichier de l'équipe, ou ancien fichier AHB modifié depuis : conservé tel quel. */
-  | 'KEEP';
+  | 'KEEP'
+  /** Règle permanente de l'équipe qui traite du même sujet qu'une règle gérée : conservée, mais à arbitrer avec l'utilisateur. */
+  | 'OVERLAP';
 
 export interface UpgradePlanEntry {
   path: string;
@@ -41,7 +43,7 @@ export interface UpgradePlanEntry {
 export interface UpgradePlanInput {
   newFiles: ReadonlyArray<{ relativePath: string; content: string }>;
   /** Fichiers du harnais existant relevés par l'audit (vide pour un audit 1.0). */
-  existingFiles: ReadonlyArray<{ path: string; sha256?: string }>;
+  existingFiles: ReadonlyArray<{ path: string; sha256?: string; kind?: string; trigger?: string; description?: string }>;
   /** Inventaire de la génération AHB précédente, s'il existe. */
   previousFiles?: ReadonlyArray<{ path: string; sha256: string }>;
 }
@@ -58,20 +60,38 @@ function isInventoriedByAudit(path: string): boolean {
 
 const ORDER: Record<UpgradeAction, number> = {
   CONFLICT: 0,
-  REMOVE: 1,
-  UPDATE: 2,
-  MERGE: 3,
-  CREATE: 4,
-  CREATE_IF_ABSENT: 5,
-  KEEP: 6,
-  UNCHANGED: 7,
+  OVERLAP: 1,
+  REMOVE: 2,
+  UPDATE: 3,
+  MERGE: 4,
+  CREATE: 5,
+  CREATE_IF_ABSENT: 6,
+  KEEP: 7,
+  UNCHANGED: 8,
 };
+
+/** Règle gérée par AHB dont le sujet (choix du modèle et de l'effort) est souvent déjà traité par une règle de l'équipe. */
+const MODEL_EFFORT_RULE = '.agents/rules/model-effort-governance.md';
+const MODEL_EFFORT_SUBJECT = /model[-_ ]?(routing|effort|selection|calibration)|mod[èe]le.{0,40}effort|effort.{0,40}mod[èe]le|model.{0,40}effort|effort.{0,40}model/i;
+
+/**
+ * Une règle de l'équipe, toujours active, portant sur le choix du modèle ou de l'effort, coexiste avec la règle gérée
+ * `model-effort-governance.md` : deux consignes permanentes contradictoires rendent le comportement de l'agent imprévisible.
+ */
+function overlapsModelEffortGovernance(file: { path: string; kind?: string; trigger?: string; description?: string }): boolean {
+  const isRule = file.kind === 'rule' || (file.kind === undefined && file.path.startsWith('.agents/rules/'));
+  if (!isRule || file.path === MODEL_EFFORT_RULE) return false;
+  if (file.trigger !== 'always_on') return false;
+  return MODEL_EFFORT_SUBJECT.test(`${file.path} ${file.description ?? ''}`);
+}
 
 /** Calcule le plan ; renvoie `undefined` quand l'audit n'a pas d'inventaire (audit 1.0) : l'agent applique alors le protocole général. */
 export function computeUpgradePlan(input: UpgradePlanInput): UpgradePlanEntry[] | undefined {
   if (input.existingFiles.length === 0) return undefined;
 
   const existing = new Map(input.existingFiles.map((f) => [f.path, f.sha256?.toLowerCase()]));
+  const existingDetails = new Map(input.existingFiles.map((f) => [f.path, f]));
+  const managesModelEffort = input.newFiles.some((f) => f.relativePath === MODEL_EFFORT_RULE);
   const previous = new Map((input.previousFiles ?? []).map((f) => [f.path, f.sha256.toLowerCase()]));
   const plan: UpgradePlanEntry[] = [];
   const newPaths = new Set<string>();
@@ -117,7 +137,14 @@ export function computeUpgradePlan(input: UpgradePlanInput): UpgradePlanEntry[] 
     if (newPaths.has(path)) continue;
     const current = existing.get(path);
     const prior = previous.get(path);
-    if (prior === undefined) {
+    const details = existingDetails.get(path);
+    if (prior === undefined && managesModelEffort && details && overlapsModelEffortGovernance(details)) {
+      plan.push({
+        path,
+        action: 'OVERLAP',
+        reason: 'Règle permanente de l’équipe sur le choix du modèle ou de l’effort, qui chevauche `model-effort-governance.md` : les deux consignes peuvent se contredire.',
+      });
+    } else if (prior === undefined) {
       plan.push({ path, action: 'KEEP', reason: 'Fichier de l’équipe.' });
     } else if (current !== undefined && current === prior) {
       plan.push({ path, action: 'REMOVE', expectedSha256: prior, reason: 'Posé par la génération précédente, intact, absent du nouveau harnais.' });
@@ -137,6 +164,7 @@ export function computeUpgradePlan(input: UpgradePlanInput): UpgradePlanEntry[] 
 
 const LABELS: Record<UpgradeAction, string> = {
   CONFLICT: 'CONFLIT — conserver, présenter la différence, demander',
+  OVERLAP: 'CHEVAUCHEMENT — conserver, comparer avec la règle gérée, proposer l’archivage, demander',
   REMOVE: 'RETIRER — sauvegarder puis supprimer',
   UPDATE: 'METTRE À JOUR — sauvegarder puis remplacer',
   MERGE: 'FUSIONNER — entre les balises gérées',
