@@ -93,6 +93,7 @@ flowchart LR
   - Installation chirurgicale sans régression des fichiers sources du projet.
   - Détection de l'environnement et validation post-déploiement.
 - **Prompt de mise à niveau assistée (`UPGRADE_PROMPT.md`) :** Guide Markdown prêt à l'emploi permettant à un agent Antigravity de réaliser la mise à niveau de façon autonome et incrémentale.
+- **Règles de l'équipe en chevauchement :** si le projet contient une règle permanente (`always_on`) qui traite du choix du modèle ou de l'effort, le plan de mise à niveau la marque `CHEVAUCHEMENT` : elle coexisterait avec `model-effort-governance.md` et les deux consignes pourraient se contredire. L'agent la conserve, présente les deux règles et propose de l'archiver (`git mv` dans `.agents/.harness-backup/`) ; rien n'est supprimé sans accord explicite.
 - **Gouvernance Centralisée Modèle / Niveau d'Effort (`model-effort-governance.md`) :**
   - Suppression de tout champ `model` statique dans le frontmatter YAML des sous-agents.
   - Matrice décisionnelle Coût / Performance par palier de complexité :

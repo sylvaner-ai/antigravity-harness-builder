@@ -154,6 +154,7 @@ export function renderUpgradePromptMarkdown(params: {
 }): string {
   const { projectName, targetSurface = 'IDE', operationalTestCommand, plan, packageSource } = params;
   // Les fichiers déjà identiques n'ont pas besoin d'être recopiés dans le prompt.
+  const overlaps = (plan ?? []).filter((e) => e.action === 'OVERLAP').map((e) => e.path);
   const unchanged = new Set((plan ?? []).filter((e) => e.action === 'UNCHANGED').map((e) => e.path));
   const files = params.files.filter((f) => !unchanged.has(f.relativePath));
 
@@ -249,7 +250,7 @@ Demande explicitement confirmation à l'utilisateur avant d'engager les écritur
    - **Ne modifie jamais** un sous-agent, une règle ou un skill préexistant du projet qui ne figure pas dans la liste des fichiers gérés (y compris son frontmatter YAML et sa clé \`model\`).
 
 ### Phase 4 — Éléments obsolètes
-- Si le répertoire obsolète \`.agents/workflows/\` est présent, **signale-le** à l'utilisateur (dépréciation dans Antigravity 2.0) et propose-lui de le migrer vers \`.agents/skills/\`. Ne le déplace pas sans son accord.
+${overlaps.length ? `- **Règles de l'équipe en chevauchement** (${overlaps.map((p) => `\`${p}\``).join(', ')}) : une règle permanente de l'équipe traite du même sujet que \`.agents/rules/model-effort-governance.md\`. **Ne la supprime ni ne la modifie de toi-même.** Lis-la, présente à l'utilisateur ses consignes face à celles de la règle gérée (en signalant celles qui se contredisent, par exemple une demande de validation systématique face à une poursuite sans interruption), indique laquelle est la plus récente (\`git log\`), puis propose d'archiver l'ancienne avec \`git mv\` dans \`.agents/.harness-backup/\`. N'applique l'archivage que sur accord explicite ; sans accord, conserve-la et signale le risque de contradiction dans le rapport final.\n` : ''}- Si le répertoire obsolète \`.agents/workflows/\` est présent, **signale-le** à l'utilisateur (dépréciation dans Antigravity 2.0) et propose-lui de le migrer vers \`.agents/skills/\`. Ne le déplace pas sans son accord.
 - Ne supprime aucun fichier existant sans l'avoir sauvegardé puis signalé.
 - Aucun fichier de code applicatif (\`src/\`, \`lib/\`, \`app/\`, \`.env\`) ne doit être touché.
 

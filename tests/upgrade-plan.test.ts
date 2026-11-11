@@ -89,4 +89,45 @@ describe('Plan de mise à niveau calculé (parcours B)', () => {
     expect(prompt).not.toContain('Plan de mise à niveau calculé');
     expect(prompt).toContain('Inspecte l\'arborescence actuelle');
   });
+
+  describe('règle de l’équipe en chevauchement avec la gouvernance modèle / effort', () => {
+    const governance = { relativePath: '.agents/rules/model-effort-governance.md', content: 'gouvernance' };
+    const legacy = {
+      path: '.agents/rules/00-model-routing.md',
+      kind: 'rule',
+      trigger: 'always_on',
+      sha256: sha('ancien routage'),
+      description: 'Évaluation systématique du couple optimal modèle / effort avant chaque tâche.',
+    };
+    const base = [{ path: 'AGENTS.md', sha256: sha('x') }];
+
+    it('signale une règle permanente de l’équipe sur le même sujet, sans la retirer', () => {
+      const p = computeUpgradePlan({ newFiles: [governance], existingFiles: [...base, legacy] });
+      expect(actionOf(p, legacy.path)).toBe('OVERLAP');
+      expect(p?.find((e) => e.path === legacy.path)?.expectedSha256).toBeUndefined();
+    });
+
+    it('ne signale rien si la règle n’est pas permanente, ou si le sujet est autre', () => {
+      const onDemand = { ...legacy, trigger: 'model_decision' };
+      const other = { path: '.agents/rules/code-style.md', kind: 'rule', trigger: 'always_on', sha256: sha('s'), description: 'Style de code.' };
+      const p = computeUpgradePlan({ newFiles: [governance], existingFiles: [...base, onDemand, other] });
+      expect(actionOf(p, legacy.path)).toBe('KEEP');
+      expect(actionOf(p, other.path)).toBe('KEEP');
+    });
+
+    it('ne signale rien si le nouveau harnais ne contient pas la règle gérée', () => {
+      const p = computeUpgradePlan({ newFiles: [{ relativePath: 'AGENTS.md', content: 'n' }], existingFiles: [...base, legacy] });
+      expect(actionOf(p, legacy.path)).toBe('KEEP');
+    });
+
+    it('le prompt demande l’arbitrage et interdit toute suppression d’office', () => {
+      const p = computeUpgradePlan({ newFiles: [governance], existingFiles: [...base, legacy] });
+      const prompt = renderUpgradePromptMarkdown({ projectName: 'Felicicar', files: [governance], plan: p });
+      expect(prompt).toContain('CHEVAUCHEMENT');
+      expect(prompt).toContain('Règles de l\'équipe en chevauchement');
+      expect(prompt).toContain('Ne la supprime ni ne la modifie de toi-même');
+      const sans = renderUpgradePromptMarkdown({ projectName: 'Felicicar', files: [governance] });
+      expect(sans).not.toContain('en chevauchement');
+    });
+  });
 });
