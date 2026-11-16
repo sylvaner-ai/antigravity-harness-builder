@@ -26,8 +26,8 @@ jobs:
 
       - name: Update Graphify graph
         run: |
-          uvx graphifyy . --update --code-only
-          uvx graphifyy cluster-only . --no-label
+          uvx --from graphifyy graphify . --update --code-only
+          uvx --from graphifyy graphify cluster-only . --no-label
 
       - name: Commit and push updated graph
         run: |
