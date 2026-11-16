@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/root/.local/bin/graphify hook-guard search",
+            "command": "sh -c 'G=$(command -v graphify || echo \"$HOME/.local/bin/graphify\"); [ -x \"$G\" ] && exec \"$G\" hook-guard search || exit 0'",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/root/.local/bin/graphify hook-guard read",
+            "command": "sh -c 'G=$(command -v graphify || echo \"$HOME/.local/bin/graphify\"); [ -x \"$G\" ] && exec \"$G\" hook-guard read || exit 0'",
             "timeout": 10
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/root/.local/bin/graphify hook-guard compact",
+            "command": "sh -c 'G=$(command -v graphify || echo \"$HOME/.local/bin/graphify\"); [ -x \"$G\" ] && exec \"$G\" hook-guard compact || exit 0'",
             "timeout": 10
           }
         ]
