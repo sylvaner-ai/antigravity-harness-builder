@@ -25,9 +25,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Update Graphify graph
+        env:
+          GRAPHIFY_FORCE: "1"
         run: |
-          uvx --from graphifyy graphify . --update --code-only
-          uvx --from graphifyy graphify cluster-only . --no-label
+          uvx --from "graphifyy[sql]" graphify . --update --code-only --allow-partial
+          uvx --from "graphifyy[sql]" graphify cluster-only . --no-label
 
       - name: Commit and push updated graph
         run: |
