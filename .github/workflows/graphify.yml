@@ -1,0 +1,40 @@
+name: Update Graphify Knowledge Graph
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - 'graphify-out/**'
+      - '**.md'
+
+permissions:
+  contents: write
+
+jobs:
+  update-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Update Graphify graph
+        run: |
+          uvx graphifyy . --update --code-only
+          uvx graphifyy cluster-only . --no-label
+
+      - name: Commit and push updated graph
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add graphify-out/
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(graphify): update knowledge graph [skip ci]"
+            git push
+          fi

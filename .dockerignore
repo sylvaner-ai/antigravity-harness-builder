@@ -7,3 +7,6 @@ coverage
 !.env.example
 /data
 tmp
+
+# Graphify knowledge graph (exclude from Coolify/Docker build context)
+graphify-out/
